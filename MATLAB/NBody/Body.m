@@ -28,19 +28,16 @@ classdef Body
             obj.acceleration_v = [0, 0, 0];
         end
         
-        function obj = update(obj, acceleration_v, dtime)
+        function obj = update(obj, dtime)
             % New position based on the old velocity values
-            obj.position_v = obj.position_v + obj.velocity_v * dtime + 0.5 * acceleration_v * dtime^2;
+            obj.position_v = obj.position_v + obj.velocity_v * dtime + 0.5 * obj.acceleration_v * dtime^2;
             
             % Adding new position to trajectory vector
             [m, n] = size(obj.trajectory_v_a);
             obj.trajectory_v_a(m + 1, :) = obj.position_v;
             
             % New velocity
-            obj.velocity_v = obj.velocity_v + acceleration_v * dtime;
-            
-            % New acceleration
-            obj.acceleration_v = acceleration_v;
+            obj.velocity_v = obj.velocity_v + obj.acceleration_v * dtime;
         end
     end
 end

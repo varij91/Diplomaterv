@@ -77,12 +77,50 @@ classdef NBodySystem
                     rabs  = sqrt((sum(rij_v.^2) + obj.eps2)^3);
                     acc_v = acc_v + obj.G * obj.bodies_a(j).mass * rij_v / rabs;
                 end
-                obj.bodies_a(i) = obj.bodies_a(i).update(acc_v, obj.dtime);
+                obj.bodies_a(i).acceleration_v = acc_v;
+            end
+            for i = 1:obj.numBody
+                obj.bodies_a(i) = obj.bodies_a(i).update(obj.dtime);
             end
             obj.evaluateCount = obj.evaluateCount + 1;
         end
+        
+        function obj = evaluate2(obj)
+            % Compute the forces and the next position for each body based
+            % on the given timestep
+            % Precalculating distatance: instead of N^2 computation -->
+            % N^2/2
+            rij_m = zeros(obj.numBody, obj.numBody);
+            sqrteps = sqrt(obj.eps2^3);
+            for i = 1:obj.numBody
+                for j = 1:obj.numBody
+                    if(i == j)
+                        rij_m(i,j) = sqrteps;
+                    elseif(rij_m(i,j) ~= 0)
+                        continue;
+                    else
+                        rij_v = obj.bodies_a(j).position_v - obj.bodies_a(i).position_v;
+                        rij_m(i,j) = sqrt((sum(rij_v.^2) + obj.eps2)^3);
+                        rij_m(j,i) = rij_m(i,j);
+                    end 
+                end
+            end
+            for i = 1:obj.numBody
+                acc_v = [0, 0, 0];
+                for j = 1:obj.numBody
+                    rij_v = obj.bodies_a(j).position_v - obj.bodies_a(i).position_v;
+                    acc_v = acc_v + obj.G * obj.bodies_a(j).mass * rij_v / rij_m(i,j);
+                end
+                obj.bodies_a(i).acceleration_v = acc_v;
+            end
+            for i = 1:obj.numBody
+                obj.bodies_a(i) = obj.bodies_a(i).update(obj.dtime);
+            end
+            obj.evaluateCount = obj.evaluateCount + 1;
+        end
+        
         function plot3(obj)
-            figure()
+            figure
             hold on
             cmap = hsv(obj.numBody);
             for currBody = 1:obj.numBody
