@@ -1,4 +1,4 @@
-classdef Body
+classdef NBodyParticle
     properties
         mass
         position_v
@@ -7,7 +7,7 @@ classdef Body
         trajectory_v_a
     end
     methods
-        function obj = Body(mass, startPosition_v, startVelocity_v)
+        function obj = NBodyParticle(mass, startPosition_v, startVelocity_v)
             if(isscalar(mass) && isnumeric(mass) && (mass > 0))
                 obj.mass = mass;
             else

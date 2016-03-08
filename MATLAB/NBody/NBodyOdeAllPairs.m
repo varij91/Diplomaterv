@@ -3,14 +3,15 @@
 % University of Colorado Boulder, Boulder, Colorado, 80309, USA
 % http://ccar.colorado.edu/asen5050/projects/projects_2013/Brown_Harrison/Code/Brown_H.pdf
 
-function dx = NBodyFunction(t, x, m, G)
+function dx = NBodyOdeAllPairs(t, x, m, G, eps2)
 % t = integration time
 % x = [ ... xi, yi, zi, vxi, vyi, vzi ...]
 % m = [ m1, m2 ... mn]
 
-G = 1.18555535802194e-04;
-m = [1;332946;0.012303192];
-
+% G = 8.890422785943706e-10;
+% G = 1.18555535802194e-04;
+% m = [332946, 1, 0.012303192];
+% m = [1, 332946, 0.012303192];
 n       = length(m);
 % Each mass have six initial conditions: (x,y,z) (vx,vy,vz)
 dx      = zeros(6*n, 1);
@@ -26,7 +27,7 @@ for i = 1:n
             % r(i,j) = sqrt((xj - xi)^2 + (yj - yi)^2 + (zj - zi)^2)^3
             r(i,j) = sqrt((x(3*(j-1) + 1) - x(3*(i-1) + 1))^2 + ...
                      (x(3*(j-1) + 2) - x(3*(i-1) + 2))^2 + ...
-                     (x(3*j) - x(3*i))^2)^3;
+                     (x(3*j) - x(3*i))^2 + eps2)^3;
             r(j,i) = r(i,j);
         end
     end
