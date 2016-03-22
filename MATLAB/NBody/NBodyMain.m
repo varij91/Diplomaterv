@@ -31,13 +31,14 @@ format long
 %% SETTINGS
 % Algorithm type
 %   'All_PAIRS'
+%   'SELECTIVE' (ONLY IN SINGLESTEP)
 %   'BARNES_HUT'
 algType     = 'ALL_PAIRS';
 % Simulation solver
 %   'SINGLESTEP'
 %   'ODE'
 % simSolver   = 'SINGLESTEP';
-simSolver   = 'ODE';
+simSolver   = 'SINGLESTEP';
 opts = odeset('reltol', 1e-3, 'abstol', 1e-6, 'refine', 1);
 % Simulation's goal
 %   'EVALUATE'
@@ -49,10 +50,10 @@ simCycle    = 50;
 %   'N_RANDOM'  = numBody sized universe with random initial values
 simType     = 'N_RANDOM';
 % Number of bodies (in some simulation cases has no effect)
-numBody     = 8;
+numBody     = 4;
 % Simulation time - [D]
 startTime   = 0;
-endTime     = 365000;
+endTime     = 350000;
 % Simulation advance in time - [D]
 % (Not in ODE)
 stepTime    = 3;
@@ -115,14 +116,15 @@ disp('Average run time:')
 disp(totalTime/numSim)
 disp('Forces/second:')
 [m,n] = size(x);
-disp(numBody*(numBody-1)*((endTime-startTime)/m)/totalTime)
+avgsteptime = (endTime-startTime)/m;
+disp(numBody*(numBody-1)*((endTime-startTime)/avgsteptime)/totalTime)
 % Plots
 figure
 hold on;
 cmap = hsv(numBody);
 for i = 1:numBody
     plot3(x(:,3*(i-1)+1), x(:,3*(i-1)+2), x(:, 3*i), 'Color', cmap(i,:), 'LineWidth', 2);
-    plot3(x(:,3*(i-1)+1), x(:,3*(i-1)+2), x(:, 3*i), 'o', 'Color', cmap(i,:), 'LineWidth', 2);
+%     plot3(x(:,3*(i-1)+1), x(:,3*(i-1)+2), x(:, 3*i), 'o', 'Color', cmap(i,:), 'LineWidth', 2);
     plot3(x(end,3*(i-1)+1), x(end,3*(i-1)+2), x(end, 3*i), 'x', 'Color', cmap(i,:), 'LineWidth', 2);
 end
 hold off;

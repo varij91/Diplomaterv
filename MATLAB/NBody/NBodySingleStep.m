@@ -15,6 +15,10 @@ function [runTime, t, x] = NBodySingleStep(algType, time, stepTime, bodies, G, e
         tic
         [t, p] = NBodySingleStepAllPairs(time, stepTime, mass, position, velocity, G, eps2);
         runTime = toc;
+    elseif(strcmp(algType, 'SELECTIVE'))
+        tic
+        [t, p] = NBodySingleStepSelectivePairs(time, stepTime, mass, position, velocity, G, eps2);
+        runTime = toc;
     end
     
     cycles = length(t);
