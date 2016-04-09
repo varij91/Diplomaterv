@@ -30,6 +30,7 @@ classdef BH2DNode
                 obj = obj.distributeBody();
             end
         end
+        
         function obj = addBody(obj, body)
             if(isempty(obj.bodies))
                 obj.bodies = body;
@@ -37,6 +38,7 @@ classdef BH2DNode
                 obj.bodies = [obj.bodies, body];
             end
         end
+        
         function section = getSection(obj, body)
             diffPos = body.pos - obj.center;
             if((diffPos(1) > 0) && (diffPos(2) >= 0))
@@ -49,6 +51,7 @@ classdef BH2DNode
                 section = obj.NorthWest;
             end
         end
+        
         function obj = distributeBody(obj)
             numBody = length(obj.bodies);
             if(numBody > 1)
