@@ -1,21 +1,23 @@
 #include "NBodyAlgorithm.h"
-#include "defines.h"
+#include "NBodyProperties.h"
 #include <math.h>
 
-void NBodyAlgorithm::calculateAcceleration(const float posI[3], float accI[3], const float massJ, const float posJ[3]) {
-    float r[3];
+float3 NBodyAlgorithm::calculateAcceleration(const float3 posI, const float massJ, const float3 posJ) {
+    float3 r(0.0f, 0.0f, 0.0f);
+    float3 accI(0.0f, 0.0f, 0.0f);
 
-    r[0] = posJ[0] - posI[0];
-    r[1] = posJ[1] - posI[1];
-    r[2] = posJ[2] - posI[2];
+    r.x = posJ.x - posI.x;
+    r.y = posJ.y - posI.y;
+    r.z = posJ.z - posI.z;
 
-    float rabs = sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2] + EPS2);
+    float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + mp_properties->eps2);
     float rabsInv = 1.0 / (rabs * rabs * rabs);
     float temp = massJ * rabsInv;
 
-    // A tömegbe bele van olvaszva a G
+    // A tömegbe bele van olvasztva a G
     // Az rabsInv-be beleraktum a massJ-t, hogy ne kelljen mindig összeszorozni
-    accI[0] += r[0] * temp;
-    accI[1] += r[1] * temp;
-    accI[2] += r[2] * temp;
+    accI.x += r.x * temp;
+    accI.y += r.y * temp;
+    accI.z += r.z * temp;
+    return accI;
 }

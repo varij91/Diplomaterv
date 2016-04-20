@@ -1,13 +1,22 @@
 #ifndef NBODY_ALGORITHM_H
 #define NBODY_ALGORITHM_H
 
+#include <vector>
+#include <memory>
+#include "NBodyProperties.h"
+
 class NBodyAlgorithm {
 
 public:
-    void calculateAcceleration(const float posI[3], float accI[3], const float massJ, const float posJ[3]);
+    NBodyAlgorithm() {}
+    NBodyAlgorithm(std::shared_ptr<NBodyProperties> properties) : mp_properties(properties) {}
 
-    virtual void advance(const unsigned int numBody, const float *mass,
-        float *pos, float *vel, float *acc, const float timeStep) = 0;
+    float3 calculateAcceleration(const float3 posI, const float massJ, const float3 posJ);
+
+    virtual void advance(std::vector<Body> &bodies) = 0;
+
+protected:
+    std::shared_ptr<NBodyProperties> mp_properties;
 };
 
 #endif // !NBODY_ALGORITHM_H

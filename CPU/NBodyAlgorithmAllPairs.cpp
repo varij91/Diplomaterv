@@ -1,34 +1,31 @@
 #include "NBodyAlgorithmAllPairs.h"
+#include "NBodyProperties.h"
 
-void NBodyAlgorithmAllPairs::advance(const unsigned int numBody, const float *mass,
-    float *pos, float *vel, float *acc, const float stepTime) {
+void NBodyAlgorithmAllPairs::advance(std::vector<Body> &bodies) {
     /* Új gyorsulási értékek kiszámítása */
-    for (int i = 0; i < numBody; i++) {
+    for (int i = 0; i < mp_properties->numBody; i++) {
 
-        float posI[3] = { pos[3 * i], pos[3 * i + 1], pos[3 * i + 2] };
-        float accI[3] = { 0, 0, 0 };
-        acc[3 * i] = 0;
-        acc[3 * i + 1] = 0;
-        acc[3 * i + 2] = 0;
+        float3 zeros = float3(0.0f, 0.0f, 0.0f);
+        bodies.at(i).acceleration = zeros;
 
-        for (int j = 0; j < numBody; j++) {
-            float posJ[3] = { pos[3 * j], pos[3 * j + 1], pos[3 * j + 2] };
-            float massJ   = mass[j];
-            calculateAcceleration(posI, accI, massJ, posJ);
-            acc[3 * i] += accI[0];
-            acc[3 * i + 1] += accI[1];
-            acc[3 * i + 2] += accI[2];
+        float3 acc(0.0f, 0.0f, 0.0f);
+        for (int j = 0; j < mp_properties->numBody; j++) {
+            acc = calculateAcceleration(bodies.at(i).position, bodies.at(j).mass, bodies.at(j).position);
+            bodies.at(i).acceleration.x += acc.x;
+            bodies.at(i).acceleration.y += acc.y;
+            bodies.at(i).acceleration.z += acc.z;
         }
     }
-    /* Új pozíció és sebesség meghatározása*/
-    float stepTime2 = 0.5 * stepTime * stepTime;
-    for (int i = 0; i < numBody; i++) {
-        pos[3 * i] += vel[3 * i] * stepTime + acc[3 * i] * stepTime2;
-        pos[3 * i + 1] += vel[3 * i + 1] * stepTime + acc[3 * i + 1] * stepTime2;
-        pos[3 * i + 2] += vel[3 * i + 2] * stepTime + acc[3 * i + 2] * stepTime2;
 
-        vel[3 * i] += acc[3 * i] * stepTime;
-        vel[3 * i + 1] += acc[3 * i + 1] * stepTime;
-        vel[3 * i + 2] += acc[3 * i + 2] * stepTime;
+    /* Új pozíció és sebesség meghatározása*/
+    float stepTime2 = 0.5f * mp_properties->stepTime * mp_properties->stepTime;
+    for (int i = 0; i < mp_properties->numBody; i++) {
+        bodies.at(i).position.x += bodies.at(i).velocity.x * mp_properties->stepTime + bodies.at(i).acceleration.x * stepTime2;
+        bodies.at(i).position.y += bodies.at(i).velocity.y * mp_properties->stepTime + bodies.at(i).acceleration.y * stepTime2;
+        bodies.at(i).position.z += bodies.at(i).velocity.z * mp_properties->stepTime + bodies.at(i).acceleration.z * stepTime2;
+
+        bodies.at(i).velocity.x += bodies.at(i).acceleration.x * mp_properties->stepTime;
+        bodies.at(i).velocity.y += bodies.at(i).acceleration.y * mp_properties->stepTime;
+        bodies.at(i).velocity.z += bodies.at(i).acceleration.z * mp_properties->stepTime;
     }
 }

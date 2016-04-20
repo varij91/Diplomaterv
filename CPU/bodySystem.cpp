@@ -4,199 +4,142 @@
 #include <random>
 #include <math.h>
 #include "bodySystem.h"
-#include "defines.h"
+#include "NBodyProperties.h"
 #include "NBodyAlgorithmAllPairs.h"
+#define GLEW_STATIC
 #include <GL\glew.h>
 #include <GL\freeglut.h>
 
-void BodySystem::init(unsigned int seedIn, InitType typeIn) {
-    
-    assert(m_numBody > 1);
+int scaledvalue(unsigned int scale) {
+    int sign = (rand() % 2) ? -1 : 1;
+    int value = (float)(rand() % scale);
+    return (sign * value);
+}
+
+void BodySystem::init() {
+    assert(mp_properties->numBody > 1);
+    assert(mp_properties->massScale != 0);
+    assert(mp_properties->positionScale != 0);
+    assert(mp_properties->velocityScale != 0);
     assert(!m_systemInitialized);
 
-    srand(seedIn);
+    srand(mp_properties->seed);
+    float3 zeros = float3(0.0f, 0.0f, 0.0f);
 
-    m_mass          = new float[m_numBody];
-    m_position      = new float[3 * m_numBody];
-    m_velocity      = new float[3 * m_numBody];
-    m_acceleration  = new float[3 * m_numBody];
+    for (int i = 0; i < mp_properties->numBody;) {
 
-    switch (typeIn)
-    {
-    case(EQUAL) :
-        for (int i = 0; i < m_numBody;) {
+        m_bodies.emplace_back(zeros, zeros, zeros, 0.0f);
 
-            float sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_position[3 * i]     = sign * (float)(rand() % UNIVERSE_SCALE);
-            sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_position[3 * i + 1] = sign * (float)(rand() % UNIVERSE_SCALE);
-            sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_position[3 * i + 2] = sign * (float)(rand() % UNIVERSE_SCALE);
+        m_bodies.at(i).position.x = scaledvalue(mp_properties->positionScale);
+        m_bodies.at(i).position.y = scaledvalue(mp_properties->positionScale);
+        m_bodies.at(i).position.z = scaledvalue(mp_properties->positionScale);
 
-            bool occupied = false;
-            float disterr = 10e-6f;
-            for (int j = 0; j < i; j++) {
-                occupied = (abs(m_position[3 * j] - m_position[3 * i]) < disterr) &&
-                    (abs(m_position[3 * j + 1] - m_position[3 * i + 1]) < disterr) &&
-                    (abs(m_position[3 * j + 2] - m_position[3 * i + 2]) < disterr);
-                if (occupied) break;
-            }
-            if (occupied) continue;
+        bool occupied = false;
+        float disterr = 10e-6f;
+        for (int j = 0; j < i; j++) {
+            occupied = (abs(m_bodies.at(j).position.x - m_bodies.at(i).position.x) < disterr) &&
+                (abs(m_bodies.at(j).position.y - m_bodies.at(i).position.y) < disterr) &&
+                (abs(m_bodies.at(j).position.z - m_bodies.at(i).position.z) < disterr);
+            if (occupied) break;
+        }
+        if (occupied) continue;
 
+        switch (mp_properties->massInit) {
+        case(EQUAL) :
             if (i == 0)
-                m_mass[i] = G * (float)((rand() % MASS_SCALE) + 1);
+                m_bodies.at(i).mass = mp_properties->gravConstant * (float)((rand() % mp_properties->massScale) + 1.0f);
             else
-                m_mass[i] = m_mass[i - 1];
-
-            sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_velocity[3 * i] = (float)((rand() % (VELOCITY_SCALE)) / VELOCITY_SCALE);
-            sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_velocity[3 * i + 1] = (float)((rand() % (VELOCITY_SCALE)) / VELOCITY_SCALE);
-            sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_velocity[3 * i + 2] = (float)((rand() % (VELOCITY_SCALE)) / VELOCITY_SCALE);
-
-            m_acceleration[3 * i] = 0.0f;
-            m_acceleration[3 * i + 1] = 0.0f;
-            m_acceleration[3 * i + 2] = 0.0f;
-
-            i++;
+                m_bodies.at(i).mass = m_bodies.at(i - 1).mass;
+            break;
+        case(RANDOM) :
+            m_bodies.at(i).mass = mp_properties->gravConstant * (float)((rand() % mp_properties->massScale) + 1.0f);
+            break;
+        default :
+            assert(false);
+            break;
         }
-        break;
-    case(RANDOM):
-        for (int i = 0; i < m_numBody;) {
+        
+        m_bodies.at(i).velocity.x = mp_properties->initVelocityFactor * scaledvalue(mp_properties->velocityScale);
+        m_bodies.at(i).velocity.y = mp_properties->initVelocityFactor * scaledvalue(mp_properties->velocityScale);
+        m_bodies.at(i).velocity.z = mp_properties->initVelocityFactor * scaledvalue(mp_properties->velocityScale);
 
-            float sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_position[3 * i] = sign * (float)(rand() % UNIVERSE_SCALE);
-            sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_position[3 * i + 1] = sign * (float)(rand() % UNIVERSE_SCALE);
-            sign = (rand() % 2) ? -1.0f : 1.0f;
-            m_position[3 * i + 2] = sign * (float)(rand() % UNIVERSE_SCALE);
-            
-            bool occupied = false;
-            float disterr = 10e-6f;
-            for (int j = 0; j < i; j++) {
-                occupied = (abs(m_position[3 * j] - m_position[3 * i]) < disterr) &&
-                    (abs(m_position[3 * j + 1] - m_position[3 * i + 1]) < disterr) &&
-                    (abs(m_position[3 * j + 2] - m_position[3 * i + 2]) < disterr);
-                if (occupied) break;
-            }
-            if (occupied) continue;
+        m_bodies.at(i).acceleration = zeros;
 
-            m_mass[i] = G * (float)((rand() % MASS_SCALE) + 1.0f);
-            
-            sign = (rand() % 2) ? -1.0 : 1.0;
-            m_velocity[3 * i] = (float)((rand() % (VELOCITY_SCALE)) / VELOCITY_SCALE);
-            sign = (rand() % 2) ? -1.0 : 1.0;
-            m_velocity[3 * i + 1] = (float)((rand() % (VELOCITY_SCALE)) / VELOCITY_SCALE);
-            sign = (rand() % 2) ? -1.0 : 1.0;
-            m_velocity[3 * i + 2] = (float)((rand() % (VELOCITY_SCALE)) / VELOCITY_SCALE);
-
-            m_acceleration[3 * i] = 0.0f;
-            m_acceleration[3 * i + 1] = 0.0f;
-            m_acceleration[3 * i + 2] = 0.0f;
-
-            i++;
-        }
-        break;
-    default:
-        break;
+        i++;
     }
-    
 
     m_systemInitialized = true;
+
 }
 
 void BodySystem::initGL(int *argc, char* argv[]) {
     glutInit(argc, argv);
+    // Törlési szín beállítása
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glutInitWindowSize(650, 650);
     glutInitWindowPosition(0, 0);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutCreateWindow("N-test szimuláció");
 }
 
-void BodySystem::setAlgorithm(AlgorithmType typeIn) {
-    if (m_algorithmInitialized) {
-        delete m_algorithm;
-    }
-    switch (typeIn) {
+void BodySystem::setAlgorithm() {
+    switch (mp_properties->algorithm) {
     case(ALL_PAIRS) :
-        m_algorithm = new NBodyAlgorithmAllPairs;
+        m_algorithm.reset(new NBodyAlgorithmAllPairs(mp_properties));
         m_algorithmInitialized = true;
         break;
-
     case(ALL_PAIRS_SELECTIVE) :
         break;
-
     default:
+        assert(false);
         break;
     }
 }
 
-void BodySystem::integrate(float startTime, float endTime, float stepTime) {
+void BodySystem::integrate() {
     assert(m_systemInitialized);
     assert(m_algorithmInitialized);
-    assert(startTime < endTime);
+    assert(mp_properties->startTime < mp_properties->endTime);
 
-    for (float i = startTime; i < endTime;) {
-        m_algorithm->advance(m_numBody, m_mass, m_position, m_velocity, m_acceleration, stepTime);
+    float stepTime = mp_properties->stepTime;
+    for (float i = mp_properties->startTime; i < mp_properties->endTime;) {
+        m_algorithm->advance(m_bodies);
 
-        //std::cout << "#############################################################" << std::endl;
-        //std::cout << "Time: " << i << std::endl;
+        /*std::cout << "#############################################################" << std::endl;
+        std::cout << "Time: " << i << std::endl;
 
-        /*for (int j = 0; j < m_numBody; j++) {
-            std::cout << j << " Pos: (" << m_position[j] << ", " << m_position[j + 1] << ", " << m_position[j + 2] << ")" << std::endl;
+        for (int j = 0; j < mp_properties->numBody; j++) {
+            std::cout << j << " Pos: (" << m_bodies.at(j).position.x << ", " << m_bodies.at(j).position.y << ", " << m_bodies.at(j).position.z << ")" << std::endl;
         }*/
 
-        renderSystem(m_numBody, m_position);
+        renderSystem(m_bodies);
 
-        if ((i + stepTime) > endTime) {
-            stepTime = endTime - i;
-            i = endTime;
+        if ((i + mp_properties->stepTime) > mp_properties->endTime) {
+            stepTime = mp_properties->endTime - i;
+            i = mp_properties->endTime;
         }
         else {
             i += stepTime;
         }
     }
+
 }
-void BodySystem::renderSystem(const unsigned int numBody, const float *pos) {
-    /* Ablak torlese az aktualis torloszinnel. */
+
+void BodySystem::renderSystem(std::vector<Body> bodies) {
+
+    // Ablak törlése a korábban beállított színre
+    // Törli a bitmaszknak megfelelõ buffer(eke)t
     glClear(GL_COLOR_BUFFER_BIT);
-
-    /* Poligon megjelenitesi modja. */
-    int filled_display = 1;
-    if (filled_display)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    /*GLfloat sizes[2] = {0.1f, 2.0f};
-    const GLfloat quadratic[] = { 0.0f, 0.0f, 0.01f };
-
-    glGetFloatv(GL_ALIASED_POINT_SIZE_RANGE, sizes);
-    glEnable(GL_POINT_SPRITE_ARB);
-    glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, sizes[1]);
-    glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, sizes[0]);
-    glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic);
-    glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);*/
-    glPointSize(2.f);
+    glPointSize(7.f);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     glBegin(GL_POINTS);
-    for (int i = 0; i < numBody; i++)
+    for (int i = 0; i < mp_properties->numBody; i++)
     {
-        glVertex3f(pos[3 * i] / UNIVERSE_SCALE/10, pos[3 * i + 1] / UNIVERSE_SCALE/10, pos[3 * i + 2] / UNIVERSE_SCALE/10);
+        glVertex3f(bodies.at(i).position.x / (mp_properties->positionScale * 10), bodies.at(i).position.y / (mp_properties->positionScale * 10), bodies.at(i).position.z / (mp_properties->positionScale * 10));
     }
     // Done drawing points
     glEnd();
     glDisable(GL_POINT_SPRITE_ARB);
     /* Pufferek csereje, uj kep megjelenitese */
     glutSwapBuffers();
-}
-
-BodySystem::~BodySystem() {
-    delete[] m_mass;
-    delete[] m_position;
-    delete[] m_velocity;
-    delete[] m_acceleration;
-
-    delete m_algorithm;
 }

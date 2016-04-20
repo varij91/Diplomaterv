@@ -1,12 +1,15 @@
 #ifndef NBODY_ALGORITHM_ALL_PAIRS_H
 #define NBODY_ALGORITHM_ALL_PAIRS_H
+
 #include "NBodyAlgorithm.h"
+#include "NBodyProperties.h"
 
 class NBodyAlgorithmAllPairs : public NBodyAlgorithm {
 public:
-    NBodyAlgorithmAllPairs(){};
+    NBodyAlgorithmAllPairs() {};
+    NBodyAlgorithmAllPairs(std::shared_ptr<NBodyProperties> properties) : NBodyAlgorithm(properties) {}
 
-    void advance(const unsigned int numBody, const float *mass,
-        float *pos, float *vel, float *acc, const float stepTime);
+    void advance(std::vector<Body> &bodies);
+
 };
 #endif
