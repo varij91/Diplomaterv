@@ -21,6 +21,7 @@ void BodySystem::init() {
     assert(mp_properties->massScale != 0);
     assert(mp_properties->positionScale != 0);
     assert(mp_properties->velocityScale != 0);
+    assert(mp_properties->startTime < mp_properties->endTime);
     assert(!m_systemInitialized);
 
     srand(mp_properties->seed);
@@ -78,7 +79,26 @@ void BodySystem::initGL(int *argc, char* argv[]) {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glutInitWindowSize(650, 650);
     glutInitWindowPosition(0, 0);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+    // Pontok simításának beállítása
+    glEnable(GL_POINT_SMOOTH);
+    glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
+    
+    glClearDepth(1.0f);        // Set background depth to farthest
+    glEnable(GL_DEPTH_TEST);   // Enable depth testing for z-culling
+    glDepthFunc(GL_LEQUAL);    // Set the type of depth-test
+    glShadeModel(GL_SMOOTH);   // Enable smooth shading
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);  // Nice perspective corrections
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    //gluPerspective(45.0f, aspect, 0.1f, 100.0f);
+    /*glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 10.0f);*/
+    //glOrtho(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+
     glutCreateWindow("N-test szimuláció");
 }
 
@@ -99,11 +119,9 @@ void BodySystem::setAlgorithm() {
 void BodySystem::integrate() {
     assert(m_systemInitialized);
     assert(m_algorithmInitialized);
-    assert(mp_properties->startTime < mp_properties->endTime);
-
-    float stepTime = mp_properties->stepTime;
-    for (float i = mp_properties->startTime; i < mp_properties->endTime;) {
-        m_algorithm->advance(m_bodies);
+    
+    while (mp_properties->currentTime <= mp_properties->endTime) {
+        advance();
 
         /*std::cout << "#############################################################" << std::endl;
         std::cout << "Time: " << i << std::endl;
@@ -111,26 +129,51 @@ void BodySystem::integrate() {
         for (int j = 0; j < mp_properties->numBody; j++) {
             std::cout << j << " Pos: (" << m_bodies.at(j).position.x << ", " << m_bodies.at(j).position.y << ", " << m_bodies.at(j).position.z << ")" << std::endl;
         }*/
+        /*if (mp_properties->displayMode == DisplayMode::GUI) {
+            renderSystem();
+        }*/
 
-        renderSystem(m_bodies);
-
-        if ((i + mp_properties->stepTime) > mp_properties->endTime) {
+        /*if ((i + mp_properties->stepTime) > mp_properties->endTime) {
             stepTime = mp_properties->endTime - i;
             i = mp_properties->endTime;
         }
         else {
             i += stepTime;
-        }
+        }*/
     }
 
 }
 
-void BodySystem::renderSystem(std::vector<Body> bodies) {
+void BodySystem::advance() {
+    assert(m_systemInitialized);
+    assert(m_algorithmInitialized);
 
-    // Ablak törlése a korábban beállított színre
+    m_algorithm->advance(m_bodies);
+
+    mp_properties->currentTime += mp_properties->stepTime;
+}
+
+void BodySystem::renderSystem(void) {
+
+    GLfloat pointSize = 3.0f;
+    glClear(GL_COLOR_BUFFER_BIT);
+    glPointSize(5.0f);
+    glBegin(GL_POINTS);
+    
+    for (int i = 0; i < mp_properties->numBody; i++)
+    {
+        glVertex3f(m_bodies.at(i).position.x / (mp_properties->positionScale * 10), m_bodies.at(i).position.y / (mp_properties->positionScale * 10), m_bodies.at(i).position.z / (mp_properties->positionScale * 10));
+    }
+    glEnd();
+
+    glutSwapBuffers();
+    /*// Ablak törlése a korábban beállított színre
     // Törli a bitmaszknak megfelelõ buffer(eke)t
     glClear(GL_COLOR_BUFFER_BIT);
     glPointSize(7.f);
+    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_LOWER_LEFT);
+    //glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
+    glEnable(GL_POINT_SPRITE);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     glBegin(GL_POINTS);
     for (int i = 0; i < mp_properties->numBody; i++)
@@ -139,7 +182,6 @@ void BodySystem::renderSystem(std::vector<Body> bodies) {
     }
     // Done drawing points
     glEnd();
-    glDisable(GL_POINT_SPRITE_ARB);
-    /* Pufferek csereje, uj kep megjelenitese */
-    glutSwapBuffers();
+    
+    glutSwapBuffers();*/
 }

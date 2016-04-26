@@ -3,7 +3,8 @@
 
 enum DisplayMode {
     GUI,
-    BATCH
+    BATCH,
+    PERFORMANCE
 };
 
 enum AlgorithmType {
@@ -38,6 +39,8 @@ struct NBodyProperties {
     DisplayMode     displayMode = GUI;
     AlgorithmType   algorithm = ALL_PAIRS;
     MassInitType    massInit = RANDOM;
+    
+    unsigned int    performanceRuns = 10;
 
     unsigned int    numBody = 32;
     unsigned int    seed = 0;
@@ -49,7 +52,8 @@ struct NBodyProperties {
 
     float           startTime = 0.0f;
     float           stepTime = 100.0f;    // [Day]
-    float           endTime = 10000000.0f;
+    float           endTime = 10000.0f;
+    float           currentTime = 0.0f;
 
     bool            allowLogger = false;
 
@@ -57,8 +61,8 @@ struct NBodyProperties {
     const float     eps2 = 10.0;
 };
 
-/*#ifndef OPENMP
+#ifndef OPENMP
 #define OPENMP
-#endif // OPENMP*/
+#endif // OPENMP
 
 #endif // NBODY_PROPERTIES_H

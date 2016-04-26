@@ -25,8 +25,9 @@ public:
 
     void setAlgorithm();
 
+    void advance();
     void integrate();
-    void renderSystem(std::vector<Body> bodies);
+    void renderSystem(void);
 
 private:
 

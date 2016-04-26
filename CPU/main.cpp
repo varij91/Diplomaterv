@@ -3,8 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <assert.h>
-#include <chrono>
-#include <ctime>
 #include <string>
 
 #define GLEW_STATIC
@@ -13,10 +11,12 @@
 
 #include "bodySystem.h"
 #include "NBodyProperties.h"
-
-using namespace std::chrono;
+#include "NBodyUtility.h"
 
 NBodyProperties g_properties;
+std::shared_ptr<NBodyProperties> gp_properties;
+std::unique_ptr<BodySystem> gp_system;
+std::shared_ptr<NBodyUtility> gp_utility;
 
 static void showProgramUsage(std::string name) {
     std::cerr << "Usage: " << name << " [<option(s)> <key1=value1> <key2=value2> ...]"
@@ -76,6 +76,9 @@ bool commandLineParser(int argc, const char *argv[]) {
             }
             else if ((value == "batch") || (value == "BATCH")) {
                 g_properties.displayMode = DisplayMode::BATCH;
+            }
+            else if ((value == "perf") || (value == "PERF")) {
+                g_properties.displayMode = DisplayMode::PERFORMANCE;
             }
             else {
                 std::cerr << "Unknown input value for " << key << ": " << value << std::endl;
@@ -138,6 +141,9 @@ bool commandLineParser(int argc, const char *argv[]) {
         else if (key == "seed") {
             g_properties.seed = atoi(value.c_str());
         }
+        else if (key == "perfruns") {
+            g_properties.performanceRuns = atoi(value.c_str());
+        }
         else {
             std::cerr << "Unknown input argument: " << argument << std::endl;
             showProgramUsage(argv[0]);
@@ -146,21 +152,67 @@ bool commandLineParser(int argc, const char *argv[]) {
     }
 
     return true;
+}
 
+void renderCallback(void) {
+    gp_system->renderSystem();
+    
+    gp_utility->startStopwatch();
+    gp_system->advance();
+    gp_utility->endStopwatch();
+    
+    if (gp_properties->currentTime >= gp_properties->endTime) {
+        glutLeaveMainLoop();
+    }
+}
+
+void idleCallback() {
+    glutPostRedisplay();
 }
 
 int main(int argc, char* argv[])
 {
-    commandLineParser(argc, (const char**)argv);
-    std::shared_ptr<NBodyProperties> p_properties = std::make_shared<NBodyProperties>(g_properties);
-    std::unique_ptr<BodySystem> p_system = std::make_unique<BodySystem>(p_properties);
+    argc = 2;
+    argv[1] = "options=options.txt";
+    if (!commandLineParser(argc, (const char**)argv))
+        exit(-1);
+    g_properties.currentTime = g_properties.startTime;
 
-    p_system->init();
-    p_system->initGL(&argc, argv);
-    p_system->setAlgorithm();
+    gp_properties = std::make_shared<NBodyProperties>(g_properties);
+    gp_system = std::make_unique<BodySystem>(gp_properties);
+    gp_utility = std::make_shared<NBodyUtility>(gp_properties);
 
-    p_system->integrate();
-
+    gp_system->init();
+    gp_system->setAlgorithm();
+    if (gp_properties->displayMode == DisplayMode::GUI) {
+        gp_system->initGL(&argc, argv);
+        glutDisplayFunc(renderCallback);
+        glutIdleFunc(idleCallback);
+        glutMainLoop();
+    }
+    else if (gp_properties->displayMode == DisplayMode::BATCH) {
+        gp_utility->startStopwatch();
+        gp_system->integrate();
+        gp_utility->endStopwatch();
+        gp_utility->printPerformace();
+    }
+    else if (gp_properties->displayMode == DisplayMode::PERFORMANCE){
+        for (int i = 0; i < gp_properties->performanceRuns; i++) {
+            gp_utility->startStopwatch();
+            gp_system->integrate();
+            gp_utility->endStopwatch();
+            gp_properties->currentTime = gp_properties->startTime;
+        }
+        gp_utility->printPerformace(gp_properties->performanceRuns);
+    }
+    //gp_system->integrate();
+    
+    /*  TODO Callback fgv-ek létrehozása, mozgatás?
+        Integrate-bõl kivenni a renderSystem-et
+        Ha a gui kapcsoló be van nyomva akkor a render callbackbõl hívni az integrate-t / advance??
+        Kérdés milyen sûrûn hívódik meg a render?
+    */
+    
     return 0;
 }
 
