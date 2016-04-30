@@ -14,7 +14,7 @@ void NBodyAlgorithmAllPairs::advance(std::vector<Body> &bodies) {
 
         float3 acc(0.0f, 0.0f, 0.0f);
         for (int j = 0; j < mp_properties->numBody; j++) {
-            // 20 FLOPS
+            // 17 FLOPS
             acc = calculateAcceleration(bodies.at(i).position, bodies.at(j).mass, bodies.at(j).position);
             // 3 FLOPS
             bodies.at(i).acceleration.x += acc.x;

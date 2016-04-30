@@ -23,6 +23,12 @@ struct float3{
     float z;
     float3(float x, float y, float z)
         : x(x), y(y), z(z) {}
+    float3& operator+=(const float3 &a) {
+        this->x += a.x;
+        this->y += a.y;
+        this->z += a.z;
+        return *this;
+    }
 };
 
 struct Body {
@@ -40,8 +46,9 @@ struct NBodyProperties {
     AlgorithmType   algorithm = ALL_PAIRS;
     MassInitType    massInit = RANDOM;
     
-    unsigned int    performanceRuns = 10;
+    unsigned int    performanceRuns = 1;
 
+    // 4-gyel osztható legyen (különben nem megy az SSE+OpenMP)
     unsigned int    numBody = 32;
     unsigned int    seed = 0;
 

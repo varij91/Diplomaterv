@@ -27,7 +27,7 @@ public:
     milliseconds getStopwatchTimeMilliseconds();
 
 private:
-    unsigned int m_numForces = 0;
+    //unsigned int m_numForces = 0;
 
     std::shared_ptr<NBodyProperties>  mp_properties;
 

@@ -6,6 +6,7 @@
 #include "bodySystem.h"
 #include "NBodyProperties.h"
 #include "NBodyAlgorithmAllPairs.h"
+#include "NBodyAlgorithmAllPairsSSE.h"
 #define GLEW_STATIC
 #include <GL\glew.h>
 #include <GL\freeglut.h>
@@ -105,7 +106,7 @@ void BodySystem::initGL(int *argc, char* argv[]) {
 void BodySystem::setAlgorithm() {
     switch (mp_properties->algorithm) {
     case(ALL_PAIRS) :
-        m_algorithm.reset(new NBodyAlgorithmAllPairs(mp_properties));
+        m_algorithm.reset(new NBodyAlgorithmAllPairsSSE(mp_properties));
         m_algorithmInitialized = true;
         break;
     case(ALL_PAIRS_SELECTIVE) :
@@ -119,15 +120,19 @@ void BodySystem::setAlgorithm() {
 void BodySystem::integrate() {
     assert(m_systemInitialized);
     assert(m_algorithmInitialized);
-    
-    while (mp_properties->currentTime <= mp_properties->endTime) {
+    /*for (int j = 0; j < mp_properties->numBody; j++) {
+        std::cout << j << " Pos: (" << m_bodies.at(j).position.x << ", " << m_bodies.at(j).position.y << ", " << m_bodies.at(j).position.z << ")" << std::endl;
+        std::cout << j << " Acc: (" << m_bodies.at(j).acceleration.x << ", " << m_bodies.at(j).acceleration.y << ", " << m_bodies.at(j).acceleration.z << ")" << std::endl;
+    }*/
+    while (mp_properties->currentTime < mp_properties->endTime) {
         advance();
 
         /*std::cout << "#############################################################" << std::endl;
-        std::cout << "Time: " << i << std::endl;
+        std::cout << "Time: " << mp_properties->currentTime << std::endl;
 
         for (int j = 0; j < mp_properties->numBody; j++) {
             std::cout << j << " Pos: (" << m_bodies.at(j).position.x << ", " << m_bodies.at(j).position.y << ", " << m_bodies.at(j).position.z << ")" << std::endl;
+            std::cout << j << " Acc: (" << m_bodies.at(j).acceleration.x << ", " << m_bodies.at(j).acceleration.y << ", " << m_bodies.at(j).acceleration.z << ")" << std::endl;
         }*/
         /*if (mp_properties->displayMode == DisplayMode::GUI) {
             renderSystem();
@@ -155,11 +160,11 @@ void BodySystem::advance() {
 
 void BodySystem::renderSystem(void) {
 
-    GLfloat pointSize = 3.0f;
+
     glClear(GL_COLOR_BUFFER_BIT);
     glPointSize(5.0f);
     glBegin(GL_POINTS);
-    
+
     for (int i = 0; i < mp_properties->numBody; i++)
     {
         glVertex3f(m_bodies.at(i).position.x / (mp_properties->positionScale * 10), m_bodies.at(i).position.y / (mp_properties->positionScale * 10), m_bodies.at(i).position.z / (mp_properties->positionScale * 10));
@@ -167,6 +172,43 @@ void BodySystem::renderSystem(void) {
     glEnd();
 
     glutSwapBuffers();
+    /*glClear(GL_COLOR_BUFFER_BIT);
+    GLfloat minDistance =  -2.0f * mp_properties->positionScale;
+    GLfloat maxDistance =  2.0f * mp_properties->positionScale;
+    GLfloat minSize = 1.0f;
+    GLfloat maxSize = 17.0f;
+    GLfloat pointScale = maxSize / (maxDistance - minDistance);*/
+    
+    
+    /*GLfloat sizes[2] = {1.0f, 7.0f};
+    GLfloat quadratic[] = { 1.0f, 5.0f, 10.0f };
+    glGetFloatv(GL_ALIASED_POINT_SIZE_RANGE, sizes);
+    glEnable(GL_POINT_SPRITE_ARB);
+    glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, sizes[1]);
+    glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, sizes[0]);
+    glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic);
+    glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+    glPointSize(5.0f);*/
+    /*glPointSize(3.0f);
+    glBegin(GL_POINTS);
+    
+    for (int i = 0; i < mp_properties->numBody; i++)
+    {
+        
+        GLfloat distance = m_bodies.at(i).position.z;
+        if (m_bodies.at(i).position.z < minDistance)
+            distance = minDistance;
+        if (m_bodies.at(i).position.z > maxDistance)
+            distance = maxDistance;
+        GLfloat pointSize = pointScale * (distance - minDistance);
+        glPointSize(pointSize);
+        glBegin(GL_POINTS);
+        glVertex3f(m_bodies.at(i).position.x / (mp_properties->positionScale * 10), m_bodies.at(i).position.y / (mp_properties->positionScale * 10), m_bodies.at(i).position.z / (mp_properties->positionScale * 10));
+        //glEnd();
+    }
+    glEnd();
+
+    glutSwapBuffers();*/
     /*// Ablak törlése a korábban beállított színre
     // Törli a bitmaszknak megfelelõ buffer(eke)t
     glClear(GL_COLOR_BUFFER_BIT);
