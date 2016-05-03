@@ -17,6 +17,10 @@ public:
 
     void calculateAcceleration(const float3 (&posI)[4], const float massJ, const float3 posJ, float3 (&accI)[4]);
 
+    void calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, float* accI);
+
+    void calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, __m128 accIx, __m128 accIy, __m128 accIz, float *accI);
+
     virtual void advance(std::vector<Body> &bodies) = 0;
 
 protected:

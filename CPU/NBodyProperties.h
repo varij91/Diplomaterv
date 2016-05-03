@@ -46,7 +46,7 @@ struct NBodyProperties {
     AlgorithmType   algorithm = ALL_PAIRS;
     MassInitType    massInit = RANDOM;
     
-    unsigned int    performanceRuns = 1;
+    unsigned int    performanceRuns = 30;
 
     // 4-gyel osztható legyen (különben nem megy az SSE+OpenMP)
     unsigned int    numBody = 32;
@@ -64,8 +64,8 @@ struct NBodyProperties {
 
     bool            allowLogger = false;
 
-    const float     gravConstant = 8.890422785943706e-10;
-    const float     eps2 = 10.0;
+    const float     gravConstant = 8.890422785943706e-10f;
+    const float     eps2 = 10.0f;
 };
 
 #ifndef OPENMP

@@ -1,4 +1,4 @@
-#include <math.h>
+ï»¿#include <math.h>
 
 #include <iostream>
 #include <fstream>
@@ -31,18 +31,18 @@ bool commandLineParser(int argc, const char *argv[]) {
         return true;
     }
 
-    // Argumentumlista feldolgozása
+    // Argumentumlista feldolgozÃ¡sa
     for (int i = 1; i < argc; i++) {
         std::string argument = argv[i];
         std::string key, value;
         std::size_t equalPosition = argument.find_first_of('=');
 
-        if (equalPosition != std::string::npos) {       // Ha talált benne egyenlõségjelet
-            key = argument.substr(0, equalPosition);    // kulcs = elejétõl az egyenlõségjelig
-            value = argument.substr(equalPosition + 1); // érték = egyenlõségjeltõl a végéig
+        if (equalPosition != std::string::npos) {       // Ha talÃ¡lt benne egyenlÅ‘sÃ©gjelet
+            key = argument.substr(0, equalPosition);    // kulcs = elejÃ©tÅ‘l az egyenlÅ‘sÃ©gjelig
+            value = argument.substr(equalPosition + 1); // Ã©rtÃ©k = egyenlÅ‘sÃ©gjeltÅ‘l a vÃ©gÃ©ig
         }
         else {
-            // Opciók (NEM kulcs érték párok feldolgozása)
+            // OpciÃ³k (NEM kulcs Ã©rtÃ©k pÃ¡rok feldolgozÃ¡sa)
             if ((argument == "-h") || (argument == "--help")) {
                 showProgramUsage(argv[0]);
             }
@@ -54,9 +54,9 @@ bool commandLineParser(int argc, const char *argv[]) {
             continue;
         }
 
-        // kulcs-érték párok feldolgozása
+        // kulcs-Ã©rtÃ©k pÃ¡rok feldolgozÃ¡sa
         if ((key == "options") || (key == "OPTIONS")) {
-            // options file beolvasása
+            // options file beolvasÃ¡sa
             std::ifstream file;
             file.open(value, std::ios::in);
 
@@ -66,9 +66,9 @@ bool commandLineParser(int argc, const char *argv[]) {
                 const char *optArgv[] = { "", optArgument.c_str() };
                 commandLineParser(2, optArgv);
             }
-            // sorok beolvasása
+            // sorok beolvasÃ¡sa
             // char *dummyArgList[] = { "", currentLine };
-            // commandLineParser(2, ["", currentLine]) meghívása
+            // commandLineParser(2, ["", currentLine]) meghÃ­vÃ¡sa
         }
         else if ((key == "display") || (key == "DISPLAY")) {
             if ((value == "gui") || (value == "GUI")) {
@@ -170,6 +170,31 @@ void idleCallback() {
     glutPostRedisplay();
 }
 
+void ChangeSize(int w, int h)
+{
+    GLfloat nRange = 20.0f;
+    // Nullaval nem osztunk
+    if (h == 0)
+        h = 1;
+
+    // Viewport beallitasa az ablak meretere.
+    glViewport(0, 0, w, h);
+
+    // Projekcios matrix inicializalasa
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // Parhuzamos vetites beallitasa
+    if (w <= h)
+        glOrtho(-nRange, nRange, -nRange*h / w, nRange*h / w, -nRange, nRange);
+    else
+        glOrtho(-nRange*w / h, nRange*w / h, -nRange, nRange, -nRange, nRange);
+
+    // ModelView matrix inicializalasa
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
 int main(int argc, char* argv[])
 {
     argc = 2;
@@ -186,6 +211,7 @@ int main(int argc, char* argv[])
     gp_system->setAlgorithm();
     if (gp_properties->displayMode == DisplayMode::GUI) {
         gp_system->initGL(&argc, argv);
+        //glutReshapeFunc(ChangeSize);
         glutDisplayFunc(renderCallback);
         glutIdleFunc(idleCallback);
         glutMainLoop();
@@ -207,10 +233,10 @@ int main(int argc, char* argv[])
     }
     //gp_system->integrate();
     
-    /*  TODO Callback fgv-ek létrehozása, mozgatás?
-        Integrate-bõl kivenni a renderSystem-et
-        Ha a gui kapcsoló be van nyomva akkor a render callbackbõl hívni az integrate-t / advance??
-        Kérdés milyen sûrûn hívódik meg a render?
+    /*  TODO Callback fgv-ek lÃ©trehozÃ¡sa, mozgatÃ¡s?
+        Integrate-bÅ‘l kivenni a renderSystem-et
+        Ha a gui kapcsolÃ³ be van nyomva akkor a render callbackbÅ‘l hÃ­vni az integrate-t / advance??
+        KÃ©rdÃ©s milyen sÅ±rÅ±n hÃ­vÃ³dik meg a render?
     */
     
     return 0;

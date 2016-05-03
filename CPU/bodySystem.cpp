@@ -159,71 +159,60 @@ void BodySystem::advance() {
 }
 
 void BodySystem::renderSystem(void) {
-
-
     glClear(GL_COLOR_BUFFER_BIT);
-    glPointSize(5.0f);
-    glBegin(GL_POINTS);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    float size = mp_properties->positionScale/500.0f;
+
+    /*glEnable(GL_BLEND);
+    glEnable(GL_POLYGON_SMOOTH);
+    glBlendFunc(GL_SRC_ALPHA_SATURATE,GL_ZERO);
+    glHint(GL_POLYGON_SMOOTH_HINT,GL_FASTEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_MULTISAMPLE_ARB);*/
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(-0.1, 0.1, -0.1, 0.1, 0.1, 100.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_POLYGON_SMOOTH);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBegin(GL_QUADS);
     for (int i = 0; i < mp_properties->numBody; i++)
     {
-        glVertex3f(m_bodies.at(i).position.x / (mp_properties->positionScale * 10), m_bodies.at(i).position.y / (mp_properties->positionScale * 10), m_bodies.at(i).position.z / (mp_properties->positionScale * 10));
-    }
-    glEnd();
 
-    glutSwapBuffers();
-    /*glClear(GL_COLOR_BUFFER_BIT);
-    GLfloat minDistance =  -2.0f * mp_properties->positionScale;
-    GLfloat maxDistance =  2.0f * mp_properties->positionScale;
-    GLfloat minSize = 1.0f;
-    GLfloat maxSize = 17.0f;
-    GLfloat pointScale = maxSize / (maxDistance - minDistance);*/
-    
-    
-    /*GLfloat sizes[2] = {1.0f, 7.0f};
-    GLfloat quadratic[] = { 1.0f, 5.0f, 10.0f };
-    glGetFloatv(GL_ALIASED_POINT_SIZE_RANGE, sizes);
-    glEnable(GL_POINT_SPRITE_ARB);
-    glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, sizes[1]);
-    glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, sizes[0]);
-    glPointParameterfvARB(GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic);
-    glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
-    glPointSize(5.0f);*/
-    /*glPointSize(3.0f);
-    glBegin(GL_POINTS);
-    
-    for (int i = 0; i < mp_properties->numBody; i++)
-    {
+        glTexCoord2f(0, 0);
+        glVertex3f(m_bodies.at(i).position.x - size, m_bodies.at(i).position.y - size, m_bodies.at(i).position.z);
+        glTexCoord2f(0, 1);
+        glVertex3f(m_bodies.at(i).position.x - size, m_bodies.at(i).position.y + size, m_bodies.at(i).position.z);
+        glTexCoord2f(1, 1);
+        glVertex3f(m_bodies.at(i).position.x + size, m_bodies.at(i).position.y + size, m_bodies.at(i).position.z);
+        glTexCoord2f(1, 0);
+        glVertex3f(m_bodies.at(i).position.x + size, m_bodies.at(i).position.y - size, m_bodies.at(i).position.z);
         
-        GLfloat distance = m_bodies.at(i).position.z;
-        if (m_bodies.at(i).position.z < minDistance)
-            distance = minDistance;
-        if (m_bodies.at(i).position.z > maxDistance)
-            distance = maxDistance;
-        GLfloat pointSize = pointScale * (distance - minDistance);
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
+    }
+    glEnd();
+    glutSwapBuffers();
+
+    /*glClear(GL_COLOR_BUFFER_BIT);
+
+    //glPointSize(4.0f);
+    glBegin(GL_POINTS);
+
+    for (int i = 0; i < mp_properties->numBody; i++)
+    {
         glVertex3f(m_bodies.at(i).position.x / (mp_properties->positionScale * 10), m_bodies.at(i).position.y / (mp_properties->positionScale * 10), m_bodies.at(i).position.z / (mp_properties->positionScale * 10));
-        //glEnd();
     }
     glEnd();
 
-    glutSwapBuffers();*/
-    /*// Ablak törlése a korábban beállított színre
-    // Törli a bitmaszknak megfelelõ buffer(eke)t
-    glClear(GL_COLOR_BUFFER_BIT);
-    glPointSize(7.f);
-    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_LOWER_LEFT);
-    //glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
-    glEnable(GL_POINT_SPRITE);
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glBegin(GL_POINTS);
-    for (int i = 0; i < mp_properties->numBody; i++)
-    {
-        glVertex3f(bodies.at(i).position.x / (mp_properties->positionScale * 10), bodies.at(i).position.y / (mp_properties->positionScale * 10), bodies.at(i).position.z / (mp_properties->positionScale * 10));
-    }
-    // Done drawing points
-    glEnd();
-    
     glutSwapBuffers();*/
 }
