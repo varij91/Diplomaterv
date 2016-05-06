@@ -172,7 +172,7 @@ void idleCallback() {
 
 void ChangeSize(int w, int h)
 {
-    GLfloat nRange = 20.0f;
+    GLfloat nRange = 5.0f;
     // Nullaval nem osztunk
     if (h == 0)
         h = 1;

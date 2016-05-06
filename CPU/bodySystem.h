@@ -32,6 +32,10 @@ public:
 private:
 
     std::vector<Body> m_bodies;
+
+    //!!!
+    Body* mp_bodies;
+
     std::unique_ptr<NBodyAlgorithm> m_algorithm;
     std::shared_ptr<NBodyProperties> mp_properties;
 

@@ -182,10 +182,17 @@ void BodySystem::renderSystem(void) {
 
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_POLYGON_SMOOTH);
-    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glPointSize(4.0f);
+    /*glBegin(GL_POINTS);
 
+    for (int i = 0; i < mp_properties->numBody; i++)
+    {
+        glVertex3f(m_bodies.at(i).position.x, m_bodies.at(i).position.y, m_bodies.at(i).position.z);
+    }
+    glEnd();*/
     glBegin(GL_QUADS);
     for (int i = 0; i < mp_properties->numBody; i++)
     {
@@ -204,8 +211,8 @@ void BodySystem::renderSystem(void) {
     glutSwapBuffers();
 
     /*glClear(GL_COLOR_BUFFER_BIT);
-
-    //glPointSize(4.0f);
+    glEnable(GL_POINT_SMOOTH);
+    glPointSize(1.0f);
     glBegin(GL_POINTS);
 
     for (int i = 0; i < mp_properties->numBody; i++)
@@ -215,4 +222,5 @@ void BodySystem::renderSystem(void) {
     glEnd();
 
     glutSwapBuffers();*/
+
 }
