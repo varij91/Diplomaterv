@@ -29,6 +29,8 @@ public:
     void integrate();
     void renderSystem(void);
 
+    void getColor(unsigned int &r, unsigned int &g, unsigned int &b, int index);
+
 private:
 
     std::vector<Body> m_bodies;

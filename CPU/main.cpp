@@ -157,6 +157,10 @@ bool commandLineParser(int argc, const char *argv[]) {
 void renderCallback(void) {
     gp_system->renderSystem();
     
+    for (int i = 0; i < gp_properties->numBody; i++) {
+        gp_properties->numNeighbours.at(i) = 0;
+    }
+
     gp_utility->startStopwatch();
     gp_system->advance();
     gp_utility->endStopwatch();
@@ -202,6 +206,8 @@ int main(int argc, char* argv[])
     if (!commandLineParser(argc, (const char**)argv))
         exit(-1);
     g_properties.currentTime = g_properties.startTime;
+    //TODO IDEIGLENESEN
+    g_properties.numNeighbours.resize(g_properties.numBody);
 
     gp_properties = std::make_shared<NBodyProperties>(g_properties);
     gp_system = std::make_unique<BodySystem>(gp_properties);

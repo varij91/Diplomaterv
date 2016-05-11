@@ -37,6 +37,15 @@ void NBodyAlgorithmAllPairsSSE::advance(std::vector<Body> &bodies) {
             __m128 currAccz = _mm_set_ps(bodies.at(i).acceleration.z, bodies.at(i + 1).acceleration.z, bodies.at(i + 2).acceleration.z, bodies.at(i + 3).acceleration.z);*/
             float3 accI[4] = { zeros, zeros, zeros, zeros };
             calculateAcceleration(posI, bodies.at(j).mass, bodies.at(j).position, accI);
+
+            /* TODO IDEIGLENESEN COLOR*/
+            unsigned int isClose[4] = { 1, 1, 1, 1 };
+            calculateAccelerationWithColor(posI, bodies.at(j).mass, bodies.at(j).position, accI, isClose);
+            mp_properties->numNeighbours.at(i) += isClose[0];
+            mp_properties->numNeighbours.at(i + 1) += isClose[1];
+            mp_properties->numNeighbours.at(i + 2) += isClose[2];
+            mp_properties->numNeighbours.at(i + 3) += isClose[3];
+
             //calculateAcceleration(posI, bodies.at(j).mass, bodies.at(j).position, currAccx, currAccy, currAccz, accI);
             /*accI[i] = calculateAcceleration(posI[i], bodies.at(j).mass, bodies.at(j).position);
             accI[i+1] = calculateAcceleration(posI[i+1], bodies.at(j).mass, bodies.at(j).position);
@@ -84,9 +93,9 @@ void NBodyAlgorithmAllPairsSSE::advance(std::vector<Body> &bodies) {
         bodies.at(i).position.y += bodies.at(i).velocity.y * mp_properties->stepTime + bodies.at(i).acceleration.y * stepTime2;
         bodies.at(i).position.z += bodies.at(i).velocity.z * mp_properties->stepTime + bodies.at(i).acceleration.z * stepTime2;
         //3*2 FLOPS
-        bodies.at(i).velocity.x += bodies.at(i).acceleration.x * mp_properties->stepTime;
-        bodies.at(i).velocity.y += bodies.at(i).acceleration.y * mp_properties->stepTime;
-        bodies.at(i).velocity.z += bodies.at(i).acceleration.z * mp_properties->stepTime;
+        bodies.at(i).velocity.x = bodies.at(i).velocity.x * mp_properties->velocity_dampening + bodies.at(i).acceleration.x * mp_properties->stepTime;
+        bodies.at(i).velocity.y = bodies.at(i).velocity.y * mp_properties->velocity_dampening + bodies.at(i).acceleration.y * mp_properties->stepTime;
+        bodies.at(i).velocity.z = bodies.at(i).velocity.z * mp_properties->velocity_dampening + bodies.at(i).acceleration.z * mp_properties->stepTime;
     }
 
     // numBody * numBody * 23 FLOPS   +   numBody * 18 FLOPS
