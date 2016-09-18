@@ -2,7 +2,7 @@
 #define NBODY_PROPERTIES_H
 #include <vector>
 
-enum DisplayMode {
+enum Mode {
     GUI,
     BATCH,
     PERFORMANCE
@@ -11,11 +11,28 @@ enum DisplayMode {
 enum AlgorithmType {
     ALL_PAIRS,
     ALL_PAIRS_SELECTIVE,
+    BARNES_HUT
 };
 
 enum MassInitType {
     EQUAL,
-    RANDOM,
+    RANDOM
+};
+
+enum BodyFormation {
+    SCATTER,
+    SPIRAL
+};
+
+enum Dimension {
+    TWO,
+    THREE
+};
+
+enum Technology {
+    BASIC,
+    SSE,
+    AVX
 };
 
 struct float3{
@@ -41,13 +58,17 @@ struct Body {
         : position(p), velocity(v), acceleration(a), mass(m) {}
 };
 
-
 struct NBodyProperties {
-    DisplayMode     displayMode = GUI;
+    Mode            mode = GUI;
     AlgorithmType   algorithm = ALL_PAIRS;
     MassInitType    massInit = RANDOM;
-    
-    unsigned int    performanceRuns = 20;
+    BodyFormation   formation = SCATTER;
+    Dimension       dimension = THREE;
+    Technology      technology = BASIC;
+
+    bool            useOpenMP = false;
+
+    unsigned int    performanceRuns = 1;
 
     // 4-gyel osztható legyen (különben nem megy az SSE+OpenMP)
     unsigned int    numBody = 32;
@@ -65,11 +86,10 @@ struct NBodyProperties {
 
     bool            allowLogger = false;
 
-    const float     gravConstant = 8.890422785943706e-10f;
-    const float     eps2 = 10.0f;
-    const float     velocity_dampening = 0.999f;
+    const float     GRAV_CONSTANT = 8.890422785943706e-10f;
+    const float     EPS2 = 10.0f;
+    const float     VELOCITY_DAMPENING = 0.999f;
 
-    //TODO IDEIGLENESEN IDE
     std::vector<unsigned int> numNeighbours;
 };
 

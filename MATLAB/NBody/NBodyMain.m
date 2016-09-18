@@ -30,7 +30,7 @@ format long
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SETTINGS
 % Algorithm type
-%   'All_PAIRS'
+%   'ALL_PAIRS'
 %   'SELECTIVE' (ONLY IN SINGLESTEP)
 %   'BARNES_HUT'
 algType     = 'ALL_PAIRS';
@@ -38,29 +38,29 @@ algType     = 'ALL_PAIRS';
 %   'SINGLESTEP'
 %   'ODE'
 % simSolver   = 'SINGLESTEP';
-simSolver   = 'SINGLESTEP';
-opts = odeset('reltol', 1e-3, 'abstol', 1e-6, 'refine', 1);
+simSolver   = 'ODE';
+opts = odeset('reltol', 1e-3, 'abstol', 1e-5, 'refine',1);
 % Simulation's goal
 %   'EVALUATE'
 %   'RUNTIME'
 simGoal     = 'EVALUATE';
-simCycle    = 50;
+simCycle    = 1;
 % Simulation type
 %   '3_SEL'     = Sun-Earth-Luna simulation
 %   'N_RANDOM'  = numBody sized universe with random initial values
 simType     = 'N_RANDOM';
 % Number of bodies (in some simulation cases has no effect)
-numBody     = 4;
+numBody     = 32;
 % Simulation time - [D]
 startTime   = 0;
-endTime     = 350000;
+endTime     = 20000;
 % Simulation advance in time - [D]
 % (Not in ODE)
-stepTime    = 3;
+stepTime    = 100;
 % Softening factor - [AU]
-eps         = 0.00001;
+eps         = 1;
 % Set initialization seed to an non-negative integer
-seed        = 0;
+seed        = 10;
 % Write results into file
 logging     = 'OFF';
 logFile     = 'NBodyLogs.txt';
@@ -93,9 +93,9 @@ totalTime = zeros(1,numSim);
 for i = 1:numSim
     switch simSolver
         case 'SINGLESTEP'
-            [totalTime(i), t, x] = NBodySingleStep(algType, time, stepTime, bodies, GA, eps);
+            [totalTime(1,i), t, x] = NBodySingleStep(algType, time, stepTime, bodies, GA, eps);
         case 'ODE'
-            [totalTime(i), t, x] = NBodyOde(algType, time, stepTime, bodies, GA, eps, opts);
+            [totalTime(1,i), t, x] = NBodyOde(algType, time, stepTime, bodies, GA, eps, opts);
         otherwise
     end
 end
@@ -117,7 +117,7 @@ disp(totalTime/numSim)
 disp('Forces/second:')
 [m,n] = size(x);
 avgsteptime = (endTime-startTime)/m;
-disp(numBody*(numBody-1)*((endTime-startTime)/avgsteptime)/totalTime)
+disp(numSim*numBody*(numBody-1)*((endTime-startTime)/avgsteptime)/totalTime)
 % Plots
 figure
 hold on;

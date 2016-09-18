@@ -39,12 +39,12 @@ void NBodyAlgorithmAllPairsSSE::advance(std::vector<Body> &bodies) {
             calculateAcceleration(posI, bodies.at(j).mass, bodies.at(j).position, accI);
 
             /* TODO IDEIGLENESEN COLOR*/
-            unsigned int isClose[4] = { 1, 1, 1, 1 };
+            /*unsigned int isClose[4] = { 1, 1, 1, 1 };
             calculateAccelerationWithColor(posI, bodies.at(j).mass, bodies.at(j).position, accI, isClose);
             mp_properties->numNeighbours.at(i) += isClose[0];
             mp_properties->numNeighbours.at(i + 1) += isClose[1];
             mp_properties->numNeighbours.at(i + 2) += isClose[2];
-            mp_properties->numNeighbours.at(i + 3) += isClose[3];
+            mp_properties->numNeighbours.at(i + 3) += isClose[3];*/
 
             //calculateAcceleration(posI, bodies.at(j).mass, bodies.at(j).position, currAccx, currAccy, currAccz, accI);
             /*accI[i] = calculateAcceleration(posI[i], bodies.at(j).mass, bodies.at(j).position);

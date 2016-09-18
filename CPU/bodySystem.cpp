@@ -81,7 +81,7 @@ void BodySystem::initGL(int *argc, char* argv[]) {
     glutInit(argc, argv);
     // Törlési szín beállítása
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glutInitWindowSize(650, 650);
+    glutInitWindowSize(720, 720);
     glutInitWindowPosition(0, 0);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     // Pontok simításának beállítása
@@ -291,8 +291,8 @@ void BodySystem::renderSystem(void) {
     //glutSwapBuffers();
 
     glClear(GL_COLOR_BUFFER_BIT);
-    //glEnable(GL_POINT_SMOOTH);
-    glPointSize(1.0f);
+    glEnable(GL_POINT_SMOOTH);
+    //glPointSize(9.0f);
     /*glEnable(GL_FOG);
     glFogf(GL_FOG_MODE, GL_EXP);
     glFogf(GL_FOG_COLOR, (1.0, 1.0, 1.0, 0.0));*/

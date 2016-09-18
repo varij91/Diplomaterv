@@ -56,15 +56,17 @@ bool commandLineParser(int argc, const char *argv[]) {
 
         // kulcs-érték párok feldolgozása
         if ((key == "options") || (key == "OPTIONS")) {
-            // options file beolvasása
+            // valueként megadott options file beolvasása
             std::ifstream file;
             file.open(value, std::ios::in);
 
             std::string optArgument;
 
+            // sorok beolvasása
             while (file >> optArgument) {
+                // megfelelő argumentum típusra konverzió
                 const char *optArgv[] = { "", optArgument.c_str() };
-                commandLineParser(2, optArgv);
+                commandLineParser(2, optArgv);  // rekurzió
             }
             // sorok beolvasása
             // char *dummyArgList[] = { "", currentLine };
