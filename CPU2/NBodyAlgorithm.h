@@ -4,8 +4,6 @@
 #include <vector>
 #include <memory>
 #include "NBodyProperties.h"
-#include "emmintrin.h"
-#include "nmmintrin.h"
 
 class NBodyAlgorithm {
 

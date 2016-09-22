@@ -16,9 +16,12 @@ private:
 
     inline void advanceBasicCore(std::vector<Body> &bodies, int index);
     inline void advanceBasicCoreGUI(std::vector<Body> &bodies, int index);
+
     inline void advanceSSECore(std::vector<Body> &bodies, int index);
     inline void advanceSSECoreGUI(std::vector<Body> &bodies, int index);
+
     inline void advanceAVXCore(std::vector<Body> &bodies, int index);
+    inline void advanceAVXCoreGUI(std::vector<Body> &bodies, int index);
 
     inline void updateBodies(std::vector<Body> &bodies, int index, int stepTime2);
 };
