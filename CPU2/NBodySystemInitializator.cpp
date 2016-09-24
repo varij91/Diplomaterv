@@ -30,6 +30,9 @@ float3 NBodySystemInitializator::getNewPosition() {
     case Dimension::THREE:
         z = scaledvalue(mp_properties->positionScale);
         break;
+    default:
+        z = scaledvalue(mp_properties->positionScale);
+        break;
     }
 
     float3 result(x, y, z);

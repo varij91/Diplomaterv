@@ -29,8 +29,7 @@ public:
 
     void advance();
     void integrate();
-
-    void setBodyNeighbours();
+    void integrateFlat();
 
 private:
 

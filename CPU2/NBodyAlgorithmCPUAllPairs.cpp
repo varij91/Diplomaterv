@@ -332,3 +332,5 @@ void NBodyAlgorithmCPUAllPairs::advanceAVX(std::vector<Body> &bodies) {
         }
     }
 }
+
+
