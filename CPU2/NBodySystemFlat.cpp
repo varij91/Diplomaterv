@@ -66,7 +66,6 @@ void NBodySystemFlat::integrate() {
 #pragma omp parallel for
 #endif
         /////////////////////////////////////////////
-
         for (int i = 0; i < mp_properties->numBody; i++) {
             float r[3], rabs, rabsInv, temp;
             mp_acceleration[3 * i] = 0.0f;
@@ -96,87 +95,67 @@ void NBodySystemFlat::integrate() {
         }
         /////////////////////////////////////////////
         /*for (int i = 0; i < mp_properties->numBody; i += 4) {
-        float3 zeros = float3(0.0f, 0.0f, 0.0f);
-
-        float3 posI[4] = { m_bodies.at(i).position, m_bodies.at(i + 1).position,
-        m_bodies.at(i + 2).position, m_bodies.at(i + 3).position };
-
-        m_bodies.at(i).acceleration = zeros;
-        m_bodies.at(i + 1).acceleration = zeros;
-        m_bodies.at(i + 2).acceleration = zeros;
-        m_bodies.at(i + 3).acceleration = zeros;
-
-        for (int j = 0; j < mp_properties->numBody; j++) {
-
-        float3 accI[4] = { zeros, zeros, zeros, zeros };
-
-        __m128 pix = _mm_set_ps(posI[0].x, posI[1].x, posI[2].x, posI[3].x);
-        __m128 piy = _mm_set_ps(posI[0].y, posI[1].y, posI[2].y, posI[3].y);
-        __m128 piz = _mm_set_ps(posI[0].z, posI[1].z, posI[2].z, posI[3].z);
-
-        __m128 pjx = _mm_set_ps1(m_bodies.at(j).position.x);
-        __m128 pjy = _mm_set_ps1(m_bodies.at(j).position.y);
-        __m128 pjz = _mm_set_ps1(m_bodies.at(j).position.z);
-
-        __m128 rx = _mm_sub_ps(pjx, pix);
-        __m128 ry = _mm_sub_ps(pjy, piy);
-        __m128 rz = _mm_sub_ps(pjz, piz);
-
-        __m128 eps2 = _mm_set_ps1(mp_properties->EPS2);
-
-        __m128 rx2 = _mm_mul_ps(rx, rx);
-        __m128 ry2 = _mm_mul_ps(ry, ry);
-        __m128 rz2 = _mm_mul_ps(rz, rz);
-        __m128 rabs = _mm_sqrt_ps(_mm_add_ps(_mm_add_ps(rx2, ry2), _mm_add_ps(rz2, eps2)));
-
-        __m128 m = _mm_set_ps1(m_bodies.at(j).mass);
-        __m128 rabsInv = _mm_div_ps(m, _mm_mul_ps(_mm_mul_ps(rabs, rabs), rabs));
-
-        __m128 aix = _mm_mul_ps(rx, rabsInv);
-        __m128 aiy = _mm_mul_ps(ry, rabsInv);
-        __m128 aiz = _mm_mul_ps(rz, rabsInv);
-
-        for (int i = 0; i < 4; i++) {
-        accI[3 - i].x = aix.m128_f32[i];
-        accI[3 - i].y = aiy.m128_f32[i];
-        accI[3 - i].z = aiz.m128_f32[i];
-        }
-
-        m_bodies.at(i).acceleration += accI[0];
-        m_bodies.at(i + 1).acceleration += accI[1];
-        m_bodies.at(i + 2).acceleration += accI[2];
-        m_bodies.at(i + 3).acceleration += accI[3];
-        }
-        }*/
-        /////////////////////////////////////////////
-        /*for (int i = 0; i < mp_properties->numBody; i += 8) {
-            float3 zeros = float3(0.0f, 0.0f, 0.0f);
-
-            float3 posI[8] = { m_bodies.at(i).position, m_bodies.at(i + 1).position,
-                m_bodies.at(i + 2).position, m_bodies.at(i + 3).position,
-                m_bodies.at(i + 4).position, m_bodies.at(i + 5).position,
-                m_bodies.at(i + 6).position, m_bodies.at(i + 7).position };
-
-            m_bodies.at(i).acceleration = zeros;
-            m_bodies.at(i + 1).acceleration = zeros;
-            m_bodies.at(i + 2).acceleration = zeros;
-            m_bodies.at(i + 3).acceleration = zeros;
-            m_bodies.at(i + 4).acceleration = zeros;
-            m_bodies.at(i + 5).acceleration = zeros;
-            m_bodies.at(i + 6).acceleration = zeros;
-            m_bodies.at(i + 7).acceleration = zeros;
+            mp_acceleration[3 * i] = 0.0f;        mp_acceleration[3 * i + 1] = 0.0f;        mp_acceleration[3 * i + 2] = 0.0f;
+            mp_acceleration[3 * (i + 1)] = 0.0f;  mp_acceleration[3 * (i + 1) + 1] = 0.0f;  mp_acceleration[3 * (i + 1) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 2)] = 0.0f;  mp_acceleration[3 * (i + 2) + 1] = 0.0f;  mp_acceleration[3 * (i + 2) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 3)] = 0.0f;  mp_acceleration[3 * (i + 3) + 1] = 0.0f;  mp_acceleration[3 * (i + 3) + 2] = 0.0f;
 
             for (int j = 0; j < mp_properties->numBody; j++) {
 
-                float3 accI[8] = { zeros, zeros, zeros, zeros, zeros, zeros, zeros, zeros };
+                __m128 pix = _mm_set_ps(mp_position[3 * i], mp_position[3 * (i + 1)], mp_position[3 * (i + 2)], mp_position[3 * (i + 3)]);
+                __m128 piy = _mm_set_ps(mp_position[3 * (i) + 1], mp_position[3 * (i + 1) + 1], mp_position[3 * (i + 2) + 1], mp_position[3 * (i + 3) + 1]);
+                __m128 piz = _mm_set_ps(mp_position[3 * (i) + 2], mp_position[3 * (i + 1) + 2], mp_position[3 * (i + 2) + 2], mp_position[3 * (i + 3) + 2]);
 
-                __m256 pix = _mm256_set_ps(posI[0].x, posI[1].x, posI[2].x, posI[3].x, posI[4].x, posI[5].x, posI[6].x, posI[7].x);
-                __m256 piy = _mm256_set_ps(posI[0].y, posI[1].y, posI[2].y, posI[3].y, posI[4].y, posI[5].y, posI[6].y, posI[7].y);
-                __m256 piz = _mm256_set_ps(posI[0].z, posI[1].z, posI[2].z, posI[3].z, posI[4].z, posI[5].z, posI[6].z, posI[7].z);
+                __m128 pjx = _mm_set_ps1(mp_position[3 * j]);
+                __m128 pjy = _mm_set_ps1(mp_position[3 * j + 1]);
+                __m128 pjz = _mm_set_ps1(mp_position[3 * j + 2]);
 
-                __m256 pjx = _mm256_set1_ps(m_bodies.at(j).position.x);
-                __m256 pjy = _mm256_set1_ps(m_bodies.at(j).position.y);
-                __m256 pjz = _mm256_set1_ps(m_bodies.at(j).position.z);
+                __m128 rx = _mm_sub_ps(pjx, pix);
+                __m128 ry = _mm_sub_ps(pjy, piy);
+                __m128 rz = _mm_sub_ps(pjz, piz);
+
+                __m128 eps2 = _mm_set_ps1(mp_properties->EPS2);
+
+                __m128 rx2 = _mm_mul_ps(rx, rx);
+                __m128 ry2 = _mm_mul_ps(ry, ry);
+                __m128 rz2 = _mm_mul_ps(rz, rz);
+                __m128 rabs = _mm_sqrt_ps(_mm_add_ps(_mm_add_ps(rx2, ry2), _mm_add_ps(rz2, eps2)));
+
+                __m128 m = _mm_set_ps1(mp_mass[j]);
+                __m128 rabsInv = _mm_div_ps(m, _mm_mul_ps(_mm_mul_ps(rabs, rabs), rabs));
+
+                __m128 aix = _mm_mul_ps(rx, rabsInv);
+                __m128 aiy = _mm_mul_ps(ry, rabsInv);
+                __m128 aiz = _mm_mul_ps(rz, rabsInv);
+
+                for (int k = 0; k < 4; k++) {
+                    mp_acceleration[(3 * (i + 3 - k))] = aix.m128_f32[k];
+                    mp_acceleration[(3 * (i + 3 - k)) + 1] = aiy.m128_f32[k];
+                    mp_acceleration[(3 * (i + 3 - k)) + 2] = aiz.m128_f32[k];
+                }
+            }
+        }*/
+        /////////////////////////////////////////////
+        /*for (int i = 0; i < mp_properties->numBody; i += 8) {
+
+            mp_acceleration[3 * i] = 0.0f;        mp_acceleration[3 * i + 1] = 0.0f;        mp_acceleration[3 * i + 2] = 0.0f;
+            mp_acceleration[3 * (i + 1)] = 0.0f;  mp_acceleration[3 * (i + 1) + 1] = 0.0f;  mp_acceleration[3 * (i + 1) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 2)] = 0.0f;  mp_acceleration[3 * (i + 2) + 1] = 0.0f;  mp_acceleration[3 * (i + 2) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 3)] = 0.0f;  mp_acceleration[3 * (i + 3) + 1] = 0.0f;  mp_acceleration[3 * (i + 3) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 4)] = 0.0f;  mp_acceleration[3 * (i + 4) + 1] = 0.0f;  mp_acceleration[3 * (i + 4) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 5)] = 0.0f;  mp_acceleration[3 * (i + 5) + 1] = 0.0f;  mp_acceleration[3 * (i + 5) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 6)] = 0.0f;  mp_acceleration[3 * (i + 6) + 1] = 0.0f;  mp_acceleration[3 * (i + 6) + 2] = 0.0f;
+            mp_acceleration[3 * (i + 7)] = 0.0f;  mp_acceleration[3 * (i + 7) + 1] = 0.0f;  mp_acceleration[3 * (i + 7) + 2] = 0.0f;
+
+            for (int j = 0; j < mp_properties->numBody; j++) {
+
+                __m256 pix = _mm256_set_ps(mp_position[3 * i], mp_position[3 * (i + 1)], mp_position[3 * (i + 2)], mp_position[3 * (i + 3)], mp_position[3 * (i + 4)], mp_position[3 * (i + 5)], mp_position[3 * (i + 6)], mp_position[3 * (i + 7)]);
+                __m256 piy = _mm256_set_ps(mp_position[3 * i + 1], mp_position[3 * (i + 1) + 1], mp_position[3 * (i + 2) + 1], mp_position[3 * (i + 3) + 1], mp_position[3 * (i + 4) + 1], mp_position[3 * (i + 5) + 1], mp_position[3 * (i + 6) + 1], mp_position[3 * (i + 7) + 1]);
+                __m256 piz = _mm256_set_ps(mp_position[3 * i + 2], mp_position[3 * (i + 1) + 2], mp_position[3 * (i + 2) + 2], mp_position[3 * (i + 3) + 2], mp_position[3 * (i + 4) + 2], mp_position[3 * (i + 5) + 2], mp_position[3 * (i + 6) + 2], mp_position[3 * (i + 7) + 2]);
+
+                __m256 pjx = _mm256_set1_ps(mp_position[3 * j]);
+                __m256 pjy = _mm256_set1_ps(mp_position[3 * j + 1]);
+                __m256 pjz = _mm256_set1_ps(mp_position[3 * j + 2]);
 
                 __m256 rx = _mm256_sub_ps(pjx, pix);
                 __m256 ry = _mm256_sub_ps(pjy, piy);
@@ -189,27 +168,18 @@ void NBodySystemFlat::integrate() {
                 __m256 rz2 = _mm256_mul_ps(rz, rz);
                 __m256 rabs = _mm256_sqrt_ps(_mm256_add_ps(_mm256_add_ps(rx2, ry2), _mm256_add_ps(rz2, eps2)));
 
-                __m256 m = _mm256_set1_ps(m_bodies.at(j).mass);
+                __m256 m = _mm256_set1_ps(mp_mass[j]);
                 __m256 rabsInv = _mm256_div_ps(m, _mm256_mul_ps(_mm256_mul_ps(rabs, rabs), rabs));
 
                 __m256 aix = _mm256_mul_ps(rx, rabsInv);
                 __m256 aiy = _mm256_mul_ps(ry, rabsInv);
                 __m256 aiz = _mm256_mul_ps(rz, rabsInv);
 
-                for (int i = 0; i < 8; i++) {
-                    accI[7 - i].x = aix.m256_f32[i];
-                    accI[7 - i].y = aiy.m256_f32[i];
-                    accI[7 - i].z = aiz.m256_f32[i];
+                for (int k = 0; k < 8; k++) {
+                    mp_acceleration[(3 * (i + 7 - k))] = aix.m256_f32[k];
+                    mp_acceleration[(3 * (i + 7 - k)) + 1] = aiy.m256_f32[k];
+                    mp_acceleration[(3 * (i + 7 - k)) + 2] = aiz.m256_f32[k];
                 }
-
-                m_bodies.at(i).acceleration += accI[0];
-                m_bodies.at(i + 1).acceleration += accI[1];
-                m_bodies.at(i + 2).acceleration += accI[2];
-                m_bodies.at(i + 3).acceleration += accI[3];
-                m_bodies.at(i + 4).acceleration += accI[4];
-                m_bodies.at(i + 5).acceleration += accI[5];
-                m_bodies.at(i + 6).acceleration += accI[6];
-                m_bodies.at(i + 7).acceleration += accI[7];
             }
         }*/
 
