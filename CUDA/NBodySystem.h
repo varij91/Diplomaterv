@@ -31,6 +31,16 @@ public:
     void integrate();
     void integrateFlat();
 
+
+    inline void integrateFlatBasicCore(int index);
+    //inline void integrateFlatBasicCoreGUI(std::vector<Body> &bodies, int index);  // Nincs megvalósítva
+
+    inline void integrateFlatSSECore(int index);
+    //inline void integrateFlatSSECoreGUI(std::vector<Body> &bodies, int index);    // Nincs megvalósítva
+
+    inline void integrateFlatAVXCore(int index);
+    //inline void integrateFlatAVXCoreGUI(std::vector<Body> &bodies, int index);    // Nincs megvalósítva
+
 private:
 
     std::shared_ptr<NBodyAlgorithm> mp_algorithm;

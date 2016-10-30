@@ -48,22 +48,39 @@ int main(int argc, char* argv[])
     }
     else if (gp_properties->mode == Mode::BATCH) {
         gp_utility->startStopwatch();
-        //gp_system->integrate();
-        //gp_system->integrateFlat();
+#ifdef USE_FLAT_FUNC
+        gp_system->integrateFlat();
+#else
+#ifdef USE_FLAT_SYSTEM
         gp_systemFlat->integrate();
+#else
+        gp_system->integrate();
+#endif
+#endif
         gp_utility->endStopwatch();
         gp_utility->printPerformace();
     }
     else if (gp_properties->mode == Mode::PERFORMANCE){
         for (int i = 0; i < gp_properties->performanceRuns; i++) {
             gp_utility->startStopwatch();
-            //gp_system->integrateFlat(); // BUG--> újra init kell a testeknek!!!!
+#ifdef USE_FLAT_FUNC
+            gp_system->integrateFlat();
+#else
+#ifdef USE_FLAT_SYSTEM
             gp_systemFlat->integrate();
+#else
+            gp_system->integrate();
+#endif
+#endif
             gp_utility->endStopwatch();
+
+            //Reset
             gp_properties->currentTime = gp_properties->startTime;
+            gp_system->init();
+            gp_systemFlat->init();
         }
         gp_utility->printPerformace(gp_properties->performanceRuns);
     }
-    
+
     return 0;
 }

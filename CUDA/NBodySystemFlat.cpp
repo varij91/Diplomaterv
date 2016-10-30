@@ -10,8 +10,12 @@ void NBodySystemFlat::init() {
     //assert(!m_systemInitialized);
 
     srand(mp_properties->seed);
-    float3 pos(0.0f, 0.0f, 0.0f);
-    float3 vel(0.0f, 0.0f, 0.0f);
+
+    float3 pos;
+    pos.x = 0.0f; pos.x = 0.0f; pos.x = 0.0f;
+
+    float3 vel;
+    vel.x = 0.0f; vel.x = 0.0f; vel.x = 0.0f;
 
     float disterr = 10e-6f;
 
@@ -59,7 +63,6 @@ void NBodySystemFlat::init() {
 
 void NBodySystemFlat::integrate() {
     assert(m_systemInitialized);
-    assert(m_algorithmInitialized);
     while (mp_properties->currentTime < mp_properties->endTime) {
 
 #ifdef OPENMP
