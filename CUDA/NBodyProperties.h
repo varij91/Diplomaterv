@@ -33,7 +33,8 @@ enum Dimension {
 enum Technology {
     BASIC,
     SSE,
-    AVX
+    AVX,
+    GPU
 };
 
 /*struct float3{

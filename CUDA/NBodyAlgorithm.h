@@ -13,6 +13,9 @@ public:
 
     virtual void advance(std::vector<Body> &bodies) = 0;
 
+    virtual void init(std::vector<Body> &bodies) = 0;
+    virtual void destroy() = 0;
+
 protected:
     std::shared_ptr<NBodyProperties> mp_properties;
 };

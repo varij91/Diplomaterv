@@ -5,6 +5,9 @@
 #include "NBodyAlgorithmCPU.h"
 #include "NBodyAlgorithmCPUAllPairs.h"
 
+#include "NBodyAlgorithmGPU.cuh"
+#include "NBodyAlgorithmGPUAllPairs.cuh"
+
 float NBodySystemInitializator::lastMass;
 
 float scaledvalue(unsigned int scale) {
@@ -78,7 +81,10 @@ float NBodySystemInitializator::getNewMass() {
 void NBodySystemInitializator::getNewAlgorithm(std::shared_ptr<NBodyAlgorithm> &algorithm) const {
     switch (mp_properties->algorithm) {
     case(ALL_PAIRS) :
-        algorithm = std::make_shared<NBodyAlgorithmCPUAllPairs>(mp_properties);
+        if (mp_properties->technology != GPU)
+            algorithm = std::make_shared<NBodyAlgorithmCPUAllPairs>(mp_properties);
+        else
+            algorithm = std::make_shared<NBodyAlgorithmGPUAllPairs>(mp_properties);
         break;
     case(ALL_PAIRS_SELECTIVE) :
         break;

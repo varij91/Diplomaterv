@@ -187,6 +187,9 @@ bool NBodyUtility::commandLineParse(int argc, const char *argv[]) {
             else if ((value == "AVX") || (value == "avx")) {
                 mp_properties->technology = Technology::AVX;
             }
+            else if ((value == "GPU") || (value == "gpu")) {
+                mp_properties->technology = Technology::GPU;
+            }
             else {
                 std::cerr << "Unknown input value for " << key << ": " << value << std::endl;
                 return false;

@@ -23,6 +23,10 @@ public:
 
     virtual void advance(std::vector<Body> &bodies) = 0;
 
+    // Nincs implementálva, csak GPU számára kell
+    virtual void init(std::vector<Body> &bodies) {}
+    virtual void destroy() {}
+
 };
 
 #endif // NBODY_ALGORITHM_CPU_H

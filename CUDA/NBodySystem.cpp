@@ -54,7 +54,16 @@ void NBodySystem::init() {
 }
 
 void NBodySystem::setAlgorithm() {
+    if (m_algorithmInitialized) {
+        mp_algorithm->destroy();
+        m_algorithmInitialized = false;
+    }
+    
     mp_initializator->getNewAlgorithm(mp_algorithm);
+    
+    // GPU esetén innen hívódik meg a memóriaallokáció
+    mp_algorithm->init(m_bodies);
+
     m_algorithmInitialized = true;
 }
 
