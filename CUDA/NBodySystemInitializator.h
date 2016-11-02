@@ -20,7 +20,7 @@ public:
     float3 getNewVelocity();
     float getNewMass();
 
-    void NBodySystemInitializator::getNewAlgorithm(std::shared_ptr<NBodyAlgorithm> &algorithm) const;
+    void getNewAlgorithm(std::shared_ptr<NBodyAlgorithm> &algorithm) const;
 
 private:
     std::shared_ptr<NBodyProperties> mp_properties;

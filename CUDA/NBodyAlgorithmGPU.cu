@@ -13,6 +13,16 @@ void NBodyAlgorithmGPU::unpackBodies(std::vector<Body> &bodies) {
     }
 }
 
+void NBodyAlgorithmGPU::packBodies(std::vector<Body> &bodies) {
+#pragma unroll
+    for (int i = 0; i < mp_properties->numBody; i++) {
+        //bodies.at(i).mass = mph_mass[i];
+        bodies.at(i).position = mph_position[i];
+        bodies.at(i).velocity = mph_velocity[i];
+        bodies.at(i).acceleration = mph_acceleration[i];
+    }
+}
+
 void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     // Van-e CUDA kompatibilis GPU?
     int numDevice;
@@ -57,6 +67,9 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     checkCudaError(cudaMalloc((void**)&mpd_mass, mp_properties->numBody * sizeof(float)));
     checkCudaError(cudaMalloc((void**)&mpd_position, mp_properties->numBody * sizeof(float3)));
     checkCudaError(cudaMalloc((void**)&mpd_acceleration, mp_properties->numBody * sizeof(float3)));
+    if (mp_properties->mode == GUI) {
+        checkCudaError(cudaMalloc((void**)&mpd_numNeighbours, mp_properties->numBody * sizeof(float)));
+    }
     
     // Másolás GPU global memóriába
     checkCudaError(cudaMemcpy(mpd_mass, mph_mass, mp_properties->numBody * sizeof(float), cudaMemcpyHostToDevice));

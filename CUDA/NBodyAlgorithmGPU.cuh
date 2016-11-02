@@ -25,6 +25,7 @@ public:
         mph_position = new float3[properties->numBody];
         mph_velocity = new float3[properties->numBody];
         mph_acceleration = new float3[properties->numBody];
+        mph_numNeighbours = new float[properties->numBody];
     }
 
     ~NBodyAlgorithmGPU() {
@@ -32,6 +33,7 @@ public:
         delete[] mph_position;
         delete[] mph_velocity;
         delete[] mph_acceleration;
+        delete[] mph_numNeighbours;
         destroy();
     }
 
@@ -47,19 +49,21 @@ protected:
     float3 *mph_position;
     float3 *mph_velocity;
     float3 *mph_acceleration;
+    float  *mph_numNeighbours;
 
     // Device
     float  *mpd_mass;
     float3 *mpd_position;
     float3 *mpd_velocity;
     float3 *mpd_acceleration;
+    float  *mpd_numNeighbours;
 
     dim3 m_gridSize;
     dim3 m_threadBlockSize;
     std::size_t m_sharedMemorySize;
 
     void unpackBodies(std::vector<Body> &bodies);
-    void packBodies(std::vector<Body> &bodies); // Not implemented
+    void packBodies(std::vector<Body> &bodies);
     void setKernelParameters();
 
 };

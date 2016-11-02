@@ -35,7 +35,7 @@ float3 NBodyAlgorithmCPU::calculateAccelerationWithColor(const float3 posI, cons
     numNeighbours = (rabs < (float)mp_properties->positionScale) ? numNeighbours + 1 : numNeighbours;
 
     // A tömegbe bele van olvasztva a G
-    // Az rabsInv-be beleraktum a massJ-t, hogy ne kelljen mindig összeszorozni
+    // Az rabsInv-be beleraktum a massJ-t, hogy ne kelljen mindi  g összeszorozni
     accI.x = r.x * temp;
     accI.y = r.y * temp;
     accI.z = r.z * temp;

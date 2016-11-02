@@ -13,12 +13,22 @@ __device__ float3 tileCalculateAcceleration(const float3 posI, float3 accI);
 
 __global__ void advanceKernel(float3 *g_pos, float *g_mass, float3 *g_acc);
 
+
+__device__ float3 calculateAccelerationWithColor(const float3 posI, const float massJ, const float3 posJ, float3 accSumI);
+
+__device__ float3 tileCalculateAccelerationWithColor(const float3 posI, float3 accI);
+
+__global__ void advanceKernelWithColor(float3 *g_pos, float *g_mass, float3 *g_acc, float *g_numNeighbours);
+
+
 class NBodyAlgorithmGPUAllPairs : public NBodyAlgorithmGPU {
 
 public:
     NBodyAlgorithmGPUAllPairs(std::shared_ptr<NBodyProperties> properties) : NBodyAlgorithmGPU(properties) {}
 
     void advance(std::vector<Body> &bodies);
+
+    void updateBodies(std::vector<Body> &bodies);
 };
 
 #endif // NBODY_ALGORITHM_GPU_ALL_PAIRS_CUH

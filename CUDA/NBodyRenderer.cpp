@@ -120,7 +120,7 @@ void NBodyRenderer::renderSystem(){
         unsigned int red, green, blue;
         getColor(red, green, blue, i);
         glColor3ui(red << 24, green << 24, blue << 24);
-        glVertex3f(mp_system->m_bodies.at(i).position.x / (mp_properties->positionScale * 10), mp_system->m_bodies.at(i).position.y / (mp_properties->positionScale * 10), mp_system->m_bodies.at(i).position.z / (mp_properties->positionScale * 10));
+        glVertex3f(mp_system->m_bodies.at(i).position.x / (mp_properties->positionScale * 10), mp_system->m_bodies.at(i).position.y / (mp_properties->positionScale * 10), mp_system->m_bodies.at(i).position.z / (mp_properties->positionScale * 10)); 
     }
     glEnd();
 
