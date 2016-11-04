@@ -16,7 +16,6 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
     }
 }
 
-__constant__ int d_numBody;
 
 class NBodyAlgorithmGPU : public NBodyAlgorithm {
 public:
@@ -26,6 +25,10 @@ public:
         mph_velocity = new float3[properties->numBody];
         mph_acceleration = new float3[properties->numBody];
         mph_numNeighbours = new float[properties->numBody];
+
+        mph_numBodies = new int(properties->numBody);
+        mph_eps2 = new float(properties->EPS2);
+        mph_positionScale = new float(properties->positionScale);
     }
 
     ~NBodyAlgorithmGPU() {
@@ -34,6 +37,10 @@ public:
         delete[] mph_velocity;
         delete[] mph_acceleration;
         delete[] mph_numNeighbours;
+
+        delete mph_numBodies;
+        delete mph_eps2;
+        delete mph_positionScale;
         destroy();
     }
 
@@ -50,6 +57,9 @@ protected:
     float3 *mph_velocity;
     float3 *mph_acceleration;
     float  *mph_numNeighbours;
+    int    *mph_numBodies;
+    float  *mph_eps2;
+    float  *mph_positionScale;
 
     // Device
     float  *mpd_mass;
@@ -57,6 +67,9 @@ protected:
     float3 *mpd_velocity;
     float3 *mpd_acceleration;
     float  *mpd_numNeighbours;
+    int    *mpd_numBodies;
+    float  *mpd_eps2;
+    float  *mpd_positionScale;
 
     dim3 m_gridSize;
     dim3 m_threadBlockSize;

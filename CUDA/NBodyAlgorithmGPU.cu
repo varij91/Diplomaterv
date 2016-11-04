@@ -67,6 +67,10 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     checkCudaError(cudaMalloc((void**)&mpd_mass, mp_properties->numBody * sizeof(float)));
     checkCudaError(cudaMalloc((void**)&mpd_position, mp_properties->numBody * sizeof(float3)));
     checkCudaError(cudaMalloc((void**)&mpd_acceleration, mp_properties->numBody * sizeof(float3)));
+    checkCudaError(cudaMalloc((void**)&mpd_numBodies, sizeof(int)));
+    checkCudaError(cudaMalloc((void**)&mpd_eps2, sizeof(float)));
+    checkCudaError(cudaMalloc((void**)&mpd_positionScale, sizeof(float)));
+
     if (mp_properties->mode == GUI) {
         checkCudaError(cudaMalloc((void**)&mpd_numNeighbours, mp_properties->numBody * sizeof(float)));
     }
@@ -74,8 +78,13 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     // Másolás GPU global memóriába
     checkCudaError(cudaMemcpy(mpd_mass, mph_mass, mp_properties->numBody * sizeof(float), cudaMemcpyHostToDevice));
     checkCudaError(cudaMemcpy(mpd_position, mph_position, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
+    checkCudaError(cudaMemcpy(mpd_numBodies, mph_numBodies, sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaError(cudaMemcpy(mpd_eps2, mph_eps2, sizeof(float), cudaMemcpyHostToDevice));
+    checkCudaError(cudaMemcpy(mpd_positionScale, mph_positionScale, sizeof(float), cudaMemcpyHostToDevice));
 
-    checkCudaError(cudaMemcpyToSymbol(d_numBody, &(mp_properties->numBody), sizeof(mp_properties->numBody)));
+    //checkCudaError(cudaMemcpyToSymbol(d_NUM_BODY, &(mp_properties->numBody), sizeof(mp_properties->numBody)));
+    //checkCudaError(cudaMemcpyToSymbol(d_POSITION_SCALE, (float*)(&(mp_properties->positionScale)), sizeof(float)));
+    //checkCudaError(cudaMemcpyToSymbol(d_EPS2, &(mp_properties->EPS2), sizeof(mp_properties->EPS2)));
 
     setKernelParameters();
 }
@@ -85,7 +94,12 @@ void NBodyAlgorithmGPU::destroy() {
     checkCudaError(cudaFree(mpd_mass));
     checkCudaError(cudaFree(mpd_position));
     checkCudaError(cudaFree(mpd_acceleration));
-
+    checkCudaError(cudaFree(mpd_numBodies));
+    checkCudaError(cudaFree(mpd_eps2));
+    checkCudaError(cudaFree(mpd_positionScale));
+    if (mp_properties->mode == GUI) {
+        checkCudaError(cudaFree(mpd_numNeighbours));
+    }
     checkCudaError(cudaDeviceReset());
 }
 
