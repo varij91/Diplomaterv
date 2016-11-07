@@ -66,10 +66,8 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     // Memóriaallokáció
     checkCudaError(cudaMalloc((void**)&mpd_mass, mp_properties->numBody * sizeof(float)));
     checkCudaError(cudaMalloc((void**)&mpd_position, mp_properties->numBody * sizeof(float3)));
+    checkCudaError(cudaMalloc((void**)&mpd_velocity, mp_properties->numBody * sizeof(float3)));
     checkCudaError(cudaMalloc((void**)&mpd_acceleration, mp_properties->numBody * sizeof(float3)));
-    checkCudaError(cudaMalloc((void**)&mpd_numBodies, sizeof(int)));
-    checkCudaError(cudaMalloc((void**)&mpd_eps2, sizeof(float)));
-    checkCudaError(cudaMalloc((void**)&mpd_positionScale, sizeof(float)));
 
     if (mp_properties->mode == GUI) {
         checkCudaError(cudaMalloc((void**)&mpd_numNeighbours, mp_properties->numBody * sizeof(float)));
@@ -78,9 +76,7 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     // Másolás GPU global memóriába
     checkCudaError(cudaMemcpy(mpd_mass, mph_mass, mp_properties->numBody * sizeof(float), cudaMemcpyHostToDevice));
     checkCudaError(cudaMemcpy(mpd_position, mph_position, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
-    checkCudaError(cudaMemcpy(mpd_numBodies, mph_numBodies, sizeof(int), cudaMemcpyHostToDevice));
-    checkCudaError(cudaMemcpy(mpd_eps2, mph_eps2, sizeof(float), cudaMemcpyHostToDevice));
-    checkCudaError(cudaMemcpy(mpd_positionScale, mph_positionScale, sizeof(float), cudaMemcpyHostToDevice));
+    checkCudaError(cudaMemcpy(mpd_velocity, mph_velocity, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
 
     //checkCudaError(cudaMemcpyToSymbol(d_NUM_BODY, &(mp_properties->numBody), sizeof(mp_properties->numBody)));
     //checkCudaError(cudaMemcpyToSymbol(d_POSITION_SCALE, (float*)(&(mp_properties->positionScale)), sizeof(float)));
@@ -93,10 +89,9 @@ void NBodyAlgorithmGPU::destroy() {
     // Allokált memória felszabadítása
     checkCudaError(cudaFree(mpd_mass));
     checkCudaError(cudaFree(mpd_position));
+    checkCudaError(cudaFree(mpd_velocity));
     checkCudaError(cudaFree(mpd_acceleration));
-    checkCudaError(cudaFree(mpd_numBodies));
-    checkCudaError(cudaFree(mpd_eps2));
-    checkCudaError(cudaFree(mpd_positionScale));
+
     if (mp_properties->mode == GUI) {
         checkCudaError(cudaFree(mpd_numNeighbours));
     }
@@ -151,15 +146,15 @@ void NBodyAlgorithmGPU::setKernelParameters() {
     
     int optimalThreadsPerBlock = maxActiveThreads / minOccupancy * 100 / maxActiveThreadBlocks; // 256
     // 16x16-os kernel indításának nincs nagyon értelme ezzel a tile-os, kommunikáció nélküli módszerrel
-    // Kétdimenziós kiosztással a Z értékét fixen 1-re állítom
-    unsigned int threadBlockX = wrapSize;    // 32
-    unsigned int threadBlockY = optimalThreadsPerBlock / wrapSize; // 8
+    // Egydimenziós kiosztással az Y és Z értékét fixen 1-re állítom
+    unsigned int threadBlockX = optimalThreadsPerBlock;    // 256
+    unsigned int threadBlockY = 1;
     unsigned int threadBlockZ = 1;
 
     unsigned int blockGridX = numBody / threadBlockX + ((numBody % threadBlockX) != 0);
-    unsigned int blockGridY = numBody / threadBlockY + ((numBody % threadBlockY) != 0);
+    unsigned int blockGridY = 1;
     unsigned int blockGridZ = 1;
-    if (threadBlockX > maxThreadDim.x || threadBlockX > maxThreadDim.y || threadBlockX > maxThreadDim.z) {
+    if (threadBlockX > maxThreadDim.x || threadBlockY > maxThreadDim.y || threadBlockZ > maxThreadDim.z) {
         std::cout << "Thread blocks contain more threads than the max value." << std::endl;
         exit(0);
     }

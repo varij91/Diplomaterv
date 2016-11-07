@@ -115,8 +115,7 @@ void NBodyRenderer::renderSystem(){
     glFogf(GL_FOG_COLOR, (1.0, 1.0, 1.0, 0.0));*/
     glBegin(GL_POINTS);
 
-    for (int i = 0; i < mp_properties->numBody; i++)
-    {
+    for (int i = 0; i < mp_properties->numBody; i++) {
         unsigned int red, green, blue;
         getColor(red, green, blue, i);
         glColor3ui(red << 24, green << 24, blue << 24);

@@ -78,7 +78,7 @@ struct NBodyProperties {
 
     unsigned int    massScale = 100000;   // [EM]
     unsigned int    positionScale = 10;   // [AU]
-    unsigned int    velocityScale = 100;   // initVelocityFactor*[AU]/[Day]
+    unsigned int    velocityScale = 100;  // initVelocityFactor*[AU]/[Day]
     const float     initVelocityFactor = 0.0001f;
 
     float           startTime = 0.0f;
@@ -87,6 +87,7 @@ struct NBodyProperties {
     float           currentTime = 0.0f;
 
     bool            allowLogger = false;
+    bool            useReferenceModel = false;
 
     const float     GRAV_CONSTANT = 8.890422785943706e-10f;
     const float     EPS2 = 10.0f;

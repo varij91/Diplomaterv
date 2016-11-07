@@ -31,8 +31,19 @@ milliseconds NBodyUtility::getStopwatchTimeMilliseconds() {
     return duration_cast<milliseconds>(duration);
 }
 
-void NBodyUtility::calculateError() {
-    // TODO
+void NBodyUtility::calculateError(std::vector<Body> bodies1, std::vector<Body> bodies2) {
+    for (int i = 0; i < mp_properties->numBody; i++) {
+        float eps = 1e-8;
+        bool hasError = false;
+        hasError = (abs(bodies1.at(i).position.x - bodies2.at(i).position.x) > eps) ||
+            (abs(bodies1.at(i).position.y - bodies2.at(i).position.y) > eps) ||
+            (abs(bodies1.at(i).position.z - bodies2.at(i).position.z) > eps);
+        if (hasError) {
+            std::cout << "Failure: difference with reference model." << std::endl;
+            return;
+        }
+    }
+    std::cout << "Success: match with the reference model." << std::endl;
 }
 
 void NBodyUtility::printPerformace() {
@@ -47,8 +58,8 @@ void NBodyUtility::printPerformace() {
     std::cout << "Number of calculated forces: " << ticks * mp_properties->numBody * mp_properties->numBody << std::endl;
     std::cout << "Simulation ticks:            " << ticks << std::endl;
     std::cout << "Total time:                  " << totalTime << " ms" << std::endl;
-    std::cout << "Forces/Second:               " << ticks * numForcesPerTicks / totalTime * 1e3 << std::endl;
-    std::cout << "GFLOPS:                      " << totalFlops / totalTime * 1e-6 << std::endl;
+    std::cout << "Forces/Second:               " << ticks * numForcesPerTicks / (totalTime + 1e-10f) * 1e3 << std::endl;
+    std::cout << "GFLOPS:                      " << totalFlops / (totalTime + 1e-10f) * 1e-6 << std::endl;
 }
 
 void NBodyUtility::printPerformace(int scale) {
@@ -246,6 +257,14 @@ bool NBodyUtility::commandLineParse(int argc, const char *argv[]) {
         }
         else if (key == "perfruns") {
             mp_properties->performanceRuns = atoi(value.c_str());
+        }
+        else if (key == "userefmod") {
+            if (value == "true") {
+                mp_properties->useReferenceModel = true;
+            }
+            else {
+                mp_properties->useReferenceModel = false;
+            }
         }
         else {
             std::cerr << "Unknown input argument: " << argument << std::endl;

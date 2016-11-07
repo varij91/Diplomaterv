@@ -17,7 +17,8 @@ public:
     void startStopwatch();
     void endStopwatch();
     void resetStopwatch();
-    void calculateError();
+
+    void calculateError(std::vector<Body> bodies1, std::vector<Body> bodies2);
     void printPerformace();
     void printPerformace(int scale);
 

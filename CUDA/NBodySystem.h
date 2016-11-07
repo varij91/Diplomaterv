@@ -5,12 +5,13 @@
 #include <vector>
 #include "NBodySystemInitializator.h"
 #include "NBodyAlgorithm.h"
+#include "NBodyUtility.h"
 
 class NBodySystem {
 public:
     std::vector<Body> m_bodies;
 
-    NBodySystem(std::shared_ptr<NBodyProperties> properties) : mp_properties(properties) {
+    NBodySystem(std::shared_ptr<NBodyProperties> properties, std::shared_ptr<NBodyUtility> utility) : mp_properties(properties), mp_utility(utility) {
         mp_initializator = std::make_shared<NBodySystemInitializator>(properties);
     }
 
@@ -43,8 +44,14 @@ public:
 
 private:
 
+    std::vector<Body> m_referenceBodies;
+    std::shared_ptr<NBodyAlgorithm> mp_referenceAlgorithm;
+    std::shared_ptr<NBodyProperties> mp_referenceProperties;
+
     std::shared_ptr<NBodyAlgorithm> mp_algorithm;
     std::shared_ptr<NBodyProperties> mp_properties;
+    std::shared_ptr<NBodyUtility> mp_utility;
+
     std::shared_ptr<NBodySystemInitializator> mp_initializator;
 
     bool m_systemInitialized = false;

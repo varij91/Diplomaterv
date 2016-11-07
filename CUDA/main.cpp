@@ -24,8 +24,8 @@ int main(int argc, char* argv[])
     argv[1] = "options=options.txt";
 
     gp_properties = std::make_shared<NBodyProperties>();
-    gp_system = std::make_shared<NBodySystem>(gp_properties);
     gp_utility = std::make_shared<NBodyUtility>(gp_properties);
+    gp_system = std::make_shared<NBodySystem>(gp_properties, gp_utility);
 
     gp_systemFlat = std::make_shared<NBodySystemFlat>(gp_properties);
 

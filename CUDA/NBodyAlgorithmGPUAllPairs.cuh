@@ -11,14 +11,24 @@ __device__ float3 calculateAcceleration(const float *posI, const float massJ, co
 
 __device__ float3 tileCalculateAcceleration(const float3 posI, float3 accI, const int eps2);
 
-__global__ void advanceKernel(float3 *g_pos, float *g_mass, float3 *g_acc, int *g_numBodies, float *g_eps2);
+__global__ void advanceKernel(float3 *g_pos, float *g_mass, float3 *g_acc, int g_numBodies, float g_eps2);
 
 
-__device__ float3 calculateAccelerationWithColor(const float3 posI, const float massJ, const float3 posJ, float3 accSumI);
+__device__ float3 advanceWithColor(float3 posI, float *g_mass, float3 *g_pos, int g_numBodies, float g_eps2, float *numNeighbours, float g_posScale);
+__global__ void integrateKernelWithColor(float *g_mass, float3 *g_pos, float3 *g_vel, float3 *g_acc,
+    int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening, float *g_numNeighbours, float g_posScale);
 
-__device__ float3 tileCalculateAccelerationWithColor(const float3 posI, float3 accI);
+__device__ float3 advance(float3 posI, float *g_mass, float3 *g_pos, int g_numBodies, float g_eps2);
 
-__global__ void advanceKernelWithColor(float3 *g_pos, float *g_mass, float3 *g_acc, float *g_numNeighbours);
+__global__ void integrateKernel(float *g_mass, float3 *g_pos, float3 *g_vel, float3 *g_acc,
+    int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening);
+
+
+__device__ float3 calculateAccelerationWithColor(const float3 posI, const float massJ, const float3 posJ, float3 accSumI, const int eps2, float *numNeighbours, const float posScale);
+
+__device__ float3 tileCalculateAccelerationWithColor(const float3 posI, float3 accI, const int eps2, float *numNeighbours, const float posScale);
+
+__global__ void advanceKernelWithColor(float3 *g_pos, float *g_mass, float3 *g_acc, int g_numBodies, float g_eps2, float *g_numNeighbours, float g_posScale);
 
 
 class NBodyAlgorithmGPUAllPairs : public NBodyAlgorithmGPU {

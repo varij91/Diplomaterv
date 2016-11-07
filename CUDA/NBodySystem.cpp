@@ -3,11 +3,14 @@
 #include <assert.h>
 #include <random>
 #include <math.h>
+#include <memory>
 #include "NBodySystem.h"
 #include "NBodyProperties.h"
 #define GLEW_STATIC
 #include <GL\glew.h>
 #include <GL\freeglut.h>
+
+#include "NBodyAlgorithmCPUAllPairs.h"
 
 void NBodySystem::init() {
     assert(mp_properties->numBody > 1);
@@ -49,6 +52,16 @@ void NBodySystem::init() {
         i++;
     }
 
+    if (mp_properties->useReferenceModel) {
+        for (int i = 0; i < mp_properties->numBody; i++) {
+            m_referenceBodies.emplace_back(zeros, zeros, zeros, 0.0f);
+            m_referenceBodies.at(i).position = m_bodies.at(i).position;
+            m_referenceBodies.at(i).mass = m_bodies.at(i).mass;
+            m_referenceBodies.at(i).velocity = m_bodies.at(i).velocity;
+            m_referenceBodies.at(i).acceleration = zeros;
+        }
+    }
+
     m_systemInitialized = true;
 
 }
@@ -59,6 +72,17 @@ void NBodySystem::setAlgorithm() {
         m_algorithmInitialized = false;
     }
     
+    if (mp_properties->useReferenceModel) {
+        // A teljes properties objektum másolása, majd a szükséges mezõk felülírása
+        mp_referenceProperties = std::make_shared<NBodyProperties>(*mp_properties);
+        mp_referenceProperties->technology = BASIC;
+        mp_referenceProperties->algorithm = ALL_PAIRS;
+        mp_referenceProperties->useOpenMP = false;
+
+        mp_referenceAlgorithm = std::make_shared<NBodyAlgorithmCPUAllPairs>(mp_referenceProperties);
+        mp_referenceAlgorithm->init(m_referenceBodies);
+    }
+
     mp_initializator->getNewAlgorithm(mp_algorithm);
     
     // GPU esetén innen hívódik meg a memóriaallokáció
@@ -81,6 +105,11 @@ void NBodySystem::advance() {
 
     // Új pozíció, sebesség, gyorsulásparaméterek meghatározása
     mp_algorithm->advance(m_bodies);
+
+    if (mp_properties->useReferenceModel) {
+        mp_referenceAlgorithm->advance(m_referenceBodies);
+        mp_utility->calculateError(m_bodies, m_referenceBodies);
+    }
 
     // Szimuláció továbbléptetése
     mp_properties->currentTime += mp_properties->stepTime;
