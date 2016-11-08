@@ -45,7 +45,10 @@ void NBodySystem::init() {
 
         m_bodies.at(i).mass = mp_initializator->getNewMass();
         
-        m_bodies.at(i).velocity = mp_initializator->getNewVelocity();
+        if (mp_properties->formation == SCATTER)
+            m_bodies.at(i).velocity = mp_initializator->getNewVelocity();
+        else if (mp_properties->formation == SPIRAL)
+            m_bodies.at(i).velocity = mp_initializator->getNewVelocity(m_bodies.at(i).position);
 
         m_bodies.at(i).acceleration = zeros;
 
@@ -94,6 +97,9 @@ void NBodySystem::setAlgorithm() {
 void NBodySystem::integrate() {
     assert(m_systemInitialized);
     assert(m_algorithmInitialized);
+
+    mp_properties->currentTime = mp_properties->startTime;
+
     while (mp_properties->currentTime < mp_properties->endTime) {
         advance();
     }

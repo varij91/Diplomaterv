@@ -90,8 +90,8 @@ struct NBodyProperties {
     bool            useReferenceModel = false;
 
     const float     GRAV_CONSTANT = 8.890422785943706e-10f;
-    const float     EPS2 = 10.0f;
-    const float     VELOCITY_DAMPENING = 0.999f;
+    const float     EPS2 = 5.0f;
+    const float     VELOCITY_DAMPENING = 0.9995f;
 
     std::vector<unsigned int> numNeighbours;
 };

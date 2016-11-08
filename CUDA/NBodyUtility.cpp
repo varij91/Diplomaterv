@@ -35,10 +35,12 @@ void NBodyUtility::calculateError(std::vector<Body> bodies1, std::vector<Body> b
     for (int i = 0; i < mp_properties->numBody; i++) {
         float eps = 1e-8;
         bool hasError = false;
-        hasError = (abs(bodies1.at(i).position.x - bodies2.at(i).position.x) > eps) ||
-            (abs(bodies1.at(i).position.y - bodies2.at(i).position.y) > eps) ||
-            (abs(bodies1.at(i).position.z - bodies2.at(i).position.z) > eps);
+        float xdiff = abs(bodies1.at(i).position.x - bodies2.at(i).position.x);
+        float ydiff = abs(bodies1.at(i).position.y - bodies2.at(i).position.y);
+        float zdiff = abs(bodies1.at(i).position.z - bodies2.at(i).position.z);
+        hasError = (xdiff > eps) || (ydiff > eps) || (zdiff > eps);
         if (hasError) {
+            std::cout << i <<  " body \t(" << xdiff << ", " << ydiff << ", " << zdiff << ")" << std::endl;
             std::cout << "Failure: difference with reference model." << std::endl;
             return;
         }

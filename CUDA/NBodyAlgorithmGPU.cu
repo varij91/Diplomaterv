@@ -65,7 +65,8 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
 
     // Memóriaallokáció
     checkCudaError(cudaMalloc((void**)&mpd_mass, mp_properties->numBody * sizeof(float)));
-    checkCudaError(cudaMalloc((void**)&mpd_position, mp_properties->numBody * sizeof(float3)));
+    checkCudaError(cudaMalloc((void**)&mpd_position[0], mp_properties->numBody * sizeof(float3)));
+    checkCudaError(cudaMalloc((void**)&mpd_position[1], mp_properties->numBody * sizeof(float3)));
     checkCudaError(cudaMalloc((void**)&mpd_velocity, mp_properties->numBody * sizeof(float3)));
     checkCudaError(cudaMalloc((void**)&mpd_acceleration, mp_properties->numBody * sizeof(float3)));
 
@@ -75,7 +76,8 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     
     // Másolás GPU global memóriába
     checkCudaError(cudaMemcpy(mpd_mass, mph_mass, mp_properties->numBody * sizeof(float), cudaMemcpyHostToDevice));
-    checkCudaError(cudaMemcpy(mpd_position, mph_position, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
+    // A positionNew inicializálatlan terület. A kernel fog neki mindig értéket adni
+    checkCudaError(cudaMemcpy(mpd_position[1 - m_writeable], mph_position, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
     checkCudaError(cudaMemcpy(mpd_velocity, mph_velocity, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
 
     //checkCudaError(cudaMemcpyToSymbol(d_NUM_BODY, &(mp_properties->numBody), sizeof(mp_properties->numBody)));
@@ -88,7 +90,8 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
 void NBodyAlgorithmGPU::destroy() {
     // Allokált memória felszabadítása
     checkCudaError(cudaFree(mpd_mass));
-    checkCudaError(cudaFree(mpd_position));
+    checkCudaError(cudaFree(mpd_position[0]));
+    checkCudaError(cudaFree(mpd_position[1]));
     checkCudaError(cudaFree(mpd_velocity));
     checkCudaError(cudaFree(mpd_acceleration));
 

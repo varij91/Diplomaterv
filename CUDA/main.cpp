@@ -38,7 +38,9 @@ int main(int argc, char* argv[])
     gp_system->init();
     gp_system->setAlgorithm();
 
+#ifdef USE_FLAT_SYSTEM
     gp_systemFlat->init();
+#endif
 
     if (gp_properties->mode == Mode::GUI) {
         NBodyRenderer::initGL(&argc, argv);
@@ -73,11 +75,12 @@ int main(int argc, char* argv[])
 #endif
 #endif
             gp_utility->endStopwatch();
-
-            //Reset
-            gp_properties->currentTime = gp_properties->startTime;
-            gp_system->init();
+            
+#ifdef USE_FLAT_SYSTEM
             gp_systemFlat->init();
+#else
+            gp_system->init();
+#endif
         }
         gp_utility->printPerformace(gp_properties->performanceRuns);
     }

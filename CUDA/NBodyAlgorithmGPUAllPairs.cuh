@@ -15,12 +15,12 @@ __global__ void advanceKernel(float3 *g_pos, float *g_mass, float3 *g_acc, int g
 
 
 __device__ float3 advanceWithColor(float3 posI, float *g_mass, float3 *g_pos, int g_numBodies, float g_eps2, float *numNeighbours, float g_posScale);
-__global__ void integrateKernelWithColor(float *g_mass, float3 *g_pos, float3 *g_vel, float3 *g_acc,
+__global__ void integrateKernelWithColor(float *g_mass, float3 *g_posOld, float3 *g_posNew, float3 *g_vel, float3 *g_acc,
     int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening, float *g_numNeighbours, float g_posScale);
 
 __device__ float3 advance(float3 posI, float *g_mass, float3 *g_pos, int g_numBodies, float g_eps2);
 
-__global__ void integrateKernel(float *g_mass, float3 *g_pos, float3 *g_vel, float3 *g_acc,
+__global__ void integrateKernel(float *g_mass, float3 *g_pos_old, float3 *g_pos_new, float3 *g_vel, float3 *g_acc,
     int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening);
 
 

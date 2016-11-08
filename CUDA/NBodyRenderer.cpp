@@ -198,7 +198,19 @@ void NBodyRenderer::getColor(unsigned int &r, unsigned int &g, unsigned int &b, 
     else if (value < 0.768f) {
         r = 255; g = 223; b = 0;
     }
-    else {
+    else if (value < 0.832f) {
         r = 255; g = 255; b = 0;
+    }
+    else if (value < 0.896f) {
+        r = 255; g = 255; b = 31;
+    }
+    else if (value < 0.928f) {
+        r = 255; g = 255; b = 63;
+    }
+    else if (value < 0.960f) {
+        r = 255; g = 255; b = 95;
+    }
+    else {
+        r = 255; g = 255; b = 127;
     }
 }

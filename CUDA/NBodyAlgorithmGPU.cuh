@@ -47,20 +47,21 @@ protected:
     // Host
     float  *mph_mass;
     float3 *mph_position;
-   float3 *mph_velocity;
+    float3 *mph_velocity;
     float3 *mph_acceleration;
     float  *mph_numNeighbours;
 
     // Device
     float  *mpd_mass;
-    float3 *mpd_position;
+    float3 *mpd_position[2];
     float3 *mpd_velocity;
-   float3 *mpd_acceleration;
+    float3 *mpd_acceleration;
     float  *mpd_numNeighbours;
 
     dim3 m_gridSize;
     dim3 m_threadBlockSize;
     std::size_t m_sharedMemorySize;
+    int m_writeable = 1;    // valid érték: 0, 1
 
     void unpackBodies(std::vector<Body> &bodies);
     void packBodies(std::vector<Body> &bodies);

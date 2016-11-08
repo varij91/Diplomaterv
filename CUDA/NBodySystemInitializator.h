@@ -18,11 +18,15 @@ public:
 
     float3 getNewPosition();
     float3 getNewVelocity();
+    float3 getNewVelocity(float3 pos);
     float getNewMass();
 
     void getNewAlgorithm(std::shared_ptr<NBodyAlgorithm> &algorithm) const;
 
 private:
+    std::default_random_engine m_generator;
+    std::normal_distribution<float> distribution;
+
     std::shared_ptr<NBodyProperties> mp_properties;
 };
 

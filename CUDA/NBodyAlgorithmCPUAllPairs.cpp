@@ -58,6 +58,7 @@ inline void NBodyAlgorithmCPUAllPairs::advanceBasicCore(std::vector<Body> &bodie
         bodies.at(index).acceleration.y += acc.y;
         bodies.at(index).acceleration.z += acc.z;
     }
+    
 }
 inline void NBodyAlgorithmCPUAllPairs::advanceBasicCoreGUI(std::vector<Body> &bodies, int index) {
     float3 zeros;

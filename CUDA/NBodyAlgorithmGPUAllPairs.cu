@@ -25,11 +25,11 @@ void NBodyAlgorithmGPUAllPairs::updateBodies(std::vector<Body> &bodies) {
 void NBodyAlgorithmGPUAllPairs::advance(std::vector<Body> &bodies) {
     if (mp_properties->mode == GUI) {
         //advanceKernelWithColor << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> > (mpd_position, mpd_mass, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mpd_numNeighbours, mp_properties->positionScale);
-        integrateKernelWithColor << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position, mpd_velocity, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mp_properties->stepTime, mp_properties->VELOCITY_DAMPENING, mpd_numNeighbours, mp_properties->positionScale);
+        integrateKernelWithColor << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position[1 - m_writeable], mpd_position[m_writeable], mpd_velocity, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mp_properties->stepTime, mp_properties->VELOCITY_DAMPENING, mpd_numNeighbours, mp_properties->positionScale);
     }
     else {
         //advanceKernel << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> > (mpd_position, mpd_mass, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2);
-        integrateKernel << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position, mpd_velocity, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mp_properties->stepTime, mp_properties->VELOCITY_DAMPENING);
+        integrateKernel << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position[1 - m_writeable], mpd_position[m_writeable], mpd_velocity, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mp_properties->stepTime, mp_properties->VELOCITY_DAMPENING);
     }
 
     cudaError_t kernelStatus = cudaGetLastError();
@@ -39,7 +39,9 @@ void NBodyAlgorithmGPUAllPairs::advance(std::vector<Body> &bodies) {
 
     checkCudaError(cudaDeviceSynchronize());
 
-    checkCudaError(cudaMemcpy(mph_position, mpd_position, mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
+    checkCudaError(cudaMemcpy(mph_position, mpd_position[m_writeable], mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
+    m_writeable = 1 - m_writeable; // érték invertálás, buffer váltása
+
     checkCudaError(cudaMemcpy(mph_velocity, mpd_velocity, mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
     checkCudaError(cudaMemcpy(mph_acceleration, mpd_acceleration, mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
     if (mp_properties->mode == GUI) {
@@ -59,11 +61,14 @@ __device__ float3 calculateAcceleration(const float3 posI, const float massJ, co
     r.x = posJ.x - posI.x;
     r.y = posJ.y - posI.y;
     r.z = posJ.z - posI.z;
+   /* if (!(blockIdx.x * blockDim.x + threadIdx.x))
+        printf("gpu - r: (%f, %f, %f)\n", r.x, r.y, r.z);*/
 
     float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + eps2);
     float rabsInv = 1.0f / (rabs * rabs * rabs);
     float temp = massJ * rabsInv;
-
+    /*if (!(blockIdx.x * blockDim.x + threadIdx.x))
+        printf("gpu - rabs, rabsinv, temp, massj (%f, %f, %f, %f)\n", rabs, rabsInv, temp, massJ);*/
     // A tömegbe bele van olvasztva a G
     // Az rabsInv-be beleraktam a massJ-t, hogy ne kelljen mindig összeszorozni
     // Be kelle hozni az gyorulás értékek akkumulálását, mert float3/float4-gyel való mûveleteket nem támogatja a CUDA C
@@ -71,15 +76,28 @@ __device__ float3 calculateAcceleration(const float3 posI, const float massJ, co
     accSumI.x += r.x * temp;
     accSumI.y += r.y * temp;
     accSumI.z += r.z * temp;
+    /*if (!(blockIdx.x * blockDim.x + threadIdx.x))
+        printf("gpu - accsum: (%f, %f, %f)\n", accSumI.x, accSumI.y, accSumI.z);*/
     return accSumI;
 }
 
 __device__ float3 tileCalculateAcceleration(const float3 posI, float3 accI, const int eps2) {
     float3 accSumI = accI;
-    extern __shared__ float sh_mass[];
-    extern __shared__ float3 sh_pos[];
-    for (int i = 0; i < blockDim.y; i++) {
-        accSumI = calculateAcceleration(posI, sh_mass[i], sh_pos[i], accSumI, eps2);
+
+    /*extern __shared__ int buf[];
+    when you launch the kernel you should launch it this way;
+    kernel << <blocks, threads, numbytes_for_shared >> >(...);
+    If you have multiple extern declaration of shared :
+    extern __shared__ float As[];
+    extern __shared__ float Bs[];
+    this will lead to As pointing to the same address as Bs.
+    You will need to keep As and Bs inside the 1D - array.*/
+
+    /*extern __shared__ float sh_mass[];
+    extern __shared__ float3 sh_pos[];*/
+    extern __shared__ float sh_pos_mass[];
+    for (int i = 0; i < blockDim.x; i++) {
+        accSumI = calculateAcceleration(posI, sh_pos_mass[i], { sh_pos_mass[blockDim.x + (3 * i)], sh_pos_mass[blockDim.x + (3 * i) + 1], sh_pos_mass[blockDim.x + (3 * i) + 2] }, accSumI, eps2);
     }
     return accSumI;
 }
@@ -146,10 +164,9 @@ __device__ float3 calculateAccelerationWithColor(const float3 posI, const float 
 
 __device__ float3 tileCalculateAccelerationWithColor(const float3 posI, float3 accI, const int eps2, float *numNeighbours, const float posScale) {
     float3 accSumI = accI;
-    extern __shared__ float sh_mass[];
-    extern __shared__ float3 sh_pos[];
+    extern __shared__ float sh_pos_mass[];
     for (int i = 0; i < blockDim.x; i++) {
-        accSumI = calculateAccelerationWithColor(posI, sh_mass[i], sh_pos[i], accSumI, eps2, numNeighbours, posScale);
+        accSumI = calculateAccelerationWithColor(posI, sh_pos_mass[i], { sh_pos_mass[blockDim.x + (3 * i)], sh_pos_mass[blockDim.x + (3 * i) + 1], sh_pos_mass[blockDim.x + (3 * i) + 2] }, accSumI, eps2, numNeighbours, posScale);
     }
     return accSumI;
 }
@@ -190,16 +207,19 @@ __global__ void advanceKernelWithColor(float3 *g_pos, float *g_mass, float3 *g_a
 
 
 __device__ float3 advance(float3 posI, float *g_mass, float3 *g_pos, int g_numBodies, float g_eps2) {
-    extern __shared__ float sh_mass[];
-    extern __shared__ float3 sh_pos[];
+    //extern __shared__ float sh_mass[];
+    //extern __shared__ float3 sh_pos[];
+    extern __shared__ float sh_pos_mass[];
 
     float3 accI = { 0.0f, 0.0f, 0.0f };
 
     for (int i = 0, tile = 0; i < g_numBodies; i += blockDim.x, tile++) {
         int tileID = tile * blockDim.x + threadIdx.x;
 
-        sh_mass[threadIdx.x] = g_mass[tileID];
-        sh_pos[threadIdx.x] = g_pos[tileID];
+        sh_pos_mass[threadIdx.x] = g_mass[tileID];
+        sh_pos_mass[blockDim.x + (3 * threadIdx.x)] = g_pos[tileID].x;
+        sh_pos_mass[blockDim.x + (3 * threadIdx.x) + 1] = g_pos[tileID].y;
+        sh_pos_mass[blockDim.x + (3 * threadIdx.x) + 2] = g_pos[tileID].z;
 
         __syncthreads();    // shared memória töltése
         accI = tileCalculateAcceleration(posI, accI, g_eps2);
@@ -209,7 +229,7 @@ __device__ float3 advance(float3 posI, float *g_mass, float3 *g_pos, int g_numBo
     return accI;
 }
 
-__global__ void integrateKernel(float *g_mass, float3 *g_pos, float3 *g_vel, float3 *g_acc,
+__global__ void integrateKernel(float *g_mass, float3 *g_posOld, float3 *g_posNew, float3 *g_vel, float3 *g_acc,
     int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening) {
 
     int globalThreadID = blockIdx.x * blockDim.x + threadIdx.x;
@@ -217,7 +237,7 @@ __global__ void integrateKernel(float *g_mass, float3 *g_pos, float3 *g_vel, flo
 
     float stepTime2 = 0.5f * g_stepTime * g_stepTime;
 
-    float3 posI = g_pos[globalThreadID];
+    float3 posI = g_posOld[globalThreadID];
     float3 velI = g_vel[globalThreadID];
     float3 accI;
 
@@ -227,7 +247,7 @@ __global__ void integrateKernel(float *g_mass, float3 *g_pos, float3 *g_vel, flo
     //int eps2 = g_eps2;
     //int posScale = g_posScale;
 
-    accI = advance(posI, g_mass, g_pos, g_numBodies, g_eps2);
+    accI = advance(posI, g_mass, g_posOld, g_numBodies, g_eps2);
 
     // Pozíció, sebesség és a szomszédos testek számának frissítése
     posI.x += velI.x * g_stepTime + accI.x * stepTime2;
@@ -238,7 +258,7 @@ __global__ void integrateKernel(float *g_mass, float3 *g_pos, float3 *g_vel, flo
     velI.y = velI.y * g_velDampening + accI.y * g_stepTime;
     velI.z = velI.z * g_velDampening + accI.z * g_stepTime;
 
-    g_pos[globalThreadID] = posI;
+    g_posNew[globalThreadID] = posI;
     g_vel[globalThreadID] = velI;
     g_acc[globalThreadID] = accI;
 }
@@ -253,16 +273,17 @@ __global__ void integrateKernel(float *g_mass, float3 *g_pos, float3 *g_vel, flo
 
 
 __device__ float3 advanceWithColor(float3 posI, float *g_mass, float3 *g_pos, int g_numBodies, float g_eps2, float *numNeighbours, float g_posScale) {
-    extern __shared__ float sh_mass[];
-    extern __shared__ float3 sh_pos[];
+    extern __shared__ float sh_pos_mass[];
 
     float3 accI = { 0.0f, 0.0f, 0.0f };
 
     for (int i = 0, tile = 0; i < g_numBodies; i += blockDim.x, tile++) {
         int tileID = tile * blockDim.x + threadIdx.x;
 
-        sh_mass[threadIdx.x] = g_mass[tileID];
-        sh_pos[threadIdx.x] = g_pos[tileID];
+        sh_pos_mass[threadIdx.x] = g_mass[tileID];
+        sh_pos_mass[blockDim.x + (3 * threadIdx.x)] = g_pos[tileID].x;
+        sh_pos_mass[blockDim.x + (3 * threadIdx.x) + 1] = g_pos[tileID].y;
+        sh_pos_mass[blockDim.x + (3 * threadIdx.x) + 2] = g_pos[tileID].z;
 
         __syncthreads();    // shared memória töltése
         accI = tileCalculateAccelerationWithColor(posI, accI, g_eps2, numNeighbours, g_posScale);
@@ -272,7 +293,7 @@ __device__ float3 advanceWithColor(float3 posI, float *g_mass, float3 *g_pos, in
     return accI;
 }
 
-__global__ void integrateKernelWithColor(float *g_mass, float3 *g_pos, float3 *g_vel, float3 *g_acc,
+__global__ void integrateKernelWithColor(float *g_mass, float3 *g_posOld, float3 *g_posNew, float3 *g_vel, float3 *g_acc,
     int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening, float *g_numNeighbours, float g_posScale) {
     
     int globalThreadID = blockIdx.x * blockDim.x + threadIdx.x;
@@ -280,7 +301,7 @@ __global__ void integrateKernelWithColor(float *g_mass, float3 *g_pos, float3 *g
 
     float stepTime2 = 0.5f * g_stepTime * g_stepTime;
 
-    float3 posI = g_pos[globalThreadID];
+    float3 posI = g_posOld[globalThreadID];
     float3 velI = g_vel[globalThreadID];
     float3 accI;
 
@@ -290,7 +311,7 @@ __global__ void integrateKernelWithColor(float *g_mass, float3 *g_pos, float3 *g
     //int eps2 = g_eps2;
     //int posScale = g_posScale;
 
-    accI = advanceWithColor(posI, g_mass, g_pos, g_numBodies, g_eps2, &numNeighboursI, g_posScale);
+    accI = advanceWithColor(posI, g_mass, g_posOld, g_numBodies, g_eps2, &numNeighboursI, g_posScale);
 
     // Pozíció, sebesség és a szomszédos testek számának frissítése
     posI.x += velI.x * g_stepTime + accI.x * stepTime2;
@@ -303,7 +324,7 @@ __global__ void integrateKernelWithColor(float *g_mass, float3 *g_pos, float3 *g
 
     //printf("(%f, %f, %f)\n", accI.x, accI.y, accI.z);
 
-    g_pos[globalThreadID] = posI;
+    g_posNew[globalThreadID] = posI;
     g_vel[globalThreadID] = velI;
     g_acc[globalThreadID] = accI;
     g_numNeighbours[globalThreadID] = numNeighboursI;
