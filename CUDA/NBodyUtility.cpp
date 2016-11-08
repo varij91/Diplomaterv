@@ -33,7 +33,7 @@ milliseconds NBodyUtility::getStopwatchTimeMilliseconds() {
 
 void NBodyUtility::calculateError(std::vector<Body> bodies1, std::vector<Body> bodies2) {
     for (int i = 0; i < mp_properties->numBody; i++) {
-        float eps = 1e-8;
+        float eps = 1e-3;
         bool hasError = false;
         float xdiff = abs(bodies1.at(i).position.x - bodies2.at(i).position.x);
         float ydiff = abs(bodies1.at(i).position.y - bodies2.at(i).position.y);
@@ -55,7 +55,7 @@ void NBodyUtility::printPerformace() {
     unsigned long long int numForcesTotal = numForcesPerTicks * ticks;
 
     long long int totalTime = getStopwatchTimeMilliseconds().count();
-    unsigned long long int totalFlops = numForcesTotal * 23 + mp_properties->numBody * 18;
+    unsigned long long int totalFlops = numForcesTotal * 20 + mp_properties->numBody * 21;
     std::cout << "--------------------------------------------" << std::endl;
     std::cout << "Number of calculated forces: " << ticks * mp_properties->numBody * mp_properties->numBody << std::endl;
     std::cout << "Simulation ticks:            " << ticks << std::endl;

@@ -143,7 +143,7 @@ void NBodyRenderer::getColor(unsigned int &r, unsigned int &g, unsigned int &b, 
     r = 255; g = 255; b = 0;
     }*/
 
-    float value = (float)mp_properties->numNeighbours.at(index) / (float)mp_properties->numBody;
+    float value = (float)mp_properties->numNeighbours.at(index) / (float)mp_properties->numBody / 2;
     if (mp_properties->numBody <= 128)
         value = value * 0.25f;
     else if (mp_properties->numBody <= 256)
