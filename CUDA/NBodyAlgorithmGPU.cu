@@ -148,6 +148,7 @@ void NBodyAlgorithmGPU::setKernelParameters() {
     // Max register per thread: 63
     
     int optimalThreadsPerBlock = maxActiveThreads / minOccupancy * 100 / maxActiveThreadBlocks; // 256
+    //optimalThreadsPerBlock = 128;
     // 16x16-os kernel indításának nincs nagyon értelme ezzel a tile-os, kommunikáció nélküli módszerrel
     // Egydimenziós kiosztással az Y és Z értékét fixen 1-re állítom
     unsigned int threadBlockX = optimalThreadsPerBlock;    // 256
