@@ -22,7 +22,7 @@ enum MassInitType {
 
 enum BodyFormation {
     SCATTER,
-    SPIRAL
+    SPHERE
 };
 
 enum Dimension {

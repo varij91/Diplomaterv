@@ -20,7 +20,8 @@ void NBodySystem::init() {
     assert(mp_properties->startTime < mp_properties->endTime);
     //assert(!m_systemInitialized);
 
-    srand(mp_properties->seed);
+    mp_initializator->init();
+
     float3 zeros;
     zeros.x = 0.0f; zeros.y = 0.0f; zeros.z = 0.0f;
 
@@ -47,7 +48,7 @@ void NBodySystem::init() {
         
         if (mp_properties->formation == SCATTER)
             m_bodies.at(i).velocity = mp_initializator->getNewVelocity();
-        else if (mp_properties->formation == SPIRAL)
+        else if (mp_properties->formation == SPHERE)
             m_bodies.at(i).velocity = mp_initializator->getNewVelocity(m_bodies.at(i).position);
 
         m_bodies.at(i).acceleration = zeros;

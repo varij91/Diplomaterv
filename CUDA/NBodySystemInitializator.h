@@ -10,11 +10,9 @@ class NBodySystemInitializator {
 public:
     static float lastMass;  // Segédváltozó azonos tömegû testek inicializálásához
 
-    NBodySystemInitializator(std::shared_ptr<NBodyProperties> properties) {
-        mp_properties = properties;
-        lastMass = 0.0f;
-        srand(mp_properties->seed);
-    }
+    NBodySystemInitializator(std::shared_ptr<NBodyProperties> properties);
+
+    void init();
 
     float3 getNewPosition();
     float3 getNewVelocity();
@@ -25,9 +23,15 @@ public:
 
 private:
     std::default_random_engine m_generator;
-    std::normal_distribution<float> distribution;
-
     std::shared_ptr<NBodyProperties> mp_properties;
+    
+
+    float3 spherePosition();
+    float3 scatterPosition();
+    float normalvalue(float mean, float deviation);
+
+    int m_numCores;
+    std::vector<float3> m_corePositions;
 };
 
 #endif // NBODY_SYSTEM_INITIALIZATOR_H

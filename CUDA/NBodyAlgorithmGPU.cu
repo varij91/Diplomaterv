@@ -13,6 +13,21 @@ void NBodyAlgorithmGPU::unpackBodies(std::vector<Body> &bodies) {
     }
 }
 
+void NBodyAlgorithmGPU::unpackBodies4(std::vector<Body> &bodies) {
+#pragma unroll
+    for (int i = 0; i < mp_properties->numBody; i++) { 
+        mph_position4[i].x = bodies.at(i).position.x;
+        mph_position4[i].y = bodies.at(i).position.y;
+        mph_position4[i].z = bodies.at(i).position.z;
+        mph_position4[i].w = bodies.at(i).mass;
+
+        mph_velocity4[i].x = bodies.at(i).velocity.x;
+        mph_velocity4[i].y = bodies.at(i).velocity.y;
+        mph_velocity4[i].z = bodies.at(i).velocity.z;
+        mph_velocity4[i].w = 0.0f;
+    }
+}
+
 void NBodyAlgorithmGPU::packBodies(std::vector<Body> &bodies) {
 #pragma unroll
     for (int i = 0; i < mp_properties->numBody; i++) {
@@ -62,6 +77,7 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
 
     // Testek kicsomagolása tömbökbe, a host memóriába
     unpackBodies(bodies);
+    unpackBodies4(bodies);
 
     // Memóriaallokáció
     checkCudaError(cudaMalloc((void**)&mpd_mass, mp_properties->numBody * sizeof(float)));
@@ -69,6 +85,10 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     checkCudaError(cudaMalloc((void**)&mpd_position[1], mp_properties->numBody * sizeof(float3)));
     checkCudaError(cudaMalloc((void**)&mpd_velocity, mp_properties->numBody * sizeof(float3)));
     checkCudaError(cudaMalloc((void**)&mpd_acceleration, mp_properties->numBody * sizeof(float3)));
+
+    checkCudaError(cudaMalloc((void**)&mpd_position4[0], mp_properties->numBody * sizeof(float4)));
+    checkCudaError(cudaMalloc((void**)&mpd_position4[1], mp_properties->numBody * sizeof(float4)));
+    checkCudaError(cudaMalloc((void**)&mpd_velocity4, mp_properties->numBody * sizeof(float4)));
 
     if (mp_properties->mode == GUI) {
         checkCudaError(cudaMalloc((void**)&mpd_numNeighbours, mp_properties->numBody * sizeof(float)));
@@ -79,6 +99,9 @@ void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     // A positionNew inicializálatlan terület. A kernel fog neki mindig értéket adni
     checkCudaError(cudaMemcpy(mpd_position[1 - m_writeable], mph_position, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
     checkCudaError(cudaMemcpy(mpd_velocity, mph_velocity, mp_properties->numBody * sizeof(float3), cudaMemcpyHostToDevice));
+
+    checkCudaError(cudaMemcpy(mpd_position4[1 - m_writeable], mph_position4, mp_properties->numBody * sizeof(float4), cudaMemcpyHostToDevice));
+    checkCudaError(cudaMemcpy(mpd_velocity4, mph_velocity4, mp_properties->numBody * sizeof(float4), cudaMemcpyHostToDevice));
 
     //checkCudaError(cudaMemcpyToSymbol(d_NUM_BODY, &(mp_properties->numBody), sizeof(mp_properties->numBody)));
     //checkCudaError(cudaMemcpyToSymbol(d_POSITION_SCALE, (float*)(&(mp_properties->positionScale)), sizeof(float)));
@@ -94,6 +117,10 @@ void NBodyAlgorithmGPU::destroy() {
     checkCudaError(cudaFree(mpd_position[1]));
     checkCudaError(cudaFree(mpd_velocity));
     checkCudaError(cudaFree(mpd_acceleration));
+
+    checkCudaError(cudaFree(mpd_position4[0]));
+    checkCudaError(cudaFree(mpd_position4[1]));
+    checkCudaError(cudaFree(mpd_velocity4));
 
     if (mp_properties->mode == GUI) {
         checkCudaError(cudaFree(mpd_numNeighbours));

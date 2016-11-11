@@ -19,6 +19,15 @@ __device__ float3 advanceWithConst(float3 posI, float *g_mass, float3 *g_pos);
 __global__ void integrateKernel(float *g_mass, float3 *g_pos_old, float3 *g_pos_new, float3 *g_vel, float3 *g_acc, int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening);
 __global__ void integrateKernelWithConst(float *g_mass, float3 *g_posOld, float3 *g_posNew, float3 *g_vel, float3 *g_acc);
 
+__device__ float3 calculateAccelerationWithFloat4(float4 posI, float4 posJ, float3 accSumI);
+
+__device__ float3 advanceWithFloat4(float4 posI, float4 *g_pos);
+
+__device__ float3 advanceWithFloat4_NoSharedNoTile(float4 posI, float4 *g_pos);
+
+__global__ void integrateKernelWithFloat4(float4 *g_posOld, float4 *g_posNew, float4 *g_vel);
+
+
 __device__ float3 calculateAccelerationWithColor(const float3 posI, const float massJ, const float3 posJ, float3 accSumI, const int eps2, float *numNeighbours, const float posScale);
 
 __device__ float3 tileCalculateAccelerationWithColor(const float3 posI, float3 accI, const int eps2, float *numNeighbours, const float posScale);

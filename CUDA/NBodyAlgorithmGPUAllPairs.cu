@@ -42,8 +42,8 @@ void NBodyAlgorithmGPUAllPairs::advance(std::vector<Body> &bodies) {
     else {
         checkCudaError(cudaFuncSetCacheConfig(&integrateKernel, cudaFuncCachePreferShared));
         //integrateKernel << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position[1 - m_writeable], mpd_position[m_writeable], mpd_velocity, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mp_properties->stepTime, mp_properties->VELOCITY_DAMPENING);
-        integrateKernelWithConst << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position[1 - m_writeable], mpd_position[m_writeable], mpd_velocity, mpd_acceleration);
-        
+        //integrateKernelWithConst << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position[1 - m_writeable], mpd_position[m_writeable], mpd_velocity, mpd_acceleration);
+        integrateKernelWithFloat4 << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_position4[1 - m_writeable], mpd_position4[m_writeable], mpd_velocity4);
     }
 
     cudaError_t kernelStatus = cudaGetLastError();
@@ -300,6 +300,97 @@ __global__ void integrateKernelWithConst(float *g_mass, float3 *g_posOld, float3
     //g_acc[globalThreadID] = accI;
 }
 
+
+__device__ float3 calculateAccelerationWithFloat4(float4 posI, float4 posJ, float3 accSumI) {
+    float3 r;
+
+    r.x = posJ.x - posI.x;
+    r.y = posJ.y - posI.y;
+    r.z = posJ.z - posI.z;
+
+    float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + d_EPS2);
+    float rabsInv = 1.0f / (rabs * rabs * rabs);
+    float temp = posJ.w * rabsInv;
+
+    accSumI.x += r.x * temp;
+    accSumI.y += r.y * temp;
+    accSumI.z += r.z * temp;
+
+    return accSumI;
+}
+
+__device__ float3 advanceWithFloat4(float4 posI, float4 *g_pos) {
+    extern __shared__ float4 sh_pm[];
+
+    float3 accI = { 0.0f, 0.0f, 0.0f };
+
+    for (int i = 0, tile = 0; i < d_NUM_BODY; i += blockDim.x, tile++) {
+        int tileID = tile * blockDim.x + threadIdx.x;
+
+        sh_pm[threadIdx.x] = g_pos[tileID];
+
+        __syncthreads();    // shared memória töltése
+#pragma unroll 128
+        for (int j = 0; j < blockDim.x; j++) {
+            accI = calculateAccelerationWithFloat4(posI, sh_pm[j], accI);
+        }
+        __syncthreads();    // ne kezdõdjön újra a shared memória feltöltése
+    }
+
+    return accI;
+}
+
+__device__ float3 advanceWithFloat4_NoSharedNoTile(float4 posI, float4 *g_pos) {
+    float3 accI = { 0.0f, 0.0f, 0.0f };
+
+#pragma unroll 128
+    for (int i = 0; i < d_NUM_BODY; i++) {
+        accI = calculateAccelerationWithFloat4(posI, g_pos[i], accI);
+    }
+    return accI;
+}
+
+__global__ void integrateKernelWithFloat4(float4 *g_posOld, float4 *g_posNew, float4 *g_vel) {
+    int globalThreadID = blockIdx.x * blockDim.x + threadIdx.x;
+    if (globalThreadID > d_NUM_BODY) return;
+
+    float stepTime2 = 0.5f * d_STEP_TIME * d_STEP_TIME;
+
+    float4 posI = g_posOld[globalThreadID]; // coalesced
+    float4 velI = g_vel[globalThreadID];    // coalesced
+    float3 accI;
+
+    accI = advanceWithFloat4(posI, g_posOld);
+    //accI = advanceWithFloat4_NoSharedNoTile(posI, g_posOld);
+
+    /*float3 r;
+    for (int i = 0; i < g_numBodies; i++) {
+    r.x = g_posOld[i].x - posI.x;
+    r.y = g_posOld[i].y - posI.y;
+    r.z = g_posOld[i].z - posI.z;
+
+    float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + g_eps2);
+    float rabsInv = 1.0f / (rabs * rabs * rabs);
+    float temp = g_mass[i] * rabsInv;
+
+    accI.x += r.x * temp;
+    accI.y += r.y * temp;
+    accI.z += r.z * temp;
+    }*/
+
+    // Pozíció, sebesség és a szomszédos testek számának frissítése
+    posI.x += velI.x * d_STEP_TIME; +accI.x * stepTime2;
+    posI.y += velI.y * d_STEP_TIME; +accI.y * stepTime2;
+    posI.z += velI.z * d_STEP_TIME; +accI.z * stepTime2;
+
+    velI.x = velI.x * d_VELOCITY_DAMPENING + accI.x * d_STEP_TIME;
+    velI.y = velI.y * d_VELOCITY_DAMPENING + accI.y * d_STEP_TIME;
+    velI.z = velI.z * d_VELOCITY_DAMPENING + accI.z * d_STEP_TIME;
+
+    g_posNew[globalThreadID] = posI;
+    g_vel[globalThreadID] = velI;
+    //g_acc[globalThreadID] = accI;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 __device__ float3 calculateAccelerationWithColor(const float3 posI, const float massJ, const float3 posJ, float3 accSumI, const int eps2, float *numNeighbours, const float posScale) {
     float3 r;

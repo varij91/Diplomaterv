@@ -33,7 +33,7 @@ milliseconds NBodyUtility::getStopwatchTimeMilliseconds() {
 
 void NBodyUtility::calculateError(std::vector<Body> bodies1, std::vector<Body> bodies2) {
     for (int i = 0; i < mp_properties->numBody; i++) {
-        float eps = 1e-3;
+        float eps = 1e-3f;
         bool hasError = false;
         float xdiff = abs(bodies1.at(i).position.x - bodies2.at(i).position.x);
         float ydiff = abs(bodies1.at(i).position.y - bodies2.at(i).position.y);
@@ -170,8 +170,8 @@ bool NBodyUtility::commandLineParse(int argc, const char *argv[]) {
             if ((value == "SCATTER") || (value == "scatter")) {
                 mp_properties->formation = BodyFormation::SCATTER;
             }
-            else if ((value == "SPIRAL") || (value == "spiral")) {
-                mp_properties->formation = BodyFormation::SPIRAL;
+            else if ((value == "SPHERE") || (value == "sphere")) {
+                mp_properties->formation = BodyFormation::SPHERE;
             }
             else {
                 std::cerr << "Unknown input value for " << key << ": " << value << std::endl;
