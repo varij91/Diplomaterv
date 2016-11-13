@@ -36,6 +36,12 @@ __device__ float3 advanceWithColor(float3 posI, float *g_mass, float3 *g_pos, in
 
 __global__ void integrateKernelWithColor(float *g_mass, float3 *g_posOld, float3 *g_posNew, float3 *g_vel, float3 *g_acc, int g_numBodies, float g_eps2, float g_stepTime, float g_velDampening, float *g_numNeighbours, float g_posScale);
 
+__device__ float3 calculateAccelerationWithFloat4WithColor(float4 posI, float4 posJ, float3 accSumI, float *numNeighbours);
+
+__device__ float3 advanceWithFloat4WithColor(float4 posI, float4 *g_pos, float *numNeighbours);
+
+__global__ void integrateKernelWithFloat4WithColor(float4 *g_posOld, float4 *g_posNew, float4 *g_vel, float *g_numNeighbours);
+
 
 class NBodyAlgorithmGPUAllPairs : public NBodyAlgorithmGPU {
 

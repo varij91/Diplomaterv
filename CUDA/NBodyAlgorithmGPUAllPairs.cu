@@ -37,7 +37,9 @@ void NBodyAlgorithmGPUAllPairs::advance(std::vector<Body> &bodies) {
 
     if (mp_properties->mode == GUI) {
         //advanceKernelWithColor << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> > (mpd_position, mpd_mass, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mpd_numNeighbours, mp_properties->positionScale);
-        integrateKernelWithColor << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position[1 - m_writeable], mpd_position[m_writeable], mpd_velocity, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mp_properties->stepTime, mp_properties->VELOCITY_DAMPENING, mpd_numNeighbours, mp_properties->positionScale);
+        //integrateKernelWithColor << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_mass, mpd_position[1 - m_writeable], mpd_position[m_writeable], mpd_velocity, mpd_acceleration, mp_properties->numBody, mp_properties->EPS2, mp_properties->stepTime, mp_properties->VELOCITY_DAMPENING, mpd_numNeighbours, mp_properties->positionScale);
+
+        integrateKernelWithFloat4WithColor << < m_gridSize, m_threadBlockSize, m_sharedMemorySize >> >(mpd_position4[1 - m_writeable], mpd_position4[m_writeable], mpd_velocity4, mpd_numNeighbours);
     }
     else {
         checkCudaError(cudaFuncSetCacheConfig(&integrateKernel, cudaFuncCachePreferShared));
@@ -54,17 +56,20 @@ void NBodyAlgorithmGPUAllPairs::advance(std::vector<Body> &bodies) {
     checkCudaError(cudaDeviceSynchronize());
 
     checkCudaError(cudaMemcpy(mph_position, mpd_position[m_writeable], mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
+    checkCudaError(cudaMemcpy(mph_position4, mpd_position4[m_writeable], mp_properties->numBody * sizeof(float4), cudaMemcpyDeviceToHost));
     m_writeable = 1 - m_writeable; // érték invertálás, buffer váltása
 
     checkCudaError(cudaMemcpy(mph_velocity, mpd_velocity, mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
-    checkCudaError(cudaMemcpy(mph_acceleration, mpd_acceleration, mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
+    checkCudaError(cudaMemcpy(mph_velocity4, mpd_velocity4, mp_properties->numBody * sizeof(float4), cudaMemcpyDeviceToHost));
+    //checkCudaError(cudaMemcpy(mph_acceleration, mpd_acceleration, mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
+
     if (mp_properties->mode == GUI) {
         checkCudaError(cudaMemcpy(mph_numNeighbours, mpd_numNeighbours, mp_properties->numBody * sizeof(float), cudaMemcpyDeviceToHost));
         for (int i = 0; i < mp_properties->numBody; i++) {
             mp_properties->numNeighbours.at(i) = (unsigned int)mph_numNeighbours[i];
         }
     }
-    packBodies(bodies);
+    packBodies4(bodies);
     //updateBodies(bodies);
 }
 
@@ -309,6 +314,9 @@ __device__ float3 calculateAccelerationWithFloat4(float4 posI, float4 posJ, floa
     r.z = posJ.z - posI.z;
 
     float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + d_EPS2);
+    // sqrt kiszedésével közel 20 GFLOPS-os (50%-os) teljesítménybeli növekedés
+    // SPU korlát lenne a gáz?
+    //float rabs = r.x * r.x + r.y * r.y + r.z * r.z + d_EPS2;
     float rabsInv = 1.0f / (rabs * rabs * rabs);
     float temp = posJ.w * rabsInv;
 
@@ -478,3 +486,73 @@ __global__ void integrateKernelWithColor(float *g_mass, float3 *g_posOld, float3
     g_numNeighbours[globalThreadID] = numNeighboursI;
 }
 
+
+
+__device__ float3 calculateAccelerationWithFloat4WithColor(float4 posI, float4 posJ, float3 accSumI, float *numNeighbours) {
+    float3 r;
+
+    r.x = posJ.x - posI.x;
+    r.y = posJ.y - posI.y;
+    r.z = posJ.z - posI.z;
+
+    float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + d_EPS2);
+    float rabsInv = 1.0f / (rabs * rabs * rabs);
+    float temp = posJ.w * rabsInv;
+    (*numNeighbours) = (rabs < d_POSITION_SCALE) ? (*numNeighbours) + 1 : (*numNeighbours);
+
+    accSumI.x += r.x * temp;
+    accSumI.y += r.y * temp;
+    accSumI.z += r.z * temp;
+
+    return accSumI;
+}
+
+__device__ float3 advanceWithFloat4WithColor(float4 posI, float4 *g_pos, float *numNeighbours) {
+    extern __shared__ float4 sh_pm[];
+
+    float3 accI = { 0.0f, 0.0f, 0.0f };
+
+    for (int i = 0, tile = 0; i < d_NUM_BODY; i += blockDim.x, tile++) {
+        int tileID = tile * blockDim.x + threadIdx.x;
+
+        sh_pm[threadIdx.x] = g_pos[tileID];
+
+        __syncthreads();    // shared memória töltése
+#pragma unroll 128
+        for (int j = 0; j < blockDim.x; j++) {
+            accI = calculateAccelerationWithFloat4WithColor(posI, sh_pm[j], accI, numNeighbours);
+        }
+        __syncthreads();    // ne kezdõdjön újra a shared memória feltöltése
+    }
+
+    return accI;
+}
+
+__global__ void integrateKernelWithFloat4WithColor(float4 *g_posOld, float4 *g_posNew, float4 *g_vel, float *g_numNeighbours) {
+    int globalThreadID = blockIdx.x * blockDim.x + threadIdx.x;
+    if (globalThreadID > d_NUM_BODY) return;
+
+    float stepTime2 = 0.5f * d_STEP_TIME * d_STEP_TIME;
+
+    float4 posI = g_posOld[globalThreadID]; // coalesced
+    float4 velI = g_vel[globalThreadID];    // coalesced
+    float3 accI;
+
+    float numNeighboursI = 0.0f;
+
+    accI = advanceWithFloat4WithColor(posI, g_posOld, &numNeighboursI);
+
+    // Pozíció, sebesség és a szomszédos testek számának frissítése
+    posI.x += velI.x * d_STEP_TIME; +accI.x * stepTime2;
+    posI.y += velI.y * d_STEP_TIME; +accI.y * stepTime2;
+    posI.z += velI.z * d_STEP_TIME; +accI.z * stepTime2;
+
+    velI.x = velI.x * d_VELOCITY_DAMPENING + accI.x * d_STEP_TIME;
+    velI.y = velI.y * d_VELOCITY_DAMPENING + accI.y * d_STEP_TIME;
+    velI.z = velI.z * d_VELOCITY_DAMPENING + accI.z * d_STEP_TIME;
+
+    g_posNew[globalThreadID] = posI;
+    g_vel[globalThreadID] = velI;
+    //g_acc[globalThreadID] = accI;
+    g_numNeighbours[globalThreadID] = numNeighboursI;
+}

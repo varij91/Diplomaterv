@@ -78,6 +78,7 @@ protected:
     void unpackBodies(std::vector<Body> &bodies);
     void unpackBodies4(std::vector<Body> &bodies);
     void packBodies(std::vector<Body> &bodies);
+    void packBodies4(std::vector<Body> &bodies);
     void setKernelParameters();
 
 };

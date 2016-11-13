@@ -38,6 +38,19 @@ void NBodyAlgorithmGPU::packBodies(std::vector<Body> &bodies) {
     }
 }
 
+void NBodyAlgorithmGPU::packBodies4(std::vector<Body> &bodies) {
+#pragma unroll
+    for (int i = 0; i < mp_properties->numBody; i++) {
+        bodies.at(i).position.x = mph_position4[i].x;
+        bodies.at(i).position.y = mph_position4[i].y;
+        bodies.at(i).position.z = mph_position4[i].z;
+
+        bodies.at(i).velocity.x = mph_velocity4[i].x;
+        bodies.at(i).velocity.y = mph_velocity4[i].y;
+        bodies.at(i).velocity.z = mph_velocity4[i].z;
+    }
+}
+
 void NBodyAlgorithmGPU::init(std::vector<Body> &bodies) {
     // Van-e CUDA kompatibilis GPU?
     int numDevice;
@@ -175,7 +188,7 @@ void NBodyAlgorithmGPU::setKernelParameters() {
     // Max register per thread: 63
     
     int optimalThreadsPerBlock = maxActiveThreads / minOccupancy * 100 / maxActiveThreadBlocks; // 256
-    //optimalThreadsPerBlock = 128;
+    optimalThreadsPerBlock = 128;
     // 16x16-os kernel indításának nincs nagyon értelme ezzel a tile-os, kommunikáció nélküli módszerrel
     // Egydimenziós kiosztással az Y és Z értékét fixen 1-re állítom
     unsigned int threadBlockX = optimalThreadsPerBlock;    // 256
