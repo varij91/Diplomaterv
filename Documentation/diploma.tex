@@ -40,10 +40,10 @@
 % (like the ToC, the References, and the Chapter pages)remain in plane style
 
 \pagestyle{plain}
-%\setlength{\parindent}{0pt} % �ttekinthet�bb, angol nyelv� dokumentumokban jellemz�
-%\setlength{\parskip}{8pt plus 3pt minus 3pt} % �ttekinthet�bb, angol nyelv� dokumentumokban jellemz�
-\setlength{\parindent}{12pt} % magyar nyelv� dokumentumokban jellemz�
-\setlength{\parskip}{0pt}    % magyar nyelv� dokumentumokban jellemz�
+%\setlength{\parindent}{0pt} % ?ttekinthet?bb, angol nyelv? dokumentumokban jellemz?
+%\setlength{\parskip}{8pt plus 3pt minus 3pt} % ?ttekinthet?bb, angol nyelv? dokumentumokban jellemz?
+\setlength{\parindent}{12pt} % magyar nyelv? dokumentumokban jellemz?
+\setlength{\parskip}{0pt}    % magyar nyelv? dokumentumokban jellemz?
 
 \marginsize{35mm}{25mm}{15mm}{15mm} % anysize package
 \setcounter{secnumdepth}{0}
@@ -56,7 +56,7 @@
 %--------------------------------------------------------------------------------------
 \hypersetup{
     bookmarks=true,            % show bookmarks bar?
-    unicode=false,             % non-Latin characters in Acrobat�s bookmarks
+    unicode=false,             % non-Latin characters in Acrobat?s bookmarks
     pdftitle={\vikcim},        % title
     pdfauthor={\vikszerzo},    % author
     pdfsubject={\vikdoktipus}, % subject of the document
@@ -139,7 +139,7 @@ aboveskip=10pt}
 %--------------------------------------------------------------------------------------
 \begin{document}
 \singlespacing
-\include{guideline}
+%\include{guideline}
 \include{project}
 
 \pagenumbering{arabic}
@@ -152,13 +152,14 @@ aboveskip=10pt}
 \include{chapter1}
 \include{chapter2}
 \include{chapter3}
+\include{chapter4}
 \include{acknowledgement}
 
-%\listoffigures\addcontentsline{toc}{chapter}{�br�k jegyz�ke}
-%\listoftables\addcontentsline{toc}{chapter}{T�bl�zatok jegyz�ke}
+%\listoffigures\addcontentsline{toc}{chapter}{?br?k jegyz?ke}
+%\listoftables\addcontentsline{toc}{chapter}{T?bl?zatok jegyz?ke}
 
 \bibliography{mybib}
-\addcontentsline{toc}{chapter}{Irodalomjegyz�k}
+\addcontentsline{toc}{chapter}{Irodalomjegyz?k}
 \bibliographystyle{plain}
 
 \include{appendices}

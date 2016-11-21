@@ -1,49 +1,263 @@
 %----------------------------------------------------------------------------
-\chapter{Bevezetés}\label{sect:bevezetes}
+\chapter{N-test probléma}
 %----------------------------------------------------------------------------
-A számítástechnika fejlõdésével együtt növekszik az elõállított és feldolgozandó adatoknak a mennyisége, legyen szó egyszerû felhasználói alkalmazásról vagy nagyszabású ipari, tudományos projektrõl. Ezek feldolgozására a legutóbbi évtizedben közel stagnáló órajel frekvencia mellett megjelentek és elterjedtek a több processzort, processzormagot tartalmazó rendszerek: a két/négy magos asztali számítógépektõl egészen a több millió magos szuperszámítógépekig.
+	%----------------------------------------------------------------------------
+	\section{Általános megfogalmazás}
+	%----------------------------------------------------------------------------
+		N-test probléma (N-body problem) alatt egy olyan részecskékbõl, testekbõl álló rendszer vizsgálatát értjük, melyben a testek folyamatos interakcióban vannak egymással valamilyen kölcsönhatáson (például erõhatáson) keresztül. Kifejezetten jól használható olyan problémák megoldására melyben a testek mozgását szeretnénk megfigyelni, s a közöttük lévõ kölcsönhatások matematikailag jól leírhatók.
+		
+		Gyakorlati alkalmazás szempontjából érdemes két típust kiemelni a gravitációs, illetve az elektromágneses/elektrosztatikus N-test problémát.
 
-A rendelkezésre álló hardver fejlõdése mellé azonban elengedhetetlen a megfelelõ szoftver írása, mely kellõ mértékben kihasználja a rendelkezésére álló erõforrásokat. A többmagot is igénybevevõ, párhuzamos programokat gyakran sokkal nagyobb kihívás megvalósítani, mint soros társaikat, ezért is kap olyan nagy hangsúlyt manapság a párhuzamos programozás.
-%----------------------------------------------------------------------------
-\section{Technológiai háttér}
-%----------------------------------------------------------------------------
-1974-ben Robert H. Dennard észrevette, hogy a tranzisztor fizikai méretével együtt csökken a vezérléséhez szükséges feszültség és áram nagysága, s következésképp a felvett teljesítmény is (Dennard törvény). Ez lehetõséget adott arra, hogy az áramköröket ugyanolyan villamos teljesítmény mellett, egyre nagyobb frekvenciájú órajelet alkalmazva, egyre gyorsabban vezéreljünk.
+		Az N-test probléma gravitációs N-test probléma, amennyiben az erõhatás forrása a testek tömege, s leírása a például Newton-féle gravitációs törvény segítségével történik.
 
-2005 környékén azonban a processzorok mûködési frekvenciájának, sebességének növekedése három akadályba (wall) ütközött:
-\begin{enumerate}
-	\item \emph{Power wall:} A villamos energia fogyasztás és disszipált hõteljesítmény nem lineáris (köbös) ütemben növekszik az órajel növelésével. A mûködési frekvencia további emelése túlmelegedési problémákat okoz, melyet a jelenleg elterjedt hûtési technikákkal nem lehet kezelni.
-	\item \emph{Instruction level parallelism wall:} A feldolgozó egységeket utasításszinten a továbbiakban nem lehet hatékonyan fejleszteni, csökkenõ tendenciát mutat a teljesítménynövekedés mértéke.
-	\item \emph{Memory wall:} A külsõ áramköri elemekkel, memóriával (off-chip memory) való kommunikáció lassabb ütemben fejlõdött, mint az integrált áramkörök, s processzorok által nyújtott számítási teljesítmény. Ez adatmozgatás során, mint szûk keresztmetszet jelenik meg.
-\end{enumerate}
+		A második esetben, a testek töltése a releváns, s a fellépõ kölcsönhatás jellege elektromágneses. A matematikai leírást ekkor a Coulomb-törvény felhasználásával kaphatjuk meg. Ez utóbbi típust használják például molekuláris dinamika során is, melyben atomok és molekulák mozgását szimulálják.
 
-A falak egymással szoros kapcsolatban állnak, egyik tulajdonság optimalizálása súlyosbíthatja a másik kettõt. [1]
-%----------------------------------------------------------------------------
-\section{Következmény}
-%----------------------------------------------------------------------------
-A technológiai akadályok arra késztették a piacvezetõ processzorgyártókat (Intel, AMD), hogy az órajel frekvenciájának növelését hanyagolva, más megoldást találjanak a számítási teljesítmény növelésére.
+		Fontos kiemelni, hogy a probléma a leggyakoribb esetekben erõsen nemlineáris kapcsolatokat ír le a testek között, így megoldásuk analitikus módszerekkel igencsak korlátozott. N-test szimuláció a diszkrét idõpontokban meghatározott, numerikus módszerek alkalmazásával megoldott N-test problémát jelenti. Számításigény szempontjából a legköltségesebb szimulációk közé tartozik, ugyanis a kiértékelendõ kölcsönhatások száma a testek számával négyzetes kapcsolatban áll, vagyis a probléma komplexitása $O(N^{2})$. Az \figref{N_Body_Alap} ábrán egy két-, illetve egy ötelemû rendszer látható feltüntetve a testek közötti kölcsönhatást.
 
-A megfelelõ irányt az egy processzoron belül több, egymástól független processzormag elhelyezése jelentheti. Kisebb mûködési frekvenciával rendelkezõ, "gyengébb" processzormagokat integrálva közös szilíciumlapkára elérhetõ, hogy az együttes számítási teljesítményük meghaladja az egymagos, "erõsebb" processzorét, s emellett még az összfogyasztás is kisebb legyen.
+		Diplomamunkámban az asztrofizikában gyakran és elõszeretettel használt gravitációs N-test szimulációt választottam, mint megvalósítandó feladat. A továbbiakban a probléma egyszerûsítése és a fogalmak pontosítása érdekében szükséges három feltétel bevezetése:
 
-A teljes számítási kapacitás kihasználása azonban lényeges erõfeszítést igényelhet programozói oldalról, ugyanis a program írása során szakítani kell szokványos szekvenciális gondolkodásmóddal. Számos probléma esetén a fejlesztõnek figyelni kell a párhuzamosan futó programrészek közti szinkronizációra, közös erõforráshasználatára, adatintegritásra.
+		\begin{itemize}
+			\item A testek diszkrét, kiterjedés nélküli tömegpontok.
+			\item A teret ahol a testek elhelyezkednek inerciarendszernek tekintjük, vagyis feltételezzük, hogy nem gyorsuló vonatkoztatási rendszer és érvényesek a Newtoni-törvények.
+			\item A gravitációs kölcsönhatáson kívül minden más külsõ és belsõ erõhatás elhanyagolható.
+		\end{itemize}
 
-%----------------------------------------------------------------------------
-\section{Grafikus processzorok általános célú felhasználása}
-%----------------------------------------------------------------------------
-A többmagos általános célú processzorok (CPU - Central Processing Unit) megjelenésével és elterjedésével egyidõben a grafikus processzorok (GPU - Graphics Processing Unit) is lényeges fejlõdésen mentek keresztül.
+		\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/N_Body_Alap.pdf}
+			\caption{N-test probléma kettõ és öt testet tartalmazó rendszerek esetében} 
+			\label{fig:N_Body_Alap}
+		\end{figure}
+	
+	%----------------------------------------------------------------------------
+	\section{Csillagászati alkalmazás}
+	%----------------------------------------------------------------------------
+		Égitestek viselkedésének leírásával már Sir Isaac Newton is foglalkozott, aki sikeresen levezette Kepler törvényeit, kiindulva a saját gravitációs és mozgási törvényébõl. Kepler feltételezte, hogy van egy kitüntetett, fixen elhelyezkedõ objektum (Nap), ami körül elliptikus pályán keringenek az égitestek. Newton a fix égitest létezését elvetette és bebizonyította, hogy a Kepler-féle leírás csak egy közelítést ad a Naprendszerünk tényleges viselkedésére. Az égitestek hatással vannak egymásra, kölcsönösen keringenek egymás körül. Megjósolta, hogy nem csak elliptikus, hanem parabolikus és hiperbolikus pályák is elõfordulhatnak. [1]
+		
+		A jelenlegi mikrohullámú háttérsugárzás egyenletessége arra enged következtetni, hogy az univerzum anyagsûrûség szempontjából kezdetben kifejezetten egyenletes volt: a fluktuáció mértéke az átlagos értéktõl körülbelül $10^{-4}$ és $10_{-5}$ nagyságrendbe esett. A mára kialakult galaxisok és a galaxisok csoportok mellett ugyanez az ingadozás eléri akár a $10^3$ nagyságrendet is. [2]
 
-A valósidejû, nagy felbontású 3D-s grafikára való növekvõ igény hatására a GPU-k rendkívül nagy számítási kapacitással és memórával rendelkezõ, sokmagos processzorrá fejlõdtek. A grafikai feladatok által igényelt lebegõpontos számítási teljesítményben ma már sokszorosan felülmúlják a CPU-kat. Ez számos tudományterület, iparág érdeklõdését felkeltette és ösztökélte a saját adatintenzív és/vagy számításigényes problémáik megoldására. Az GPU-k ilyen, nem grafikai jellegû alkalmazását nevezik általános célú felhasználásnak (GPGPU - General-Purpose computation on Graphics Processing Units).
+		A gravitációs kölcsönhatás következtében az apró tömörülések, csomók megfelelõ kiindulási pontot biztosítottak ahhoz, hogy a korai univerzum ,,összeomoljon'' és kialakuljanak a korábban említett jelentõs sûrûségbeli eltérések. Az ilyen tömörülések növekedési, fejlõdési folyamata és a közöttük lévõ kapcsolat is erõsen nemlineáris, ami korlátozza a tisztán analitikus kiértékelés lehetõségét, elõtérbe hozva a korábban említett numerikus megoldásokat.
+		
+		Az asztrofizikában alkalmazott N-test szimuláció célja, hogy segítse megérteni az égitestek, galaxisok és végsõ soron az univerzum kialakulását. Szerepet játszik például ûreszközök, bolygók pályájának meghatározásában, galaxis formációk vizsgálatában és kiemelkedõen fontos módszer a sötétanyag kutatás terén.
 
-Ilyen probléma például a globális idõjárás elõrejelzés, melynek során a newtoni, termodinamikai és kontikuitási egyenletekbõl kialakított többmilliós ismeretlenbõl álló egyenletrendszert kell rövid idõközönként megoldani.
+	%----------------------------------------------------------------------------
+	\section{Összefüggések}
+	%----------------------------------------------------------------------------
+		%----------------------------------------------------------------------------
+		\subsection{Test interakciók}
+		%----------------------------------------------------------------------------
+			A testek közti interakciót a Newton-féle gravitációs törvény segítségével írhatjuk le, mely szerint bármely két tömeggel rendelkezõ test között erõhatás lép fel úgy, hogy a testek tömegközéppontját egymás felé gyorsítja. A kialakuló erõ nagysága:
+			\begin{align}
+				F = G\frac{m_{1}m_{2}}{r^{2}}
+			\end{align}
+			ahol $m_1$ és $m_2$ a két test tömege, $r$ a két test tömegközéppontjának a távolsága és $G$ a gravitációs állandó. A képletbõl leolvasható, hogy a testek között ható erõ egyenesen arányos a testek tömegével és fordítottan arányos a testek közti távolság négyzetével.
 
-Hasonló probléma a feladatomnak választott gravitációs N-test szimuláció is, melyet elõszeretettel használnak csillagászatban égitestek mozgásának elõrejelzésére, modellezésére.
+			Az erõ vektoriális mennyiség, vagyis iránnyal jellemezhetõ és az erõ minden esetben a testek tömegközéppontjának hatásvonalába esik. Vektoriális alakban a második test által az elsõre kifejtett erõ:
+			\begin{align}
+				\mathbf{F_{12}} = G\frac{m_{1}m_{2}}{\left \| \mathbf{r_{12}} \right \|^{2}}\cdot \frac{\mathbf{r_{12}}}{\left \| \mathbf{r_{12}} \right \|}
+			\end{align}
+			Itt $\mathbf{r_{12}}$ már egy vektort reprezentál, mely vektor a második test tömegközéppontjából mutat az elsõ test tömegközéppontjába. Az $\left \| \mathbf{r_{12}} \right \|$ pedig az elõbb említett vektor hossza, vagyis a tömegközéppontok távolsága. A baloldali tényezõ az erõ nagyságát adja meg, míg a jobb oldali tényezõ az irányát, egységvektor formájában. Ugyanez felírva a második testre:
+			\begin{align}
+				\mathbf{F_{21}} = G\frac{m_{1}m_{2}}{\left \| \mathbf{r_{21}} \right \|^{2}}\cdot \frac{\mathbf{r_{21}}}{\left \| \mathbf{r_{21}} \right \|}
+			\end{align}
+			
+			Newton 3. axiómája értelmében, ha két test erõvel hat egymásra, akkor az az erõ mindkét testre ugyanolyan nagyságú és ellentétes irányú:
+			\begin{align}
+				\mathbf{F_{12}} = -\mathbf{F_{21}}
+			\end{align}
+	
+			A fenti megfontolásokat követve az összefüggések felírhatók tetszõleges $2 \leq N$ egész számú objektumra is.
+			
+			Rátérve a gravitációs N-test szimuláció alapösszefüggéseire be kell vezetnünk néhány jelölési konvenciót, illetve tulajdonságot:
 
-%----------------------------------------------------------------------------
-\section{A dolgozat felépítése}
-%----------------------------------------------------------------------------
-Diplomamunkám során különféle párhuzamosítási technikákat mutatok be és próbálok ki.
+			\begin{itemize}
+				\item $\mathbf{F_{ij}}$ a $j.$ test által az $i.$ testre kifejtett gravitációs erõvektora,
+				\item $\mathbf{F_{i}}$ az $i.$ testre kifejtett eredõ gravitációs erõvektora,
+				\item $m_{i}$ az $i.$ test tömege,
+				\item $\mathbf{x_{i}}$ az $i.$ test aktuális pozícióvektora,
+				\item $\mathbf{v_{i}}$ az $i.$ test aktuális sebességvektora,
+				\item $\mathbf{r_{ij}}$ az $j.$ test tömegközéppontjából az $i.$ test tömegközéppontjába mutató vektor, ami $\mathbf{r_{ij}} = \mathbf{x_{j}} - \mathbf{x_{i}}$ alakban áll elõ.
+			\end{itemize}
+		
+			Az indexek mindig egy testet, vagy testeket jelölnek ki és értékük $1 \leq i$ és $j \leq N$
 
-A soronkövetkezõ 2. fejezetben röviden ismertetem a választott párhuzamosítandó feladato: az N-test problémát.
+			Ezek után az $i.$ testre ható erõ, amit gravitációs kölcsönhatás okoz a $j.$ testtel a következõképpen adható meg:
+			\begin{align}
+				\mathbf{F_{ij}} = G\frac{m_{i}m_{j}}{\left \| \mathbf{r_{ij}} \right \|^{2}}\cdot \frac{\mathbf{r_{ij}}}{\left \| \mathbf{r_{ij}} \right \|}
+			\end{align}
+			
+			Newton 4. axiómáját (az erõhatások függetlenségének elvét) felhasználva az $i.$ testre ható eredõ erõ a rendszerben lévõ más testek által okozott erõk vektoriális összegeként írható fel:
+			\begin{align}
+				\mathbf{F_{i}} = \sum_{j = 1,j\neq i}^{N} \mathbf{F_{ij}} = Gm_{i} \sum_{j = 1,j\neq i}^{N} \frac{m_{j}\mathbf{r_{ij}}}{\left \| \mathbf{r_{ij}} \right \|^{3}}
+			\end{align}
+	
+			Amennyiben a testek közti távolság tart a nullához, a köztük ható erõ tart a végtelenhez, ami nem kívánatos anomáliákhoz vezet a szimuláció során. A legtöbb asztrofizikai alkalmazásban a testek ütközése tiltott, így ezeket a szituációkat valamilyen formában le kell kezelni. Az egyik legegyszerûbb megoldás egy erõ enyhítéséért felelõs pozitív konstans ($\varepsilon^2$ - softening factor) bevezetése. Segítségével korlátozni tudjuk a testek között kialakuló erõ nagyságát, ami numerikus integrálás során kedvezõ. A kiegészített képlet:
+			\begin{align}
+				\mathbf{F_{i}} \approx Gm_{i} \sum_{j = 1}^{N} \frac{m_{j}\mathbf{r_{ij}}}{\left ( \left \| \mathbf{r_{ij}} \right \|^{2} + \varepsilon^{2} \right )^{\frac{3}{2}}}
+			\end{align}
+			
+			A nevezõben lévõ négyzetgyökvonás az $r_{ij}$  és az $\varepsilon$ négyzetes összegzése miatt jött be.
+			
+			Megjegyzendõ, hogy a korábban feltett $j \neq i$ a továbbiakban nem szükséges, ugyanis $F_ii=0$, ha $\varepsilon^2 > 0$. Bár elsõ ránézésre feleslegesnek tûnik elvégezni a számításokat $j=i$ esetben, azonban SIMD jellegû adatfeldolgozás esetén érdemes elkerülni az elágazó utasításokat a hatékonyság érdekében. [3]
 
-A 3. fejezetben bemutatom a kiválasztott NVIDIA GPU-kat és az azokat tartalmazó rendszereket, mind hardveres, mind szoftveres tekintetben.
+		%----------------------------------------------------------------------------
+		\subsection{Integrálás}
+		%----------------------------------------------------------------------------
+			Numerikus integrálás során lépésrõl-lépésre meghatározzuk a testek új pozícióját és sebességét a kiszámított erõvel arányos gyorsulás alapján, ezzel szimulálva az idõ haladását. A lépésköz általában fix értékû, de a felírt egyenletek megoldhatóak változó lépésközû KDE (közönséges differenciálegyenlet) megoldó használatával is. Háromdimenziós esetben minden testhez 6 differenciálegyenlet rendelhetõ (3 a pozíció-, és 3 a sebességvektor koordinátáiból adódik), vagyis az integrálás komplexitása $O(N)$. Az $i.$ test gyorsulása a dinamika alapegyenlete $a_i = \frac{F_i}{m_i}$  alapján a következõ módon alakul:
+			\begin{align}
+				\mathbf{a_{i}} \approx G \sum_{j = 1}^{N} \frac{m_{j}\mathbf{r_{ij}}}{\left ( \left \| \mathbf{r_{ij}} \right \|^{2} + \varepsilon^{2} \right )^{\frac{3}{2}}}
+			\end{align}
+			Numerikus integráció elvégzésére számos lehetõség adódik. Az egyik legegyszerûbb megoldás az úgynevezett Verlet-módszer (Verlet-integrator) használata. A szimuláció során választott integrálási módszer befolyásolja mind sebességet, mind pontosságot, így a vizsgált probléma természete nem hagyható figyelmen kívül a döntés során.
+			
+			A Verlet-módszer gyakran alkalmazott módszer Newton-féle mozgásegyenletek alkalmazásánál, valamint objektum röppályája meghatározása során.
+			\begin{align}
+				\mathbf{x_{i}}\left ( t + \Delta t \right ) := \mathbf{x_{i}}\left ( t \right ) + \mathbf{v_{i}}\left ( t  \right )\Delta t + \frac{1}{2}\mathbf{a_{i}}\left ( t \right )\Delta t^{2}
+			\end{align}
+			\begin{align}
+				\mathbf{v_{i}}\left ( t + \Delta t \right ) := \mathbf{v_{i}}\left ( t \right ) + \mathbf{a_{i}}\left ( t  \right )\Delta t
+			\end{align}
+			
+			A fentiekbõl látható, hogy a lépésköz megválasztásával állítható a meghatározott pozíciók és sebességértékek felbontása. Azonban a lépésköz csökkentésével elkerülhetetlenül növekszik a szimuláció során elvégzendõ számítások mennyisége, így a lépésköz helyes megválasztása mindig kiemelt fontosságú feladat.
+			
+			Ahhoz, hogy a fent levezetett képletek használhatók legyenek, minden testnek kell rendelkeznie kezdeti feltételekkel. A szimuláció elõtt minden test számára megadandó értékek:
+			\begin{itemize}
+				\item tömeg
+				\item pozícióvektor
+				\item sebességvektor
+			\end{itemize}
+			Háromdimenziós térben a pozícióvektor és sebességvektor háromelemû vektor, míg a tömeg skaláris mennyiség.
+	%----------------------------------------------------------------------------
+	\section{Algoritmusok}
+	%----------------------------------------------------------------------------
+		Egy diszkrét testekbõl álló gravitációs rendszer vizsgálatakor szükséges, hogy minden egyes testre a rendszerben található más testek által okozott gyorsulást meghatározzuk.
+	
+		A direkt algoritmus komplexitása miatt kifejlesztettek egyéb megoldásokat is, amelyek valamilyen formában elhanyagolásokkal élnek a gyors végrehajthatóság érdekében.
 
-A 4. fejezetben az implementáció részleteit és folyamatát ismertetem.
+		Az algoritmus komplexitásának csökkentésére számos megoldás áll a rendelkezésre. Alapvetõen két fõ csoportra oszthatók az ilyen algoritmusok:
+
+		Az elsõ csoport a testeket hierarchikus fába rendezve tárolja és az úgynevezett ,,multipole expansion'' matematikai módszerrel közelíti a gravitációs kölcsönhatást. Ilyen algoritmus például a Barnes-Hut vagy a Fast-Multipole módszer.
+		
+		Az második csoport az FFT-t (Gyors Fourier-transzformáció) megvalósító algoritmusok sebességét igyekszik kihasználni. A testeket háló és Poisson egyenlet megoldásával határozzák meg a testekre ható gravitációs potenciált. Ilyen például a Particle-mesh (test-háló) módszer és annak továbbfejlesztett változatai P3M (Particle-particle-particle-mesh), AP3M (Adaptive P3M).
+
+		A közös az algoritmusokban, hogy védekezniük kell a valamilyen módon a ,,közeli'' testek közti interakciónál. Ha az ütközés esete nincs lekezelve a testek egymást ,,katapultként kilõhetik'' (a Newton-féle gravitációs törvény nevezõje nulla közeli érték, s a testek között ható erõ végtelenhez tart), ezzel rontva az élethûségét a szimulációnak. A megoldást az összefüggések levezetése során már említett közeli testek közti erõ enyhítése (force softening) jelenti. Ezt a legegyszerûbben úgy tehetjük meg, ha a nevezõt kiegészítjük egy konstans nem nulla értékkel, megakadályozva a szingularitást.
+
+		Az N-test szimulációt terhelõ hiba meghatározása nagyon nehéz feladat. Minden algoritmustípus másként viselkedik. Az algoritmus futási sebessége és a szimuláció pontossága egymással fordított arányban áll, így az alkalmazáshoz elengedhetetlen egy számunkra megfelelõ kompromisszum kötése.
+		
+		%----------------------------------------------------------------------------
+		\subsection{Direkt módszer}
+		%----------------------------------------------------------------------------
+			A legegyszerûbb és legkézenfekvõbb megoldás a számítás elvégzésére, ha minden egyes kölcsönhatást kiszámolunk. $N$ darab test esetén minden egyes test hat a másikra, tehát egy kiszemelt test esetében $N - 1$ kölcsönhatást kell kiszámolnunk. Így összességében $N(N - 1)$ erõ kiszámítása szükséges egy idõpillanatban. Newton 3. axiómája értelmében, ha két test erõvel hat egymásra, akkor az az erõ mindkét testre ugyanolyan nagyságú és ellentétes irányú. Ez lehetõséget biztosít a szükséges számítások mennyiségének csökkentésére. Azonban párhuzamosított algoritmusok esetén nehezen kihasználható, ugyanis szükségessé teszi az eredetileg egymástól független számításokat végzõ szálak közti kommunikációt, ami jelentõsen lassíthatja a számítást végzõ program futását.
+
+			Az algoritmus komplexitása a testek számával négyzetes növekszik, így ez megfelelõ számítási kapacitás hiányában csak korlátozott mértékben használható módszer.
+			
+			A direkt módszer egy gyorsabb változata, ha egy bizonyos távolságon túl, elhanyagoljuk a testek egymásra hatását. Ez mindösszesen egy elágazás beépítésével megtehetõ, s megspórolja az erõk kiszámítását. Ez a legegyszerûbb approximáció, amivel gyorsíthatjuk a szimulációt. SIMD esetén azonban nem nyerünk vele annyit futási sebességben, mint amennyit pontosságban esetleg veszítünk, ugyanis az egyes szálaknak ilyen esetben be kell várniuk egymást. Minden egyes futó egy adott pillanatban ugyanazt az utasítást hajtja végre, ha van számítás, ha nincs. Így ez a gyorsítási opció elsõsorban egy szálon futó programok esetén jöhet szóba.
+
+		%----------------------------------------------------------------------------
+		\subsection{Direkt módszer}
+		%----------------------------------------------------------------------------	
+			A direkt módszert úgy próbálják közelíteni, felgyorsítani, hogy az egymáshoz közel lévõ testcsoportokat egy testként kezelik. Ha ez testcsoport kellõen távol helyezkedik el az éppen vizsgált testtõl, akkor ennek a csoportnak a gravitációs hatását közelíthetjük a csoport tömegközéppontjába helyezett virtuális testtel.
+
+			Ezek az algoritmusok felosztják a teljes rendelkezésre álló teret cellákra (kétdimenziós esetben négyzet, háromdimenziós esetben kocka). A cellákat egy bináris-fához hasonló módon tárolják, csak itt a fa egyes elemei 4 (quad-tree), illetve 8 (oct-tree) gyerekkel rendelkeznek dimenziótól függõen. [4]
+
+			A felosztás kétdimenziós esetben a 2. ábrának megfelelõ módon addig folytatódik ameddig egy cella pontosan 1 vagy 0 testet tartalmaz. Ha egy cellában több is található, akkor a vizsgált cellát 4 azonos méretû kisebb cellára bontja. A szemléltethetõség miatt a kétdimenziós esetet választottam, de a leírtak könnyedén alkalmazhatók háromdimenziós esetben is.
+
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/N_Body_Fa_modszer.pdf}
+			\caption{A cellákra bontott tér} 
+			\label{fig:N_Body_Fa_modszer}
+			\end{figure}
+			
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/N_Body_Fa_felepites.pdf}
+			\caption{A felépített fa (quad-tree)} 
+			\label{fig:N_Body_Fa_felepites}
+			\end{figure}
+			
+			A több testet tartalmazó cellákat virtuális testként kezeli: rendelkeznek tömeggel és pozícióval. A tömegük a bennfoglalt testek össztömege, a pozíciójuk pedig a tömegközéppont.
+
+			Direkt módszerhez hasonlóan test-test közötti interakciókat vizsgál, belevéve a virtuális testeket is. A fán fentrõl, lefele, balról jobbra haladva minden elemet megvizsgál az algoritmus. Ha üres cellához ér nem tesz semmit, ha testhez, akkor a direkt módszerhez hasonlóan kiszámolja a test által okozott erõt. Virtuális testhez érve elõször megvizsgálja a távolságot. Ha a végeredmény az, hogy ,,közeli'' a test, akkor a pontosság miatt tovább megy a rekurzió a virtuális test gyerekeire. Ha azonban ,,kellõen távoli'' a virtuális test a vizsgált testtõl, akkor a rekurzió nem folytatódik, és cellában található összes testet egy csoportként kezelve kerül kiszámításra a gyorsulás. A feltétel a ,,kellõen távoliságra'':
+			\begin{align}
+				\frac{s}{d} < \theta 
+			\end{align}
+			
+			ahol $s$ vizsgált cella szélessége, $d$ a test és a cella tömegközéppont távolsága és $\theta$ pedig egy konstans küszöbérték (jellemzõen $0,5$).
+
+			A fent bemutatott lépéssorozat a Barnes-Hut algoritmust reprezentálja, melynek komplexitása $O(Nlog_{2}N)$. Más fa alapú módszerek is léteznek, s egyes esetekben ez a komplexitás redukálódhat akár $O(N)$-re is.
+
+		%----------------------------------------------------------------------------
+		\subsection{Részecske-háló alapú módszerek}
+		%----------------------------------------------------------------------------
+			Az FFT-t megvalósító algoritmusok sebességét kihasználó módszerek felosztják a teljes teret azonos méretû cellákra (cell) ezzel egy nagy hálót (mesh) alkotva és az összes testet (annak tömegét) hozzárendelik egy vagy több cellához. A teljes háló ezután egyfajta test-sûrûséget reprezentál, melyre kiszámolva a gravitációs potenciált meghatározhatók a testekre ható erõk, attól függõen, hogy melyik cellában helyezkedik el. A gravitációs potenciál meghatározásához Poisson egyenlet megoldása szükséges. [5]
+			
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/N_Body_Particle_Mesh.pdf}
+			\caption{Particle-mesh típusú algoritmus} 
+			\label{fig:N_Body_Particle_Mesh}
+			\end{figure}
+			
+			A Poisson egyenlet a frekvenciatartományban egyszerûbb alakra hozható, s itt jön képbe a FFT.
+
+			A módszer elõnyei közé tartozik, hogy az algoritmus komplexitása $O(N)$, vagyis a számításigény és a testek száma lineáris kapcsolatban vannak. Hátránya, hogy a cellaméret miatt csak véges felbontásra ad lehetõséget, és az egymáshoz relatíve közeli testek (távolságuk kisebb, mint a cella oldalhossza) közötti erõt nem képes modellezni.
+
+			Nagyszabású csillagászati szimulációkban nagyon elterjedt és kedvelt módszercsalád.
+	%----------------------------------------------------------------------------
+	\section{Szimulációs hibák}
+	%----------------------------------------------------------------------------
+		Az asztrofizikai N-test rendszerek kaotikusak. Másként megfogalmazva rendkívüli érzékenységet mutatnak a kezdeti feltételeikre (tömeg, pozíció, sebesség), illetve a hibákra. A feltételekben egy kis eltérés is képes szimuláció kimenetelét nagyon megváltoztatni.
+
+		Bizonyított, hogy a számítógépekkel végzett szimulációk során keletkezõ apró számítási, kerekítési hibák halmozódásával a kiszámított megoldás exponenciálisan divergál a valódi viselkedéstõl, azonos kezdeti feltételekre. A hiba nagysága olyan méreteket ölthet, hogy ha nem kezelik, korlátozzák valamilyen módon, az megkérdõjelezi a szimuláció érvényességét.
+
+		Különbözõ N-test szimulációt végzõ programok összehasonlítása során, azonos feltételek mellett az eredmények $100 \%$-os eltérést mutattak. A szimuláció kimenetele nagymértékben függ a választott algoritmustól, annak megvalósításától, illetve a választott számítógéptõl.
+
+		Bizonyos korlátozások között és feltételek betartása mellett a szimuláció megbízható eredményt tud adni.
+
+		A hiba növekedésérõl adott részletes elméleti elemzések alapján, a hibákat elsõsorban az egymáshoz relatíve közeli (távolságuk közelít a nullához) testek közötti interakciók okozzák, így hiba szempontjából az ütközésmentes szimulációk kedvezõbbek. A szimuláció során fellépõ hibákat két fõ csoportba sorolhatjuk [6]: 
+				
+		\begin{itemize}
+				\item \textbf{Bemeneti hibák:} ide tartozik minden modellezési, közelítés és egyszerûsítés okozta hiba.
+				\begin{itemize}
+					\item \textbf{Modellezési hibák:}
+						\begin{itemize}
+							\item \textbf{kvantálási hiba/zaj}: a folyamatosnak tekinthetõ modellezett rendszer jellemzése diszkrét értékekkel.
+							\item \textbf{erõ korlátozása} (force softening): a közeli interakciókból származó erõ limitálása.
+						\end{itemize}
+					\item \textbf{Megvalósítási hibák:}
+						\begin{itemize}
+							\item \textbf{közelítõ algoritmus használata} (pl.: Barnes-Hut, Fast Multipole módszer)
+							\item \textbf{numerikus integrátor véges felbontása:} integrálás helyettesítése szummázással
+							\item \textbf{kerekítési hiba}
+						\end{itemize}
+				\end{itemize}
+				\item \textbf{Kimeneti hiba:} ez mutatja meg az eltérést a számított és a valódi rendszer között. Minél kisebb ez a hiba annál megbízhatóbb az eredmény. Jellemzõen a fent említett bemeneti hibákból különbözõ súlyozással tevõdik össze.
+		\end{itemize}
+		
+	%----------------------------------------------------------------------------
+	\section{Mértékegységrendszer}
+	%----------------------------------------------------------------------------
+		Annak érdekében, hogy kezelhetõbb számokkal tudjak dolgozni úgy döntöttem, hogy SI mértékegységrendszer helyett átváltok csillagászati mértékegységrendszerre (IAU - Astronomical System of Units).
+
+		A rendszert pont az SI-ben való mérések és számábrázolás okozta nehézségek miatt határozták meg, annak érdekében, hogy a nagyságrendeket közelebb hozzák egymáshoz. Összesen három mértékegységet definiál: távolság, tömeg és idõ.
+
+		A távolságot csillagászati egységben (astronomical unit) mérik, rövidítve CsE (AU) és az általa definiált távolság megegyezik az átlagos Nap-Föld távolsággal.
+
+		Az idõ alapegysége a nap (day), mely $86400$ másodpercként van rögzítve. Gyakran használt egység még a Julián naptár szerinti év (year) is mely $365,25$ napot tesz ki.
+
+		A tömeget többféleképpen is meg lehet választani. A hivatalosan elfogadott érték a Nap tömege, jelölése $M_{\odot}$. Alkalmazástól függõen szokás használni a Jupiter, vagy a Föld tömegét is. Szimpátia alapján a Föld tömegét választottam alapegységnek.
+
+		\begin{align}
+				1~AU = 149~597~870~700~m
+		\end{align}
+		\begin{align}
+				1~D = 86~400~s
+		\end{align}
+		\begin{align}
+				1~M_{\oplus} = 5,9742 \dot 10^24~kg
+		\end{align}
+		
+		Ennek megfelelõen minden felhasznált konstanst és származtatott mennyiség értékét módosítani kell, melyet az alkalmazásunk felhasznál. Jelen esetben ez csak a gravitációs állandó érinti. Új értéke:
+		\begin{align}
+				G = 8,89042279 \dot 10^{-10} \frac{{AU}^3}{M_{\oplus}D^2}
+		\end{align}

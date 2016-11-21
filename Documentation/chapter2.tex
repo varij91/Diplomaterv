@@ -1,21 +1,223 @@
 %----------------------------------------------------------------------------
-\chapter{A dolgozat formai kivitele}
+\chapter{Grafikus processzorok}
 %----------------------------------------------------------------------------
-Az itt található információk egy része a BME VIK Hallgatói Képviselet által készített ,,Utolsó félév a villanykaron'' c. munkából lett kis változtatásokkal átemelve. Az eredeti dokumentum az alábbi linken érhetõ el: \url{http://vik-hk.bme.hu/diplomafelev-howto-2009}.
 
-%----------------------------------------------------------------------------
-\section{A dolgozat kimérete}
-%----------------------------------------------------------------------------
-A minimális 50, az optimális kiméret 60-70 oldal (függelékkel együtt). A bírálók és a záróvizsga bizottság sem szereti kifejezetten a túl hosszú dolgozatokat, így a bruttó 90 oldalt már nem érdemes túlszárnyalni. Egyébként függetlenül a dolgozat kiméretétõl, ha a dolgozat nem érdekfeszítõ, akkor az olvasó már az elején a végét fogja várni. Érdemes zárt, önmagában is érthetõ mûvet alkotni.
+	%----------------------------------------------------------------------------
+	\section{Heterogén számítási rendszerek}
+	%----------------------------------------------------------------------------
+		Heterogén számítási rendszer alatt olyan processzoros rendszert értünk, mely több, különbözõ típusú és célú processzort használ közös buszrendszerre integrálva. A manapság kapható asztali számítógépek és laptopok is ide tartoznak. Elõnye és a célja az ilyen rendszereknek, hogy hatékonyabbá tegye az energiafelhasználást, növelje az egységnyi teljesítményre jutó számítási kapacitást.
+		A GPU rengeteg, elsõsorban kijelzéshez, grafikához kapcsolódó, párhuzamosan számítandó terhet vesz le a CPU válláról.
 
-%----------------------------------------------------------------------------
-\section{A dolgozat nyelve}
-%----------------------------------------------------------------------------
-Mivel Magyarországon a hivatalos nyelv a magyar, ezért alapértelmezésben magyarul kell megírni a dolgozatot. Aki külföldi posztgraduális képzésben akar részt venni, nemzetközi szintû tudományos kutatást szeretne végezni, vagy multinacionális cégnél akar elhelyezkedni, annak célszerû angolul megírnia diplomadolgozatát. Mielõtt a hallgató az angol nyelvû verzió mellett dönt, erõsen ajánlott mérlegelni, hogy ez mennyi többletmunkát fog a hallgatónak jelenteni fogalmazás és nyelvhelyesség terén, valamint - nem utolsó sorban - hogy ez mennyi többletmunkát fog jelenteni a konzulens illetve bíráló számára. Egy nehezen olvasható, netalán érthetetlen szöveg teher minden játékos számára.
+		%\begin{figure}[!ht]
+		%\centering
+		%\includegraphics[width=150mm, keepaspectratio]{figures/PC.pdf}
+		%\caption{PC vázlatos felépítése} 
+		%\label{fig:PC}
+		%\end{figure}
 
-%----------------------------------------------------------------------------
-\section{A dokumentum nyomdatechnikai kivitele}
-%----------------------------------------------------------------------------
-A dolgozatot A4-es fehér lapra nyomtatva, 2,5 centiméteres margóval (+1~cm kötésbeni), 11-12 pontos betûmérettel, talpas betûtípussal és másfeles sorközzel célszerû elkészíteni.
+		Az alfejezet további részében a CPU-k és GPU-k felépítés- és használatbeli eltéréseit mutatom be teljesen általánosan, a legfontosabb szempontokat kiemelve. Elõfordulhatnak olyan fogalmak, melyeket csak a dolgozat késõbbi fejezeteiben ismertetek részletesebben.
+		%----------------------------------------------------------------------------
+		\subsection{Rendszerben betöltött szerep}
+		%----------------------------------------------------------------------------
+			\textbf{CPU}: Ellátott feladatok skálája széles, általános célú felhasználásra rendkívül alkalmas és rugalmas. Mikroarchitektúráját vezérlési feladatokhoz, alacsony késleltetést (latency) szem elõtt tartva tervezik: gyors reagálás, utasítások végrehajtása rövid idõ alatt.
 
+			\noindent
+			\textbf{GPU}: Elsõsorban szolga koprocesszor szerepet tölt be a rendszerben. A feladatot és a feldolgozandó adatokat a CPU-tól kapja. Mikroarchitechtúra szempontjából áteresztõképességre (throughput) optimalizált: nem baj, ha az egyes utasításokat lassabban hajtja végre. Azzal, hogy sok utasításon dolgozik párhuzamosan, képes a késleltetés elfedésére.
 
+		%----------------------------------------------------------------------------
+		\subsection{Hardver felépítése}
+		%----------------------------------------------------------------------------
+			\textbf{CPU}: Rendszerint magas frekvenciájú (2-4 GHz) órajelen mûködtetett kisszámú, de "erõteljes" processzormagból áll. A flexibilis felhasználhatóság következménye, hogy komplex hardveres vezérlõ logikát (control unit) igényel. Ez az egység felelõs a magok közti feladatok kiosztásáért, az esetleges utasítás-, adat-egymásra hatás kiküszöböléséért. Gyártás szempontjából az egyik legköltségesebb rész a chipfelület körülbelül 30\%-t kitevõ gyorsítótár (cache).
+
+			\noindent
+			\textbf{GPU}: Kis fogyasztású, azonos felépítésû, egyszerû processzormagokat tartalmaz, melyek relatíve kis frekvencián (0.8-1.3 GHz) üzemelnek. A chipfelület legnagyobb részét ezek foglalják el. A magok száma alsó hangon néhány 10-tõl egészen 1000-res nagyságrendig terjedhet. A vezérlõ logika is egyszerû, mivel egyes magokon ugyanaz a program fut, csak más adatokkal.
+
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/GPU_vs_CPU.pdf}
+			\caption{CPU és GPU mikroarchitektúra} 
+			\label{fig:GPU_vs_CPU}
+			\end{figure}
+
+		%----------------------------------------------------------------------------
+		\subsection{Programozás}
+		%----------------------------------------------------------------------------
+			\textbf{CPU}: Programozásuk viszonylag egyszerû és könnyedén elsajátítható, mindenféle mögöttes hardver ismerete nélkül. A fordító sok esetben automatikusan elvégzi a párhuzamosítást, ha kód tartalmaz egymástól függetlenül végrehajtható programrészeket.
+
+			\noindent
+			\textbf{GPU}: A kisebb teljesítményû, egyszerûbb magok miatt a programozási modell is jóval kötöttebb, kevesebb lehetõséget kínál. Jó teljesítményû párhuzamos program írásához a hardver ismerete (a szálak ütemezése, processzormagok számítási kapacitása, memória hierarchia stb.) elengedhetetlen. A párhuzamosság kifejezése a kódban explicite történik.
+
+		%----------------------------------------------------------------------------
+		\subsection{Memória modell}
+		%----------------------------------------------------------------------------
+			\textbf{CPU}: Egyszerû, dedikált rendszermemórián kívül csak néhány (1/2/3) szintû chipre integrált cache-hierarchiával rendelkeznek. A cache-bõl adódó problémákat és nehézségeket teljes mértékben hardver vezérli, elfedve ezeket a felhasználó elõl. A memóriát az operációs rendszer felügyeli és menedzseli.
+
+			\noindent
+			\textbf{GPU}: Az integrált GPU-kat leszámítva, melyek a CPU rendszermemóriáját használják fel videomemóriának, dedikált memóriával rendelkeznek. Memória hierarchiájuk többszintû, az irányítás teljes mértékben a programozó kezében van. Lehetõséget biztosít bizonyos mértékû cache használatra, de teljesítmény szempontjából általában nem kifizetõdõ teljesen ráhagyatkozni. A programok nagyobb részénél a korlátozó tényezõt az alacsony memória sávszélesség vagy rosszul kihasznált memória hierarchia jelenti.
+
+		%----------------------------------------------------------------------------
+		\subsection{Párhuzamosítási modell}
+		%----------------------------------------------------------------------------
+			\textbf{CPU}: Egy mag képes több szál párhuzamos futtatására idõosztásos alapon (Intel processzorok esetén HyperThreading a neve). Több mag esetén képes "valósan" is párhuzamos, egymástól független szálakat futtatni. Flynn taxonómia\footnote{Az egyik legismertebb csoportosítása a párhuzamos számítógép architektúráknak a Michael J. Flynn által 1966-ban publikált Flynn osztályozás (Flynn's taxonomy), mely a felhasznált utasítás- és adatfolyamok száma (instruction stream, data stream) alapján kategorizálja az egyes számítógépeket. Négy csoport létezik: SISD, SIMD, MISD, MIMD (S - Single, M - Multiple, I - Instruction, D - Data).} (Flynn's taxonomy) szerint ez a MIMD kategóriába esik. Adatfeldolgozás szempontjából nem hatékony, de cserébe flexibilis.
+
+			SIMD végrehajtásra is képesek a modern CPU-k, ugyanis rendelkeznek speciális utasításokkal és széles (vektor) regiszterekkel, melyekbe egyszerre több adat is betölthetõ. A regiszterekbe helyezett adatokon egyszerre hajtódik végre a beolvasott utasítás. Intel processzorokban például ez a 128 bites regiszterekkel dolgozó SSE (Streaming SIMD Extensions) és a 256 bites AVX (Advanced Vector Extensions). Utóbbi 8 egyszeres pontosságú lebegõpontos adaton képes utasítások végrehajtására.
+
+			\noindent
+			\textbf{GPU}: SIMD jelleghez hasonló, de vektorba rendezett adatok helyett, itt minden adathoz külön szál tartozik és a szálak szinkronban (lockstep) hajtanak végre utasításokat; elnevezése a SIMT (Single Instruction Multiple Thread).
+
+		%----------------------------------------------------------------------------
+		\subsection{Szálkezelés}
+		%----------------------------------------------------------------------------
+			\textbf{CPU}: Futtatott szálak közötti váltás során a kontextuscsere lassú és költséges, ugyanis sok adminisztratív jellegû feladattal (overhead) jár. A szálhoz tartozó egyedi információk (pl.: regiszterek tartalma) kimentésre kerülnek a rendszermemóriába.
+
+			\noindent
+			\textbf{GPU}: Regiszterben gazdag architektúrával teszi lehetõvé a szálak közti gyors váltást, szinte zérus overheaddel. Minden szálhoz dedikált regiszterek tartoznak, melyek regiszterbankokba vannak szervezve, így szálak közti váltás során csupán egy bankváltással elérhetõ.
+
+	%----------------------------------------------------------------------------
+	\section{Grafikus processzorok felépítése}
+	%----------------------------------------------------------------------------
+		A GPU-król az eddig általánosságban volt szó. A két nagy, ismert GPU gyártó az NVIDIA és az AMD\footnote{Piacrészesedést tekintve az Intel vezet toronymagasan, az alaplap chipsetjébe integrált kisteljesítményû GPU-i miatt. GPGPU felhasználást tekintve az NVIDIA és az AMD a piacvezetõk.} architektúrái között vannak számottevõ eltérések, azonban mindkettõ bemutatására jelen dolgozat keretei között nincs lehetõség. A számítógépemben egy dedikált NVIDIA GPU található, így NVIDIA architektúrák bemutatása és ezzel együtt az NVIDIA terminológia használata mellett döntöttem.
+
+		Teljesítménybeli összehasonlításukra nincs kiforrott, általánosan elfogadott referenciaprogram (benchmark), így a kérdésre, hogy melyik gyártó GPU-i jobbak, a válasz rendszerint: attól függ. Marketingtõl elvonatkoztatva még azonos gyártó esetén is változik, hogy mely GPU generáció és család ér el jobb relatív teljesítményt egy adott probléma megoldása során.
+
+		Programozásukban is vannak különbségek. Az NVIDIA jobban támogatja az általa kifejlesztett és karbantartott programozási modellt és nyelvi kiegészítést a CUDA-t (Compute Unified Device Architecture), mint a nyílt, platform- és gyártó független OpenCL-t (Open Compulting Language).
+
+		A CUDA egyszerûen elsajátítható és rengeteg segítség, példakód található az NVIDIA honlapján. Nagy hátránya csak NVIDIA által készített GPU-kon futtatható kódot lehet vele írni. Az OpenCL-nek csak egy közel 6 éves verzióját támogatják, és nem igazán foglalkoznak vele. Amennyiben friss OpenCL verzió használata kritérium, AMD-s GPU-t tartalmazó videokártyát érdemes választani.
+		Az alfejezet további részében kiemelem a programozói szempontból leglényegesebb hardverelemeit az NVIDIA GPU-knak. Az újabb architektúrákon az egyes elnevezések, csoportosítások eltérhetnek, illetve számos újdonsággal kiegészülnek; ezeket majd egy késõbbi fejezetben tárgyalom.
+		
+		%----------------------------------------------------------------------------
+		\subsection{Processzormagok}
+		%----------------------------------------------------------------------------
+			A GPU-k szilíciumlapkán betöltött felület mérete és fontosság alapján a legfontosabb elemek a processzorblokkok. Legfelsõ szinten az úgynevezett SM (Streaming Multiprocessor), ami lényegében egy processzor tömb. Tartalmaz egyszeres és kétszeres pontosságú lebegõpontos mûveletek végrehajtásáért felelõs processzormagokat, speciális operátorok elvégzésére alkalmas processzormagokat, szálak számára közös használatú memóriát, egy regiszterbankot, valamint az elõbbiek ütemezésért, erõforrás menedzseléséért felelõs logikát. Az elõbb felsorolt egységek vezérlését, utasítások felhozatalát és dekódolását és az SM-hez rendelt szálak ütemezését szintén egy belül található modul végzi.
+			
+			Új architektúrás SM-eket, processzortömböket már más elnevezésekkel illetik, ugyanis lényeges módosításokon és funkcióbõvítésen estek keresztül az évek során.
+			
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/GPU_SM.pdf}
+			\caption{SM belsõ felépítése és elhelyezkedése a GPU-ban} 
+			\label{fig:GPU_SM}
+			\end{figure}
+			
+			\subsubsection{Streaming Processor}
+				Jellemzõen ebbõl az almodulból található a legtöbb, egy SM-en belül. Ez az egység felelõs az IEEE 754 szabvány szerinti egyszeres pontosságú lebegõpontos számokon és az egész (integer) számokon végzett alapvetõ, algebrai utasítások végrehajtásáért. Ilyen például az összeadás, szorzás, osztás, reciprokképzés, hatványozás és a gyökvonás. GPU-k specifikációin ezek száma van feltüntetve. Gyakori elnevezése még CUDA mag vagy szál processzor (thread processor).
+			
+			\subsubsection{Double Precision Unit}
+				Hasonló SP-hoz. Feladata, hogy IEEE 754 szabvány szerinti kétszeres pontosságú lebegõpontos számok hajtson végre algebrai utasításokat. Ebbõl magból jellemzõen csak a nagyteljesítményû számítások elvégzésére tervezett, drága GPU-k bõvelkednek.
+			
+			\subsubsection{Special Function Unit}
+				Különleges, ritkábban elõforduló transzcendens mûveletek végrehajtásáért felelõs egység. Ide tartozik minden olyan mûvelet, mely nem írható fel véges hosszú, tisztán algebrai operátorokat felhasználó alakban. Például: szinusz, koszinusz, logaritmus, exponenciális.
+			
+			\subsubsection{Multithreaded Instruction Unit}
+				Ez az almodul végzi az utasítások felhozatalát a külsõ memóriából és ezek dekódolását. Ütemezi az SM-hez kiosztott szálak processzorhoz való rendelését, valamint menedzseli a szálak állapotát: ha például egy szál külsõ memóriában lévõ adatra vár, a futása felfüggesztésre kerül és más szálak kerülnek végrehajtás alá, míg a memória tranzakció befejezõdik.
+			
+			\subsubsection{Regiszterbank}
+				GPU-k regiszterben gazdag architektúrával rendelkeznek, ezzel a szálak közti gyors kontextusváltást lehetõvé téve. Amikor az SM megkap a futtatandó szálak csoportját a regiszterek kiosztása megtörténik. Minden szálnak saját regiszterei vannak, melyhez csak õk maguk férhetnek hozzá.
+			
+			\subsubsection{Osztott memória}
+				A GPU memóriái közül a regiszterek után a leggyorsabb, melynek két fontos szerepe van. A szálak közti kommunikációt teszi lehetõvé, valamint a szálak között többször felhasznált adatokat betöltve csökkenthetõk a lassú, külsõ memóriához történõ hozzáférések száma. Bankokba van rendezve, melyek támogatják, hogy egyszerre több szál is képes legyen hozzáférni az osztott memóriához. Használatára vannak szoftveres, programozói megkötések, melyeket, majd a késõbbi fejezetekben fogok részletesebben ismertetni.
+				
+		%----------------------------------------------------------------------------
+		\subsection{Vezérlés és ütemezés}
+		%----------------------------------------------------------------------------
+			A GPU a szálakat 32-es csoportokra, úgynevezett warp-okra osztva menedzseli és futtatja. A irányító hardver neve a warp ütemezõ (scheduler), mely az SM-en belüli vezérlõlogika része. A warp-ok mindig ugyanúgy, a szál saját azonosítószámai alapján jönnek létre, melyeknek programozás során is kiemelt szerepük van.
+		
+			A warp-on belüli szálak egyszerre indulnak, ugyanattól az utasítástól és mindig egyszerre haladnak végig az utasításokon. Ha legalább egy szál programjának végrehajtási útvonala eltér a többi, warp-on belüli szálétól, akkor a teljes warp végrehajtja mindkét utat, a felesleges szálak deaktiválása után. Ez a jelenség az száldivergencia, ami leggyakrabban elágazó kódrészleteknél és ciklusoknál fordult elõ. A jó teljesítmény eléréséhez el kell kerülni az ilyen helyzeteket, minimalizálni kell a divergens kód mennyiségét.
+
+			Egy szál/warp teljes futáshoz kapcsolódó kontextusa megõrzõdik a szál/warp létrejöttétõl egészen a befejezésig. A hardveres warp ütemezõ a regiszterben gazdag architektúrának köszönhetõen szinte zérus overheaddel képes az SM-re kiosztott warp-ok között váltani, így elérve, hogy minél jobban ki legyen használva a GPU. Ha egy szál várakozik valamilyen erõforrásra, vagy adatra, akkor egy olyan szálat helyez végrehajtás alá, ami futásra kész állapotban van.
+		%----------------------------------------------------------------------------
+		\subsection{Memória modell}\label{sect:Memoria_modell}
+		%----------------------------------------------------------------------------
+			Többszintû memória hierarchiával rendelkezik a GPU, mind más és más szereppel. A viszonylag kisméretû gyorsítótárakat leszámítva teljes mértékben a programozó rendelkezik a memóriák felett.
+		
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_memoria_hierarchia.pdf}
+			\caption{GPU memória hierarchia} 
+			\label{fig:GPU_mem_hier}
+			\end{figure}
+		
+			\subsubsection{Globális memória}
+				A legnagyobb, GB nagyságrendû memória, mely hasonló funkciót lát el, mint a CPU által hozzáférhetõ rendszermemória. A GPU-n kívül található (off-chip) DRAM (Dynamic Random-Access Memory) típusú, így a memória tranzakciók több száz órajelciklust vesznek igénybe. Adatátvitelnél szavas (4 byte) hozzáférés esetén 128 byte-os tranzakciót jelent, ekkora egy szegmens. Ha nem megfelelõen van megírva a szálak által futtatott program, a felesleges olvasások nagyon lassíthatják a futási sebességet. Minden szál látja és eléri így használható szálak közti kommunikációra, de az adatintegritásra, mint minden közösen használt memória esetén itt is figyelni kell. Rendelkezik gyorsítótárral írási és olvasási irányban is.
+			
+			\subsubsection{Osztott memória (Shared memory)}
+				A regiszterek után, ennek a memóriának a legnagyobb a sebessége. A GPU-n, pontosabban minden SM-ben található, mérete néhány 10 kB nagyságrendû. Programozó választhat, hogy ezt, vagy az L1 szintû cache-t preferálja jobban az alkalmazásában, így tudja változtatni (fix értékekre) a méretet a másiknak rovására. Ezen keresztül tudnak egy blokkon belül futó szálak kommunikálni egymással, illetve többször felhasznált adatot effektíve manuálisan cache-elni.
+				Szoftveresen nem lehet teljesen kikapcsolni (minimális mérete 16 kB), a korábbi GPU-k támogatása (backward compatibility) miatt.
+			
+			\subsubsection{Regiszterek}
+				SM-en belül található, minden szál számára privát. Bár sok regiszter van a GPU-kban, sokszor korlátozó tényezõ tud lenni. Korlátozza az egy SM-en párhuzamosan futtatható szálak számát, ami rossz GPU kihasználtsághoz vezethet.
+			
+			\subsubsection{Lokális memória}
+				Ha korlátozott a szálak által felhasználható regiszterek száma (programozó megadhatja), vagy elfogytak, akkor a szál futása során használt változókat, argumentumokat kimenti az off-chip globális memóriába, mely terület a regiszterekhez hasonlóan privát hozzáférésû (innen a lokális név). Lassú, de mindkét tranzakciós irányban cache-elt.
+			
+			\subsubsection{Konstans memória}
+				A chipen kívüli globális memóriában található rész, de csak olvasható a GPU számára. Saját gyorsítótárral rendelkezik és mérete jellemzõen néhány 10 kB. Gyors hozzáférést biztosít és minden szál által látható. Csak CPU tudja írni a tartalmát.
+			
+			\subsubsection{Textúra memória}
+				Konstans memóriához hasonlóan ez is a globális memóriában kap helyet. Szintén saját cache-sel rendelkezik, de írásnál nincs cache koherencia. Többdimenziós textúraelemek (texel) kiolvasására van optimalizálva. Méretét a videokártyán található DRAM korlátozza.
+
+		%----------------------------------------------------------------------------
+		\subsection{Architektúrák}
+		%----------------------------------------------------------------------------
+			Az egyes GPU generációk között számos eltérés található, melyeket röviden igyekszem bemutatni kiemelve a leglényegesebb információkat. Idõrendnek megfelelõen, a legkorábbi architektúrával kezdem.
+		
+			\subsubsection{Tesla}
+				Az NVIDIA elsõ CUDA kompatibilis architektúrája, mely elõször 2006 végén jelent. Az évek során sokat fejlõdött a gyártási technológia és 2008 után 55 nm-es csíkszélességgél készültek.
+				
+				\textbf{Újdonságok:}
+				\begin{itemize}
+					\item SM-ek megjelennek, belül 8 CUDA magak (SP)
+				\end{itemize}
+
+			\subsubsection{Fermi}
+				2010-ben jelent meg, 40 és 28 nm csíkszélességû technológiával gyártott architektúra. Az SM-ek 8/32 darab 32 bites lebegõpontos CUDA magból épülnek fel.
+				
+				\textbf{Újdonságok:}
+				\begin{itemize}
+					\item Megjelent egy második szintû (L2) cache is chipen belül.
+					\item Állítható méretû L1 cache és osztott memória (16kB vagy 48kB, összesen 64kB).
+					\item Átlépték a TFLOPS nagyságrendû számítási teljesítményt.
+				\end{itemize}
+				
+			Az általam felhasznált GPU is ilyen architektúrával rendelkezik.
+			
+
+			\subsubsection{Kepler}
+				2012-ben jelent meg elõször és ez volt  NVIDIA elsõ olyan mikroarchitektúrája, melyet kifejezetten hatékony energiafelhasználásra törekedve terveztek. Csíkszélessége 28 nm. NVIDIA marketing szerint egy Kepler SM mindössze csak a 45\%-át használja annak az energiának, amit Fermi SM fogyaszt.
+				
+				\textbf{Újdonságok:}
+				\begin{itemize}
+					\item SMX:  Módosított, csökkentett fogyasztású 192 CUDA magból álló SM.
+					\item Egységes órajel(unified clock): A teljes GPU egy közös órajelet használ.
+					\item Dynamic Parallelism: A GPU indíthat saját magán új kerneleket (maximum 32 darab). Lényegesen gyorsabban teszi, mint a CPU.
+					\item Hyper-Q: Több, különbözõ CPU szálról indított kernel.
+					\item GPUDirect: Közvetlen kommunikáció más, a PCIe buszon lévõ eszközökkel (pl.: más GPU).
+					\item NVENC: Hardveres videó enkóder.
+					\item Szálankénti regiszterek maximális száma 64-rõl 255-re emelkedett.
+				\end{itemize}
+
+			\subsubsection{Maxwell}
+				2014-ben jelent meg, a felhasznált gyártási technológia itt is 28 nm, ugyanaz mint Kepler esetén. Még jobban fejlesztették az egységnyi teljesítményre esõ számítást, a magok fogyasztása megint felezõdött.
+				
+				\textbf{Újdonságok:}
+				\begin{itemize}
+					\item SMM: 4x32 CUDA magú SM, remek teljesítménymutatóval.
+					\item Megnövelt L2 cache méret.
+				\end{itemize}
+
+			\subsubsection{Pascal}
+				2016-ban, azaz idén megjelent architektúra, mely már 16 nm-es áramköri csíkszélességgel kerül gyártásra.
+				
+				\textbf{Újdonságok:}
+				\begin{itemize}
+					\item SM: 64 CUDA magból áll.
+					\item NVLink: szélessávú direkt buszrendszer a CPU vagy más GPU-k között.
+					\item Unified memory: GPU számára elérhetõvé válik a rendszermemória.
+					\item Osztott memória és regiszterek száma növekedett.
+				\end{itemize}
+	%----------------------------------------------------------------------------
+	%\section{CUDA}
+	%----------------------------------------------------------------------------
+
+	
+	
