@@ -1,3 +1,18 @@
+## Latex
+*.aux
+*.toc
+*.thm
+*.gz
+*.log
+*.bbl
+*.blg
+*.tcp
+*.ldf
+*.out
+*.cmd
+diploma.pdf
+
+
 ## CUDA
 *.i
 *.ii
