@@ -153,7 +153,7 @@
 			A direkt módszer egy gyorsabb változata, ha egy bizonyos távolságon túl, elhanyagoljuk a testek egymásra hatását. Ez mindösszesen egy elágazás beépítésével megtehetõ, s megspórolja az erõk kiszámítását. Ez a legegyszerûbb approximáció, amivel gyorsíthatjuk a szimulációt. SIMD esetén azonban nem nyerünk vele annyit futási sebességben, mint amennyit pontosságban esetleg veszítünk, ugyanis az egyes szálaknak ilyen esetben be kell várniuk egymást. Minden egyes futó egy adott pillanatban ugyanazt az utasítást hajtja végre, ha van számítás, ha nincs. Így ez a gyorsítási opció elsõsorban egy szálon futó programok esetén jöhet szóba.
 
 		%----------------------------------------------------------------------------
-		\subsection{Direkt módszer}
+		\subsection{Fa alapú módszerek}
 		%----------------------------------------------------------------------------	
 			A direkt módszert úgy próbálják közelíteni, felgyorsítani, hogy az egymáshoz közel lévõ testcsoportokat egy testként kezelik. Ha ez testcsoport kellõen távol helyezkedik el az éppen vizsgált testtõl, akkor ennek a csoportnak a gravitációs hatását közelíthetjük a csoport tömegközéppontjába helyezett virtuális testtel.
 
@@ -204,7 +204,7 @@
 
 			Nagyszabású csillagászati szimulációkban nagyon elterjedt és kedvelt módszercsalád.
 	%----------------------------------------------------------------------------
-	\section{Szimulációs hibák}
+	\section{Szimulációs hibák}\label{sect:nbody_szimhibak}
 	%----------------------------------------------------------------------------
 		Az asztrofizikai N-test rendszerek kaotikusak. Másként megfogalmazva rendkívüli érzékenységet mutatnak a kezdeti feltételeikre (tömeg, pozíció, sebesség), illetve a hibákra. A feltételekben egy kis eltérés is képes szimuláció kimenetelét nagyon megváltoztatni.
 
