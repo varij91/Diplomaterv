@@ -6,6 +6,7 @@
 	\section{Heterogén számítási rendszerek}
 	%----------------------------------------------------------------------------
 		Heterogén számítási rendszer alatt olyan processzoros rendszert értünk, mely több, különbözõ típusú és célú processzort használ közös buszrendszerre integrálva. A manapság kapható asztali számítógépek és laptopok is ide tartoznak. Elõnye és a célja az ilyen rendszereknek, hogy hatékonyabbá tegye az energiafelhasználást, növelje az egységnyi teljesítményre jutó számítási kapacitást.
+		
 		A GPU rengeteg, elsõsorban kijelzéshez, grafikához kapcsolódó, párhuzamosan számítandó terhet vesz le a CPU válláról.
 
 		%\begin{figure}[!ht]
@@ -19,7 +20,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Rendszerben betöltött szerep}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Ellátott feladatok skálája széles, általános célú felhasználásra rendkívül alkalmas és rugalmas. Mikroarchitektúráját vezérlési feladatokhoz, alacsony késleltetést (latency) szem elõtt tartva tervezik: gyors reagálás, utasítások végrehajtása rövid idõ alatt.
+			\textbf{CPU}: Ellátott feladatok skálája széles, általános célú felhasználásra rendkívül alkalmas és rugalmas. Mikroarchitektúráját vezérlési feladatokhoz, alacsony késleltetést (latency) szem elõtt tartva tervezik: gyors reagálás, utasítások végrehajtása rövid idõ alatt~\cite{CUDACProg}.
 
 			\noindent
 			\textbf{GPU}: Elsõsorban szolga koprocesszor szerepet tölt be a rendszerben. A feladatot és a feldolgozandó adatokat a CPU-tól kapja. Mikroarchitechtúra szempontjából áteresztõképességre (throughput) optimalizált: nem baj, ha az egyes utasításokat lassabban hajtja végre. Azzal, hogy sok utasításon dolgozik párhuzamosan, képes a késleltetés elfedésére.
@@ -88,7 +89,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Processzormagok}
 		%----------------------------------------------------------------------------
-			A GPU-k szilíciumlapkán betöltött felület mérete és fontosság alapján a legfontosabb elemek a processzorblokkok. Legfelsõ szinten az úgynevezett SM (Streaming Multiprocessor), ami lényegében egy processzor tömb. Tartalmaz egyszeres és kétszeres pontosságú lebegõpontos mûveletek végrehajtásáért felelõs processzormagokat, speciális operátorok elvégzésére alkalmas processzormagokat, szálak számára közös használatú memóriát, egy regiszterbankot, valamint az elõbbiek ütemezésért, erõforrás menedzseléséért felelõs logikát. Az elõbb felsorolt egységek vezérlését, utasítások felhozatalát és dekódolását és az SM-hez rendelt szálak ütemezését szintén egy belül található modul végzi.
+			A GPU-k szilíciumlapkán betöltött felület mérete és fontosság alapján a legfontosabb elemek a processzorblokkok. Legfelsõ szinten az úgynevezett SM (Streaming Multiprocessor), ami lényegében egy processzor tömb. Tartalmaz egyszeres és kétszeres pontosságú lebegõpontos mûveletek végrehajtásáért felelõs processzormagokat, speciális operátorok elvégzésére alkalmas processzormagokat, szálak számára közös használatú memóriát, egy regiszterbankot, valamint az elõbbiek ütemezésért, erõforrás menedzseléséért felelõs logikát. Az elõbb felsorolt egységek vezérlését, utasítások felhozatalát és dekódolását és az SM-hez rendelt szálak ütemezését szintén egy belül található modul végzi~\cite{ModernGPUArch}.
 			
 			Új architektúrás SM-eket, processzortömböket már más elnevezésekkel illetik, ugyanis lényeges módosításokon és funkcióbõvítésen estek keresztül az évek során.
 			
@@ -181,7 +182,6 @@
 				
 			Az általam felhasznált GPU is ilyen architektúrával rendelkezik.
 			
-
 			\subsubsection{Kepler}
 				2012-ben jelent meg elõször és ez volt  NVIDIA elsõ olyan mikroarchitektúrája, melyet kifejezetten hatékony energiafelhasználásra törekedve terveztek. Csíkszélessége 28 nm. NVIDIA marketing szerint egy Kepler SM mindössze csak a 45\%-át használja annak az energiának, amit Fermi SM fogyaszt.
 				
@@ -216,8 +216,170 @@
 					\item Osztott memória és regiszterek száma növekedett.
 				\end{itemize}
 	%----------------------------------------------------------------------------
-	%\section{CUDA}
+	\section{CUDA}
 	%----------------------------------------------------------------------------
+		A CUDA (Compute Unified Device Architecture) egy az NVIDIA által fejlesztett programozási modell és egyben nyelvi kiegészítés is, mely úgy tekint a GPU-ra, mintha az egy koprocessor lenne a CPU számára. A CPU vezérli a folyamatokat, õ futtatja a fõprogramot és feladatokat ad a GPU számára. A GPU nem viselkedhet mesterként, vagyis nem kezdeményezhet, nem küldhet, és nem kérhet adatokat a CPU-tól. Kapcsolatukat a \figref{CUDA_feldolgozasi_modell} ábrán láthatjuk CUDA terminológiát használva a továbbiakban gyakran a CPU-ra host-ként, a GPU-ra eszközként (device) fogok hivatkozni \cite{Heterogen}.
 
+		A CUDA kiegészíti többek között a C, C++ és a Fortran nyelveket, melyekhez saját fordítót is ad az NVIDIA. Számomra a C/C++ kiegészítés és az NVCC nevû fordító a lényeges. A CUDA nyelvi elemeket használó fájlok kiterjesztése *.cu, melyeket elõször a NVCC fog feldolgozni és egy C/C++ fordító által elfogadott szintaktikára hozni, ezzel felbontva a host és a eszköz által futtatandó kódokat.
+
+		\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_feldolgozasi_modell.pdf}
+		\caption{Feldolgozási modell} 
+		\label{fig:CUDA_feldolgozasi_modell}
+		\end{figure}
 	
+		A host négy fontos feladata:
+		\begin{itemize}
+			\item memóriaallokáció a device memóriájában
+			\item adat másolása a device memóriájába
+			\item adat másolása a device memóriájából
+			\item program indítása a device-on
+		\end{itemize}
+
+		Az alfejezet további részében bemutatom a CUDA legfontosabb alapelemeit, melyek elengedhetetlenek GPU-n futó program írásához.
+		
+		%----------------------------------------------------------------------------
+		\subsection{Szál hierarchia}
+		%----------------------------------------------------------------------------
+			A program végrehajtás alapegysége a szál (\emph{thread}), melyeket blokkosítva (TB - \emph{Thread Block}) kezel a CUDA és a GPU, ahogy az a \figref{CUDA_szal_hierarchia} ábrán is látható. Egy blokkon belüli szálak képesek egymás közötti relatíve gyors kommunikációra és szinkronizációra. Mérete korlátozott, jelenleg maximum $1024$ szálat tartalmazhat. A blokkokon belül $32$-es szálcsoportok kerülnek kialakításra, melyeket \emph{warp}-oknak nevezünk. Warpon belüli $32$ szál mindig azonos ütemben, egyszerre kerül futtatásra. A blokkok felett van még egy konténer, melyet rácsnak (\emph{thread grid})-nek nevezik~\cite{ShaneCook}.
+		
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_szal_hierarchia.pdf}
+			\caption{Szálakból alkotott csoportok}
+			\label{fig:CUDA_szal_hierarchia}
+			\end{figure}
+			
+		%----------------------------------------------------------------------------
+		\subsection{Kernel felépítése}
+		%----------------------------------------------------------------------------
+			A CUDA C kiegészíti a natív C nyelvet úgy, hogy a programozó létre tudjon hozni speciális, GPU-n futtatható függvényt, melynek neve a \emph{kernel}. CPU-n futó kódban ilyen kernelek meghívásával használhatjuk ki a GPU-t.
+			
+			\begin{lstlisting}
+__global__ void myKernel(type1 arg1, type2 arg2, ...) {
+	// GPU-n lefuttatandó kód
+}
+
+// CPU-n futó kód
+void main() {
+	...
+	myKernel <<< param1, param2, ... >>> (arg1, arg2, ...);
+	...
+}
+			\end{lstlisting}
+			
+			A \verb+__global__+ kulcsszó jelzi a fordító számára, hogy a myKernel nevû függvény egy GPU-n futtatandó kernel. Hívása hasonló egy egyszerû függvényhíváshoz, de a név és az argumentumlista között kiegészül egy \verb+<<< param1, param2, ... >>>+, úgynevezett \emph{futtatási konfigurációval} (execution configuration). Itt lehet megadni többek között a futtatandó szálak számát (ennyi példányban fog lefutni a kernel). Elsõre feleslegesnek tûnhet, hogy többször akarom lefuttatni ugyanazt a kódot, de a valóság az, hogy a kernel-nek a kódját úgy írjuk meg, hogy minden szálra egyedi lesz. Vannak beépített változók, melyekkel azonosítani tudjuk a szálakat, elérve ezzel, hogy minden szál például egy tömb más-más adatán dolgozzon. Gyakori feladat párhuzamos programozásnál a ciklusok párhuzamosítása. Vegyük az alábbi példát (deklarációtól és memóriaallokációtól most eltekintünk):
+			
+			\begin{lstlisting}
+void main() {
+	...
+	for (int i = 0; i < 256; i++) {
+		c[i] = a[i] + b[i];
+	}
+	...
+}
+			\end{lstlisting}
+			
+		Egy dimenziós tömbök elemeit szeretnénk összeadni. Az egyes összeadások jól párhuzamosíthatók, hiszen teljesen függetlenek egymástól. GPU-ra úgy írjuk meg a kernelt mintha az maga a ciklusmag lenne:
+		
+			\begin{lstlisting}
+__global__ void myAddKernel (float* a, float* b, float* c) {
+	int index = threadIdx.x;
+	c[index] = a[index] + b[index];
+}
+void main() {
+	...
+	myAddKernel <<<1, 256>>> (a, b, c);
+	...
+}
+			\end{lstlisting}
+			
+			A \verb+threadIdx+ beépített változó segítségével létrehoztunk egy olyan kernelt ami a beadott \verb+a+ és \verb+b+ tömböket képes összeadni, az eredményt pedig a \verb+c+ pointer által mutatott területre visszamásolni. Minden szál a saját, egyedi indexe alapján dolgozik. A $0.$ szál a tömbök $0.$ elemeit, az $N$-edik szál a tömbök $N$-edik elemeit adja össze. A kernel hívása során pedig -- feltételezve, hogy a tömbök mérete ugyanakkora -- megadjuk, hogy pontosan annyi szál induljon, amennyi elemûek a tömbjeink.
 	
+			Beépített változók segítségével (megfelelõ módon szorozgatva és összeadva) létrehozhatunk egyedi azonosítót minden szálunk számára, melyekkel a fentiekkel analóg módon egyedi adatokat jelölhetünk ki feldolgozásra.
+			
+			\begin{itemize}
+				\item \verb+threadIdx+: Háromelemû azonosító (x, y, z), mely a szál saját blokkján belüli elhelyezkedését tartalmazza. $2$ és $3$ dimenziós blokk is létrehozható.
+				\item \verb+blockIdx+: Háromelemû azonosító (x, y, z), mely a blokk rácson belüli elhelyezkedését tartalmazza. $2$ és $3$ dimenziós rácsszerkezet is létrehozható.
+				\item \verb+blockDim+: Háromelemû azonosító (x, y, z), mely a blokkok méretét tartalmazza (kernel hívása után minden TB azonos méretû).
+			\end{itemize}
+
+			Attól függõen, hogy hány dimenziós blokkokat és a rácsot használunk, az egyedi azonosító kiszámítása változik. 1D-s tömbök feldolgozásánál 1D-s rács és 1D-s blokkot érdemes használni. Egy 2D-s képfeldolgozásnál, viszont már választhatunk. Lehet maradni az 1D-s feldolgozásnál is, de ha kétdimenziós tömbben van eltárolva a feldolgozandó kép, akkor érdemes kétdimenziós rács- és blokkméretet megadni a kernel hívásakor. A kernelben ekkor létre kell hozni egy x és y azonosítót, melyek együttesen különböztetik meg az egyes szálakat. Ezt szemlélteti a \figref{CUDA_2D_pelda} ábra, melynél az egyes négyzetek jelölik a szálakat, a nagyobb ($4 \dot 5$) téglalapok a blokkokat. Az ábra jobb oldalán pedig az egyes szálak elhelyezkedése látható a rácson belül.
+			
+			\begin{lstlisting}
+int idX = blockIdx.x * blockDim.x + threadIdx.x;
+int idY = blockIdx.y * blockDim.y + threadIdx.y;
+			\end{lstlisting}
+		
+			\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_2D_pelda.pdf}
+			\caption{Kétdimenziós példa az egyedi azonosítókra}
+			\label{fig:CUDA_2D_pelda}
+			\end{figure}
+			
+		%----------------------------------------------------------------------------
+		\subsection{Tipikus CUDA program felépítése}
+		%----------------------------------------------------------------------------
+			Ahhoz, hogy ,,hasznos'' kernelt tudjunk készíteni adatokat kell adnunk GPU-nak és fogadnunk a GPU-tól, ugyanis az csak a saját memóriájához fér hozzá, a rendszermemóriához nem. A CPU feladata, hogy a feldolgozandó adatokat eljuttassa és a futási végeredményeket visszamásolja egyikbõl a másikba.
+		
+			Ezt a \verb+cudaMemcpy(...)+ függvény segítségével tehetjük meg, miután helyet allokáltunk a GPU memóriájában a \verb+cudaMalloc(...)+ függvénnyel~\cite{CUDACBest}.
+
+			A korábban megírt \verb+myAddKernel+-t felhasználva a CPU-n futó kód az alábbi lesz:
+			
+			\begin{lstlisting}
+void main() {
+	// Adatok száma
+	const unsigned int N = 8192;
+	
+	// Hoszt memóriába mutató pointerek
+	float h_a[N], h_b[N], h_c[N];
+	// Eszköz memóriába mutató pointerek
+	float *d_a, *d_b, *d_c;
+	
+	// ...
+	// h_a és h_b vektorok feltöltése adatokkal
+	// ...
+	
+	// Memóriaallokáció az eszköz memóriájában
+	cudaMalloc(d_a, N * sizeof(float));
+	cudaMalloc(d_b, N * sizeof(float));
+	cudaMalloc(d_c, N * sizeof(float));
+
+	// Adatok másolása az eszköz memóriájába feldolgozásra
+	cudaMemcpy(d_a, h_a, N * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_b, h_b, N * sizeof(float), cudaMemcpyHostToDevice);
+
+	// Kernel futtatási paramétereinek kiszámítása
+	dim3 blockSize( 256, 1, 1 );
+	dim3 gridSize( N / blockSize.x, 1, 1 );
+
+	// Kernel futtatása
+	myAddKernel <<<gridSize, blockSize>>> (d_a, d_b, d_c);
+
+	// Eredmények visszamásolása a hoszt memóriájába
+	cudaMemcpy(h_c, d_c, N * sizeof(float), cudaMemcpyDeviceToHost);
+	
+	// ...
+	// Eredmények kiértékelése a hoszton
+	// ...
+	
+	// Eszköz memóriájában lefoglalt területek felszabadítása
+	cudaFree(d_a);
+	cudaFree(d_b);
+	cudaFree(d_c);
+}
+			\end{lstlisting}
+
+			Megjegyzések:
+
+			Konvenció szerint érdemes jelölni a host és a device memóriájára mutató pointereket egy prefixummal \verb+(h_*, d_*)+. Ezzel elkerülhetõk az olyan helyzetek, amikor például rendszermemóriába mutató pointert próbálunk átadni a kernel argumentumlistájában.
+
+			A CUDA utasítások túlnyomó része egy \verb+cudaError_t+ típusú értékkel tér vissza, melyet mindig érdemes leellenõrizni. Ha gond nélkül sikerült végrehajtani az adott CUDA függvényt akkor a visszatérési érték értéke cudaSuccess.
+
+			Ha kevés adatot akarsz feldolgozni, akkor nem biztos, hogy megéri GPU-t használni. A szálak száma amivel érdemes más GPU-t használni legyen körülbelül $1000$-res nagyságrendben.
+
+			Ökölszabályként elmondható, hogy az ideális blokkméret $32$-nek egész számú többszöröse, és nagyobb mint $192$. Gyakori választás a $256$.
+
+		

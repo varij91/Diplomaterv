@@ -21,6 +21,7 @@
 \usepackage[hang]{caption}
 \usepackage{hyperref}
 
+\usepackage{multirow}
 %--------------------------------------------------------------------------------------
 % Main variables
 %--------------------------------------------------------------------------------------
@@ -86,7 +87,31 @@
 	columns=fixed,
 	backgroundcolor=\color{lightgray},
 } 		
-\def\lstlistingname{lista}	
+\def\lstlistingname{lista}
+
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\definecolor{keywordblue}{rgb}{0,0,1}
+\definecolor{commentgreen}{rgb}{0,0.78,0}
+\definecolor{stringred}{rgb}{0.72,0,0}
+
+\lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=3,
+	language=C++,
+	captionpos=b,
+	frame=lines,
+	numbers=left,
+	numberstyle=\tiny,
+	numbersep=5pt,
+	breaklines=true,
+	showstringspaces=false,
+	basicstyle=\small\ttfamily,
+	keywordstyle=\color{keywordblue},
+	commentstyle=\color{commentgreen},
+	stringstyle=\color{stringred}
+  }
 
 %--------------------------------------------------------------------------------------
 %	Some new commands and declarations
@@ -118,6 +143,7 @@
 	chapter1,%
 	chapter2,%
 	chapter3,%
+	chapter4,%
 	acknowledgement,%
 	appendices,%
 }
@@ -155,14 +181,15 @@ aboveskip=10pt}
 \include{chapter4}
 \include{acknowledgement}
 
-%\listoffigures\addcontentsline{toc}{chapter}{?br?k jegyz?ke}
-%\listoftables\addcontentsline{toc}{chapter}{T?bl?zatok jegyz?ke}
+%\listoffigures\addcontentsline{toc}{chapter}{Ábrák jegyzéke}
+%\listoftables\addcontentsline{toc}{chapter}{Táblázatok jegyzéke}
 
 \bibliography{mybib}
-\addcontentsline{toc}{chapter}{Irodalomjegyz?k}
+\addcontentsline{toc}{chapter}{Irodalomjegyzék}
 \bibliographystyle{plain}
 
 \include{appendices}
 
 \label{page:last}
 \end{document}
+

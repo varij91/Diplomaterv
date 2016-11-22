@@ -32,9 +32,9 @@
 	%----------------------------------------------------------------------------
 	\section{Csillagászati alkalmazás}
 	%----------------------------------------------------------------------------
-		Égitestek viselkedésének leírásával már Sir Isaac Newton is foglalkozott, aki sikeresen levezette Kepler törvényeit, kiindulva a saját gravitációs és mozgási törvényébõl. Kepler feltételezte, hogy van egy kitüntetett, fixen elhelyezkedõ objektum (Nap), ami körül elliptikus pályán keringenek az égitestek. Newton a fix égitest létezését elvetette és bebizonyította, hogy a Kepler-féle leírás csak egy közelítést ad a Naprendszerünk tényleges viselkedésére. Az égitestek hatással vannak egymásra, kölcsönösen keringenek egymás körül. Megjósolta, hogy nem csak elliptikus, hanem parabolikus és hiperbolikus pályák is elõfordulhatnak. [1]
+		Égitestek viselkedésének leírásával már Sir Isaac Newton is foglalkozott, aki sikeresen levezette Kepler törvényeit, kiindulva a saját gravitációs és mozgási törvényébõl. Kepler feltételezte, hogy van egy kitüntetett, fixen elhelyezkedõ objektum (Nap), ami körül elliptikus pályán keringenek az égitestek. Newton a fix égitest létezését elvetette és bebizonyította, hogy a Kepler-féle leírás csak egy közelítést ad a Naprendszerünk tényleges viselkedésére. Az égitestek hatással vannak egymásra, kölcsönösen keringenek egymás körül. Megjósolta, hogy nem csak elliptikus, hanem parabolikus és hiperbolikus pályák is elõfordulhatnak~\cite{OrbitMech}.
 		
-		A jelenlegi mikrohullámú háttérsugárzás egyenletessége arra enged következtetni, hogy az univerzum anyagsûrûség szempontjából kezdetben kifejezetten egyenletes volt: a fluktuáció mértéke az átlagos értéktõl körülbelül $10^{-4}$ és $10_{-5}$ nagyságrendbe esett. A mára kialakult galaxisok és a galaxisok csoportok mellett ugyanez az ingadozás eléri akár a $10^3$ nagyságrendet is. [2]
+		A jelenlegi mikrohullámú háttérsugárzás egyenletessége arra enged következtetni, hogy az univerzum anyagsûrûség szempontjából kezdetben kifejezetten egyenletes volt: a fluktuáció mértéke az átlagos értéktõl körülbelül $10^{-4}$ és $10^{-5}$ nagyságrendbe esett. A mára kialakult galaxisok és a galaxisok csoportok mellett ugyanez az ingadozás eléri akár a $10^3$ nagyságrendet is~\cite{CosmSimAnal}.
 
 		A gravitációs kölcsönhatás következtében az apró tömörülések, csomók megfelelõ kiindulási pontot biztosítottak ahhoz, hogy a korai univerzum ,,összeomoljon'' és kialakuljanak a korábban említett jelentõs sûrûségbeli eltérések. Az ilyen tömörülések növekedési, fejlõdési folyamata és a közöttük lévõ kapcsolat is erõsen nemlineáris, ami korlátozza a tisztán analitikus kiértékelés lehetõségét, elõtérbe hozva a korábban említett numerikus megoldásokat.
 		
@@ -98,7 +98,7 @@
 			
 			A nevezõben lévõ négyzetgyökvonás az $r_{ij}$  és az $\varepsilon$ négyzetes összegzése miatt jött be.
 			
-			Megjegyzendõ, hogy a korábban feltett $j \neq i$ a továbbiakban nem szükséges, ugyanis $F_ii=0$, ha $\varepsilon^2 > 0$. Bár elsõ ránézésre feleslegesnek tûnik elvégezni a számításokat $j=i$ esetben, azonban SIMD jellegû adatfeldolgozás esetén érdemes elkerülni az elágazó utasításokat a hatékonyság érdekében. [3]
+			Megjegyzendõ, hogy a korábban feltett $j \neq i$ a továbbiakban nem szükséges, ugyanis $F_{ii}=0$, ha $\varepsilon^2 > 0$. Bár elsõ ránézésre feleslegesnek tûnik elvégezni a számításokat $j=i$ esetben, azonban SIMD jellegû adatfeldolgozás esetén érdemes elkerülni az elágazó utasításokat a hatékonyság érdekében~\cite{GPUGems}.
 
 		%----------------------------------------------------------------------------
 		\subsection{Integrálás}
@@ -157,9 +157,9 @@
 		%----------------------------------------------------------------------------	
 			A direkt módszert úgy próbálják közelíteni, felgyorsítani, hogy az egymáshoz közel lévõ testcsoportokat egy testként kezelik. Ha ez testcsoport kellõen távol helyezkedik el az éppen vizsgált testtõl, akkor ennek a csoportnak a gravitációs hatását közelíthetjük a csoport tömegközéppontjába helyezett virtuális testtel.
 
-			Ezek az algoritmusok felosztják a teljes rendelkezésre álló teret cellákra (kétdimenziós esetben négyzet, háromdimenziós esetben kocka). A cellákat egy bináris-fához hasonló módon tárolják, csak itt a fa egyes elemei 4 (quad-tree), illetve 8 (oct-tree) gyerekkel rendelkeznek dimenziótól függõen. [4]
+			Ezek az algoritmusok felosztják a teljes rendelkezésre álló teret cellákra (kétdimenziós esetben négyzet, háromdimenziós esetben kocka). A cellákat egy bináris-fához hasonló módon tárolják, csak itt a fa egyes elemei 4 (quad-tree), illetve 8 (oct-tree) gyerekkel rendelkeznek dimenziótól függõen~\cite{BHGalSim}.
 
-			A felosztás kétdimenziós esetben a 2. ábrának megfelelõ módon addig folytatódik ameddig egy cella pontosan 1 vagy 0 testet tartalmaz. Ha egy cellában több is található, akkor a vizsgált cellát 4 azonos méretû kisebb cellára bontja. A szemléltethetõség miatt a kétdimenziós esetet választottam, de a leírtak könnyedén alkalmazhatók háromdimenziós esetben is.
+			A felosztás kétdimenziós esetben a \figref{N_Body_Fa_modszer} ábrának megfelelõ módon addig folytatódik ameddig egy cella pontosan $1$ vagy $0$ testet tartalmaz. Ha egy cellában több is található, akkor a vizsgált cellát $4$ azonos méretû kisebb cellára bontja. A szemléltethetõség miatt a kétdimenziós esetet választottam, de a leírtak könnyedén alkalmazhatók háromdimenziós esetben is.
 
 			\begin{figure}[!ht]
 			\centering
@@ -189,7 +189,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Részecske-háló alapú módszerek}
 		%----------------------------------------------------------------------------
-			Az FFT-t megvalósító algoritmusok sebességét kihasználó módszerek felosztják a teljes teret azonos méretû cellákra (cell) ezzel egy nagy hálót (mesh) alkotva és az összes testet (annak tömegét) hozzárendelik egy vagy több cellához. A teljes háló ezután egyfajta test-sûrûséget reprezentál, melyre kiszámolva a gravitációs potenciált meghatározhatók a testekre ható erõk, attól függõen, hogy melyik cellában helyezkedik el. A gravitációs potenciál meghatározásához Poisson egyenlet megoldása szükséges. [5]
+			Az FFT-t megvalósító algoritmusok sebességét kihasználó módszerek felosztják a teljes teret azonos méretû cellákra (cell) ezzel egy nagy hálót (mesh) alkotva és az összes testet (annak tömegét) hozzárendelik egy vagy több cellához. A teljes háló ezután egyfajta test-sûrûséget reprezentál, melyre kiszámolva a gravitációs potenciált meghatározhatók a testekre ható erõk, attól függõen, hogy melyik cellában helyezkedik el. A gravitációs potenciál meghatározásához Poisson egyenlet megoldása szükséges~\cite{PartMesh}.
 			
 			\begin{figure}[!ht]
 			\centering
@@ -214,24 +214,24 @@
 
 		Bizonyos korlátozások között és feltételek betartása mellett a szimuláció megbízható eredményt tud adni.
 
-		A hiba növekedésérõl adott részletes elméleti elemzések alapján, a hibákat elsõsorban az egymáshoz relatíve közeli (távolságuk közelít a nullához) testek közötti interakciók okozzák, így hiba szempontjából az ütközésmentes szimulációk kedvezõbbek. A szimuláció során fellépõ hibákat két fõ csoportba sorolhatjuk [6]: 
+		A hiba növekedésérõl adott részletes elméleti elemzések alapján, a hibákat elsõsorban az egymáshoz relatíve közeli (távolságuk közelít a nullához) testek közötti interakciók okozzák, így hiba szempontjából az ütközésmentes szimulációk kedvezõbbek. A szimuláció során fellépõ hibákat két fõ csoportba sorolhatjuk~\cite{EffShadow}: 
 				
 		\begin{itemize}
-				\item \textbf{Bemeneti hibák:} ide tartozik minden modellezési, közelítés és egyszerûsítés okozta hiba.
-				\begin{itemize}
-					\item \textbf{Modellezési hibák:}
-						\begin{itemize}
-							\item \textbf{kvantálási hiba/zaj}: a folyamatosnak tekinthetõ modellezett rendszer jellemzése diszkrét értékekkel.
-							\item \textbf{erõ korlátozása} (force softening): a közeli interakciókból származó erõ limitálása.
-						\end{itemize}
-					\item \textbf{Megvalósítási hibák:}
-						\begin{itemize}
-							\item \textbf{közelítõ algoritmus használata} (pl.: Barnes-Hut, Fast Multipole módszer)
-							\item \textbf{numerikus integrátor véges felbontása:} integrálás helyettesítése szummázással
-							\item \textbf{kerekítési hiba}
-						\end{itemize}
-				\end{itemize}
-				\item \textbf{Kimeneti hiba:} ez mutatja meg az eltérést a számított és a valódi rendszer között. Minél kisebb ez a hiba annál megbízhatóbb az eredmény. Jellemzõen a fent említett bemeneti hibákból különbözõ súlyozással tevõdik össze.
+			\item \textbf{Bemeneti hibák:} ide tartozik minden modellezési, közelítés és egyszerûsítés okozta hiba.
+			\begin{itemize}
+				\item \textbf{Modellezési hibák:}
+					\begin{itemize}
+						\item \textbf{kvantálási hiba/zaj}: a folyamatosnak tekinthetõ modellezett rendszer jellemzése diszkrét értékekkel.
+						\item \textbf{erõ korlátozása} (force softening): a közeli interakciókból származó erõ limitálása.
+					\end{itemize}
+				\item \textbf{Megvalósítási hibák:}
+					\begin{itemize}
+						\item \textbf{közelítõ algoritmus használata} (pl.: Barnes-Hut, Fast Multipole módszer)
+						\item \textbf{numerikus integrátor véges felbontása:} integrálás helyettesítése szummázással
+						\item \textbf{kerekítési hiba}
+					\end{itemize}
+			\end{itemize}
+			\item \textbf{Kimeneti hiba:} ez mutatja meg az eltérést a számított és a valódi rendszer között. Minél kisebb ez a hiba annál megbízhatóbb az eredmény. Jellemzõen a fent említett bemeneti hibákból különbözõ súlyozással tevõdik össze.
 		\end{itemize}
 		
 	%----------------------------------------------------------------------------
