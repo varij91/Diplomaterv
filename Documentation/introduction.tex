@@ -1,50 +1,52 @@
 %----------------------------------------------------------------------------
 \chapter*{Bevezetõ}\addcontentsline{toc}{chapter}{Bevezetõ}
 %----------------------------------------------------------------------------
+	A számítástechnika fejlõdésével együtt növekszik az elõállított és feldolgozandó adatoknak a mennyisége, legyen szó egyszerû felhasználói alkalmazásról vagy nagyszabású ipari, tudományos projektrõl. Ezek feldolgozására a legutóbbi évtizedben közel stagnáló órajel frekvencia mellett megjelentek és elterjedtek a több processzort, processzormagot tartalmazó rendszerek: a két/négy magos asztali számítógépektõl egészen a több millió magos szuperszámítógépekig.
 
-A számítástechnika fejlõdésével együtt növekszik az elõállított és feldolgozandó adatoknak a mennyisége, legyen szó egyszerû felhasználói alkalmazásról vagy nagyszabású ipari, tudományos projektrõl. Ezek feldolgozására a legutóbbi évtizedben közel stagnáló órajel frekvencia mellett megjelentek és elterjedtek a több processzort, processzormagot tartalmazó rendszerek: a két/négy magos asztali számítógépektõl egészen a több millió magos szuperszámítógépekig.
+	A rendelkezésre álló hardver fejlõdése mellé azonban elengedhetetlen a megfelelõ szoftver írása, mely kellõ mértékben kihasználja a rendelkezésére álló erõforrásokat. A többmagot is igénybevevõ, párhuzamos programokat gyakran sokkal nagyobb kihívás megvalósítani, mint soros társaikat, ezért is kap olyan nagy hangsúlyt manapság a párhuzamos programozás.
+	%----------------------------------------------------------------------------
+	\section*{Technológiai háttér}
+	%----------------------------------------------------------------------------
+		1974-ben Robert H. Dennard észrevette, hogy a tranzisztor fizikai méretével együtt csökken a vezérléséhez szükséges feszültség és áram nagysága, s következésképp a felvett teljesítmény is (Dennard törvény). Ez lehetõséget adott arra, hogy az áramköröket ugyanolyan villamos teljesítmény mellett, egyre nagyobb frekvenciájú órajelet alkalmazva, egyre gyorsabban vezéreljünk.
 
-A rendelkezésre álló hardver fejlõdése mellé azonban elengedhetetlen a megfelelõ szoftver írása, mely kellõ mértékben kihasználja a rendelkezésére álló erõforrásokat. A többmagot is igénybevevõ, párhuzamos programokat gyakran sokkal nagyobb kihívás megvalósítani, mint soros társaikat, ezért is kap olyan nagy hangsúlyt manapság a párhuzamos programozás.
-%----------------------------------------------------------------------------
-\section*{Technológiai háttér}
-%----------------------------------------------------------------------------
-1974-ben Robert H. Dennard észrevette, hogy a tranzisztor fizikai méretével együtt csökken a vezérléséhez szükséges feszültség és áram nagysága, s következésképp a felvett teljesítmény is (Dennard törvény). Ez lehetõséget adott arra, hogy az áramköröket ugyanolyan villamos teljesítmény mellett, egyre nagyobb frekvenciájú órajelet alkalmazva, egyre gyorsabban vezéreljünk.
+		2005 környékén azonban a processzorok mûködési frekvenciájának, sebességének növekedése három akadályba (wall) ütközött:
+		\begin{enumerate}
+			\item \emph{Power wall:} A villamos energia fogyasztás és disszipált hõteljesítmény nem lineáris (köbös) ütemben növekszik az órajel növelésével. A mûködési frekvencia további emelése túlmelegedési problémákat okoz, melyet a jelenleg elterjedt hûtési technikákkal nem lehet kezelni.
+			\item \emph{Instruction level parallelism wall:} A feldolgozó egységeket utasításszinten a továbbiakban nem lehet hatékonyan fejleszteni, csökkenõ tendenciát mutat a teljesítménynövekedés mértéke.
+			\item \emph{Memory wall:} A külsõ áramköri elemekkel, memóriával (off-chip memory) való kommunikáció lassabb ütemben fejlõdött, mint az integrált áramkörök, s processzorok által nyújtott számítási teljesítmény. Ez adatmozgatás során, mint szûk keresztmetszet jelenik meg.
+		\end{enumerate}
 
-2005 környékén azonban a processzorok mûködési frekvenciájának, sebességének növekedése három akadályba (wall) ütközött:
-\begin{enumerate}
-	\item \emph{Power wall:} A villamos energia fogyasztás és disszipált hõteljesítmény nem lineáris (köbös) ütemben növekszik az órajel növelésével. A mûködési frekvencia további emelése túlmelegedési problémákat okoz, melyet a jelenleg elterjedt hûtési technikákkal nem lehet kezelni.
-	\item \emph{Instruction level parallelism wall:} A feldolgozó egységeket utasításszinten a továbbiakban nem lehet hatékonyan fejleszteni, csökkenõ tendenciát mutat a teljesítménynövekedés mértéke.
-	\item \emph{Memory wall:} A külsõ áramköri elemekkel, memóriával (off-chip memory) való kommunikáció lassabb ütemben fejlõdött, mint az integrált áramkörök, s processzorok által nyújtott számítási teljesítmény. Ez adatmozgatás során, mint szûk keresztmetszet jelenik meg.
-\end{enumerate}
+		A falak egymással szoros kapcsolatban állnak, egyik tulajdonság optimalizálása súlyosbíthatja a másik kettõt~\cite{StructParallel}.
+		
+	%----------------------------------------------------------------------------
+	\section*{Következmény}
+	%----------------------------------------------------------------------------
+		A technológiai akadályok arra késztették a piacvezetõ processzorgyártókat (Intel, AMD), hogy az órajel frekvenciájának növelését hanyagolva, más megoldást találjanak a számítási teljesítmény növelésére.
 
-A falak egymással szoros kapcsolatban állnak, egyik tulajdonság optimalizálása súlyosbíthatja a másik kettõt. [1]
-%----------------------------------------------------------------------------
-\section*{Következmény}
-%----------------------------------------------------------------------------
-A technológiai akadályok arra késztették a piacvezetõ processzorgyártókat (Intel, AMD), hogy az órajel frekvenciájának növelését hanyagolva, más megoldást találjanak a számítási teljesítmény növelésére.
+		A megfelelõ irányt az egy processzoron belül több, egymástól független processzormag elhelyezése jelentheti. Kisebb mûködési frekvenciával rendelkezõ, "gyengébb" processzormagokat integrálva közös szilíciumlapkára elérhetõ, hogy az együttes számítási teljesítményük meghaladja az egymagos, "erõsebb" processzorét, s emellett még az összfogyasztás is kisebb legyen.
 
-A megfelelõ irányt az egy processzoron belül több, egymástól független processzormag elhelyezése jelentheti. Kisebb mûködési frekvenciával rendelkezõ, "gyengébb" processzormagokat integrálva közös szilíciumlapkára elérhetõ, hogy az együttes számítási teljesítményük meghaladja az egymagos, "erõsebb" processzorét, s emellett még az összfogyasztás is kisebb legyen.
+		A teljes számítási kapacitás kihasználása azonban lényeges erõfeszítést igényelhet programozói oldalról, ugyanis a program írása során szakítani kell szokványos szekvenciális gondolkodásmóddal. Számos probléma esetén a fejlesztõnek figyelni kell a párhuzamosan futó programrészek közti szinkronizációra, közös erõforráshasználatára, adatintegritásra.
 
-A teljes számítási kapacitás kihasználása azonban lényeges erõfeszítést igényelhet programozói oldalról, ugyanis a program írása során szakítani kell szokványos szekvenciális gondolkodásmóddal. Számos probléma esetén a fejlesztõnek figyelni kell a párhuzamosan futó programrészek közti szinkronizációra, közös erõforráshasználatára, adatintegritásra.
+	%----------------------------------------------------------------------------
+	\section*{Grafikus processzorok általános célú felhasználása}
+	%----------------------------------------------------------------------------
+		A többmagos általános célú processzorok (CPU - Central Processing Unit) megjelenésével és elterjedésével egyidõben a grafikus processzorok (GPU - Graphics Processing Unit) is lényeges fejlõdésen mentek keresztül.
 
-%----------------------------------------------------------------------------
-\section*{Grafikus processzorok általános célú felhasználása}
-%----------------------------------------------------------------------------
-A többmagos általános célú processzorok (CPU - Central Processing Unit) megjelenésével és elterjedésével egyidõben a grafikus processzorok (GPU - Graphics Processing Unit) is lényeges fejlõdésen mentek keresztül.
+		A valósidejû, nagy felbontású 3D-s grafikára való növekvõ igény hatására a GPU-k rendkívül nagy számítási kapacitással és memórával rendelkezõ, sokmagos processzorrá fejlõdtek. A grafikai feladatok által igényelt lebegõpontos számítási teljesítményben ma már sokszorosan felülmúlják a CPU-kat. Ez számos tudományterület, iparág érdeklõdését felkeltette és ösztökélte a saját adatintenzív és/vagy számításigényes problémáik megoldására. Az GPU-k ilyen, nem grafikai jellegû alkalmazását nevezik általános célú felhasználásnak (GPGPU - General-Purpose computation on Graphics Processing Units).
 
-A valósidejû, nagy felbontású 3D-s grafikára való növekvõ igény hatására a GPU-k rendkívül nagy számítási kapacitással és memórával rendelkezõ, sokmagos processzorrá fejlõdtek. A grafikai feladatok által igényelt lebegõpontos számítási teljesítményben ma már sokszorosan felülmúlják a CPU-kat. Ez számos tudományterület, iparág érdeklõdését felkeltette és ösztökélte a saját adatintenzív és/vagy számításigényes problémáik megoldására. Az GPU-k ilyen, nem grafikai jellegû alkalmazását nevezik általános célú felhasználásnak (GPGPU - General-Purpose computation on Graphics Processing Units).
+		Ilyen probléma például a globális idõjárás elõrejelzés, melynek során a newtoni, termodinamikai és kontikuitási egyenletekbõl kialakított többmilliós ismeretlenbõl álló egyenletrendszert kell rövid idõközönként megoldani.
 
-Ilyen probléma például a globális idõjárás elõrejelzés, melynek során a newtoni, termodinamikai és kontikuitási egyenletekbõl kialakított többmilliós ismeretlenbõl álló egyenletrendszert kell rövid idõközönként megoldani.
+		Hasonló probléma a feladatomnak választott gravitációs N-test szimuláció is, melyet elõszeretettel használnak csillagászatban égitestek mozgásának elõrejelzésére, modellezésére.
 
-Hasonló probléma a feladatomnak választott gravitációs N-test szimuláció is, melyet elõszeretettel használnak csillagászatban égitestek mozgásának elõrejelzésére, modellezésére.
+	%----------------------------------------------------------------------------
+	\section*{A dolgozat felépítése}
+	%----------------------------------------------------------------------------
+		\towrite{Ide kellene egy kb fél oldal a diploma tartalmáról}
 
-%----------------------------------------------------------------------------
-\section*{A dolgozat felépítése}
-%----------------------------------------------------------------------------
-Diplomamunkám során különféle párhuzamosítási technikákat mutatok be és próbálok ki.
+		Diplomamunkám során különféle párhuzamosítási technikákat mutatok be és próbálok ki.
 
-A soronkövetkezõ 2. fejezetben röviden ismertetem a választott párhuzamosítandó feladato: az N-test problémát.
+		A soronkövetkezõ 2. fejezetben röviden ismertetem a választott párhuzamosítandó feladato: az N-test problémát.
 
-A 3. fejezetben bemutatom a kiválasztott NVIDIA GPU-kat és az azokat tartalmazó rendszereket, mind hardveres, mind szoftveres tekintetben.
+		A 3. fejezetben bemutatom a kiválasztott NVIDIA GPU-kat és az azokat tartalmazó rendszereket, mind hardveres, mind szoftveres tekintetben.
 
-A 4. fejezetben az implementáció részleteit és folyamatát ismertetem.
+		A 4. fejezetben az implementáció részleteit és folyamatát ismertetem.

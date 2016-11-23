@@ -30,7 +30,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Hardver felépítése}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Rendszerint magas frekvenciájú ($2-4$ GHz) órajelen mûködtetett kisszámú, de ,,erõteljes'' processzormagból áll. A flexibilis felhasználhatóság következménye, hogy komplex hardveres vezérlõ logikát (control unit) igényel. Ez az egység felelõs a magok közti feladatok kiosztásáért, az esetleges utasítás-, adat-egymásra hatás kiküszöböléséért. Gyártás szempontjából az egyik legköltségesebb rész a chipfelület körülbelül $30\%$-t kitevõ gyorsítótár (cache).
+			\textbf{CPU}: Rendszerint magas frekvenciájú ($2-4$ GHz) órajelen mûködtetett kisszámú, de ,,erõteljes'' processzormagból áll. A flexibilis felhasználhatóság következménye, hogy komplex hardveres vezérlõ logikát (control unit) igényel. Ez az egység felelõs a magok közti feladatok kiosztásáért, az esetleges utasítás-, adat-egymásra hatás kiküszöböléséért. Gyártás szempontjából az egyik legköltségesebb rész a chipfelület körülbelül $30\%$-t kitevõ cache.
 
 			\noindent
 			\textbf{GPU}: Kis fogyasztású, azonos felépítésû, egyszerû processzormagokat tartalmaz, melyek relatíve kis frekvencián ($0,8-1,3$ GHz) üzemelnek. A chipfelület legnagyobb részét ezek foglalják el. A magok száma alsó hangon néhány $10$-tõl egészen $1000$-res nagyságrendig terjedhet. A vezérlõ logika is egyszerû, mivel egyes magokon ugyanaz a program fut, csak más adatokkal.
@@ -131,7 +131,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Memória modell}\label{sect:cuda_memoriamodell}
 		%----------------------------------------------------------------------------
-			Többszintû memória hierarchiával rendelkezik a GPU, mind más és más szereppel. A viszonylag kisméretû gyorsítótárakat leszámítva teljes mértékben a programozó rendelkezik a memóriák felett.
+			Többszintû memória hierarchiával rendelkezik a GPU, mind más és más szereppel. A viszonylag kisméretû cache-t leszámítva teljes mértékben a programozó rendelkezik a memóriák felett.
 		
 			\begin{figure}[!ht]
 			\centering
@@ -141,7 +141,7 @@
 			\end{figure}
 		
 			\subsubsection{Globális memória}
-				A legnagyobb, GB nagyságrendû memória, mely hasonló funkciót lát el, mint a CPU által hozzáférhetõ rendszermemória. A GPU-n kívül található (off-chip) DRAM (Dynamic Random-Access Memory) típusú, így a memória tranzakciók több száz órajelciklust vesznek igénybe. Adatátvitelnél szavas ($4$ byte) hozzáférés esetén $128$ byte-os tranzakciót jelent, ekkora egy szegmens. Ha nem megfelelõen van megírva a szálak által futtatott program, a felesleges olvasások nagyon lassíthatják a futási sebességet. Minden szál látja és eléri így használható szálak közti kommunikációra, de az adatintegritásra, mint minden közösen használt memória esetén itt is figyelni kell. Rendelkezik gyorsítótárral írási és olvasási irányban is.
+				A legnagyobb, GB nagyságrendû memória, mely hasonló funkciót lát el, mint a CPU által hozzáférhetõ rendszermemória. A GPU-n kívül található (off-chip) DRAM (Dynamic Random-Access Memory) típusú, így a memória tranzakciók több száz órajelciklust vesznek igénybe. Adatátvitelnél szavas ($4$ byte) hozzáférés esetén $128$ byte-os tranzakciót jelent, ekkora egy szegmens. Ha nem megfelelõen van megírva a szálak által futtatott program, a felesleges olvasások nagyon lassíthatják a futási sebességet. Minden szál látja és eléri így használható szálak közti kommunikációra, de az adatintegritásra, mint minden közösen használt memória esetén itt is figyelni kell. Rendelkezik cache-sel írási és olvasási irányban is.
 			
 			\subsubsection{Osztott memória (Shared memory)}
 				A regiszterek után, ennek a memóriának a legnagyobb a sebessége. A GPU-n, pontosabban minden SM-ben található, mérete néhány $10$ kB nagyságrendû. Programozó választhat, hogy ezt, vagy az L1 szintû cache-t preferálja jobban az alkalmazásában, így tudja változtatni (fix értékekre) a méretet a másiknak rovására. Ezen keresztül tudnak egy blokkon (lásd \sectref{cuda_szalhier} alfejezet) belül futó szálak kommunikálni egymással, illetve többször felhasznált adatot effektíve manuálisan cache-elni.
@@ -151,10 +151,10 @@
 				SM-en belül található, minden szál számára privát. Bár sok regiszter van a GPU-kban, sokszor korlátozó tényezõ tud lenni. Korlátozza az egy SM-en párhuzamosan futtatható szálak számát, ami rossz GPU kihasználtsághoz vezethet.
 			
 			\subsubsection{Lokális memória}
-				Ha korlátozott a szálak által felhasználható regiszterek száma (programozó megadhatja), vagy elfogytak, akkor a szál futása során használt változókat, argumentumokat kimenti az off-chip globális memóriába, mely terület a regiszterekhez hasonlóan privát hozzáférésû (innen a lokális név). Lassú, de mindkét tranzakciós irányban cache-elt.
+				Ha korlátozott a szálak által felhasználható regiszterek száma (programozó megadhatja), vagy elfogytak, akkor a szál futása során használt változókat, argumentumokat kimenti az off-chip globális memóriába, mely terület a regiszterekhez hasonlóan privát hozzáférésû (innen a lokális név). Lassú, de mindkét tranzakciós irányban rendelkezik cache-sel.
 			
 			\subsubsection{Konstans memória}
-				A chipen kívüli globális memóriában található rész, de csak olvasható a GPU számára. Saját gyorsítótárral rendelkezik és mérete jellemzõen néhány $10$ kB. Gyors hozzáférést biztosít és minden szál által látható. Csak CPU tudja írni a tartalmát.
+				A chipen kívüli globális memóriában található rész, de csak olvasható a GPU számára. Saját cache-sel rendelkezik és mérete jellemzõen néhány $10$ kB. Gyors hozzáférést biztosít és minden szál által látható. Csak CPU tudja írni a tartalmát.
 			
 			\subsubsection{Textúra memória}
 				Konstans memóriához hasonlóan ez is a globális memóriában kap helyet. Szintén saját cache-sel rendelkezik, de írásnál nincs cache koherencia. Többdimenziós textúraelemek (texel) kiolvasására van optimalizálva. Méretét a videokártyán található DRAM korlátozza.
