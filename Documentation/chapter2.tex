@@ -1,6 +1,8 @@
 %----------------------------------------------------------------------------
 \chapter{Grafikus processzorok}
 %----------------------------------------------------------------------------
+	
+	Ez a fejezet -- a feladatkiírásnak megfelelõen -- egy alapvetõ ismertetést tartalmaz grafikus processzorok belsõ struktúrájáról, valamint programozásukról.
 
 	%----------------------------------------------------------------------------
 	\section{Heterogén számítási rendszerek}
@@ -61,7 +63,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Párhuzamosítási modell}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Egy mag képes több szál párhuzamos futtatására idõosztásos alapon (Intel processzorok esetén HyperThreading a neve). Több mag esetén képes "valósan" is párhuzamos, egymástól független szálakat futtatni. Flynn taxonómia\footnote{Az egyik legismertebb csoportosítása a párhuzamos számítógép architektúráknak a Michael J. Flynn által 1966-ban publikált Flynn osztályozás (Flynn's taxonomy), mely a felhasznált utasítás- és adatfolyamok száma (instruction stream, data stream) alapján kategorizálja az egyes számítógépeket. Négy csoport létezik: SISD, SIMD, MISD, MIMD (S - Single, M - Multiple, I - Instruction, D - Data).} (Flynn's taxonomy) szerint ez a MIMD kategóriába esik. Adatfeldolgozás szempontjából nem hatékony, de cserébe flexibilis.
+			\textbf{CPU}: Egy mag képes több szál párhuzamos futtatására idõosztásos alapon (Intel processzorok esetén HyperThreading a neve). Több mag esetén képes ,,valósan'' is párhuzamos, egymástól független szálakat futtatni. Flynn taxonómia\footnote{Az egyik legismertebb csoportosítása a párhuzamos számítógép architektúráknak a Michael J. Flynn által 1966-ban publikált Flynn osztályozás (Flynn's taxonomy), mely a felhasznált utasítás- és adatfolyamok száma (instruction stream, data stream) alapján kategorizálja az egyes számítógépeket. Négy csoport létezik: SISD, SIMD, MISD, MIMD (S - Single, M - Multiple, I - Instruction, D - Data).} (Flynn's taxonomy) szerint ez a MIMD kategóriába esik. Adatfeldolgozás szempontjából nem hatékony, de cserébe flexibilis.
 
 			SIMD végrehajtásra is képesek a modern CPU-k, ugyanis rendelkeznek speciális utasításokkal és széles (vektor) regiszterekkel, melyekbe egyszerre több adat is betölthetõ. A regiszterekbe helyezett adatokon egyszerre hajtódik végre a beolvasott utasítás. Intel processzorokban például ez a $128$ bites regiszterekkel dolgozó SSE (Streaming SIMD Extensions) és a $256$ bites AVX (Advanced Vector Extensions). Utóbbi 8 egyszeres pontosságú lebegõpontos adaton képes utasítások végrehajtására.
 
@@ -106,7 +108,7 @@
 				Jellemzõen ebbõl az almodulból található a legtöbb, egy SM-en belül. Ez az egység felelõs az IEEE 754 szabvány szerinti egyszeres pontosságú lebegõpontos számokon és az egész (integer) számokon végzett alapvetõ, algebrai utasítások végrehajtásáért. Ilyen például az összeadás, szorzás, osztás, reciprokképzés, hatványozás és a gyökvonás. GPU-k specifikációin ezek száma van feltüntetve. Gyakori elnevezése még CUDA mag vagy szál processzor (thread processor).
 			
 			\subsubsection{Double Precision Unit}
-				Hasonló SP-hoz. Feladata, hogy IEEE 754 szabvány szerinti kétszeres pontosságú lebegõpontos számok hajtson végre algebrai utasításokat. Ebbõl magból jellemzõen csak a nagyteljesítményû számítások elvégzésére tervezett, drága GPU-k bõvelkednek.
+				Hasonló SP-hoz. Feladata, hogy IEEE 754 szabvány szerinti kétszeres pontosságú lebegõpontos számokon hajtson végre algebrai utasításokat. Ebbõl a magból jellemzõen csak a nagyteljesítményû számítások elvégzésére tervezett, drága GPU-k bõvelkednek.
 			
 			\subsubsection{Special Function Unit}
 				Különleges, ritkábban elõforduló transzcendens mûveletek végrehajtásáért felelõs egység. Ide tartozik minden olyan mûvelet, mely nem írható fel véges hosszú, tisztán algebrai operátorokat felhasználó alakban. Például: szinusz, koszinusz, logaritmus, exponenciális.
@@ -165,11 +167,11 @@
 			Az egyes GPU generációk között számos eltérés található, melyeket röviden igyekszem bemutatni kiemelve a leglényegesebb információkat. Idõrendnek megfelelõen, a legkorábbi architektúrával kezdem.
 		
 			\subsubsection{Tesla}
-				Az NVIDIA elsõ CUDA kompatibilis architektúrája, mely elõször 2006 végén jelent. Az évek során sokat fejlõdött a gyártási technológia és 2008 után $55$ nm-es csíkszélességgél készültek.
+				Az NVIDIA elsõ CUDA kompatibilis architektúrája, mely elõször 2006 végén jelent meg. Az évek során sokat fejlõdött a gyártási technológia és 2008 után $55$ nm-es csíkszélességgel készültek.
 				
 				\textbf{Újdonságok:}
 				\begin{itemize}
-					\item SM-ek megjelennek, belül $8$ CUDA magak (SP)
+					\item SM-ek megjelennek, belül $8$ CUDA maggal (SP)
 				\end{itemize}
 
 			\subsubsection{Fermi}
@@ -382,7 +384,7 @@ void main() {
 
 			A CUDA utasítások túlnyomó része egy \verb+cudaError_t+ típusú értékkel tér vissza, melyet mindig érdemes leellenõrizni. Ha gond nélkül sikerült végrehajtani az adott CUDA függvényt akkor a visszatérési érték értéke cudaSuccess.
 
-			Ha kevés adatot akarsz feldolgozni, akkor nem biztos, hogy megéri GPU-t használni. A szálak száma amivel érdemes más GPU-t használni legyen körülbelül $1000$-res nagyságrendben.
+			Ha kevés adatot kell feldolgozni, akkor nem biztos, hogy megéri GPU-t használni. A szálak száma, amivel érdemes már GPU-t használni legyen körülbelül $1000$-es nagyságrendben.
 
 			Ökölszabályként elmondható, hogy az ideális blokkméret $32$-nek egész számú többszöröse, és nagyobb mint $192$. Gyakori választás a $256$.
 

@@ -11,9 +11,9 @@
 
 		2005 környékén azonban a processzorok mûködési frekvenciájának, sebességének növekedése három akadályba (wall) ütközött:
 		\begin{enumerate}
-			\item \emph{Power wall:} A villamos energia fogyasztás és disszipált hõteljesítmény nem lineáris (köbös) ütemben növekszik az órajel növelésével. A mûködési frekvencia további emelése túlmelegedési problémákat okoz, melyet a jelenleg elterjedt hûtési technikákkal nem lehet kezelni.
-			\item \emph{Instruction level parallelism wall:} A feldolgozó egységeket utasításszinten a továbbiakban nem lehet hatékonyan fejleszteni, csökkenõ tendenciát mutat a teljesítménynövekedés mértéke.
-			\item \emph{Memory wall:} A külsõ áramköri elemekkel, memóriával (off-chip memory) való kommunikáció lassabb ütemben fejlõdött, mint az integrált áramkörök, s processzorok által nyújtott számítási teljesítmény. Ez adatmozgatás során, mint szûk keresztmetszet jelenik meg.
+			\item \emph{Teljesítménykorlát} (Power wall): A villamos energia fogyasztás és disszipált hõteljesítmény nemlineáris (köbös) ütemben növekszik az órajel növelésével. A mûködési frekvencia további emelése túlmelegedési problémákat okoz, melyet a jelenleg elterjedt hûtési technikákkal nem lehet kezelni.
+			\item \emph{Utasításszintû párhuzamosítás korlát} (Instruction level parallelism wall): A feldolgozó egységeket utasításszinten a továbbiakban nem lehet hatékonyan fejleszteni, csökkenõ tendenciát mutat a teljesítménynövekedés mértéke.
+			\item \emph{Memóriakorlát} (Memory wall): A külsõ áramköri elemekkel, memóriával (off-chip memory) való kommunikáció lassabb ütemben fejlõdött, mint az integrált áramkörök, s processzorok által nyújtott számítási teljesítmény. Ez adatmozgatás során, mint szûk keresztmetszet jelenik meg.
 		\end{enumerate}
 
 		A falak egymással szoros kapcsolatban állnak, egyik tulajdonság optimalizálása súlyosbíthatja a másik kettõt~\cite{StructParallel}.
@@ -23,7 +23,7 @@
 	%----------------------------------------------------------------------------
 		A technológiai akadályok arra késztették a piacvezetõ processzorgyártókat (Intel, AMD), hogy az órajel frekvenciájának növelését hanyagolva, más megoldást találjanak a számítási teljesítmény növelésére.
 
-		A megfelelõ irányt az egy processzoron belül több, egymástól független processzormag elhelyezése jelentheti. Kisebb mûködési frekvenciával rendelkezõ, "gyengébb" processzormagokat integrálva közös szilíciumlapkára elérhetõ, hogy az együttes számítási teljesítményük meghaladja az egymagos, "erõsebb" processzorét, s emellett még az összfogyasztás is kisebb legyen.
+		A megfelelõ irányt az egy processzoron belül több, egymástól független processzormag elhelyezése jelentheti. Kisebb mûködési frekvenciával rendelkezõ, ,,gyengébb'' processzormagokat integrálva közös szilíciumlapkára elérhetõ, hogy az együttes számítási teljesítményük meghaladja az egymagos, ,,erõsebb'' processzorét, s emellett még az összfogyasztás is kisebb legyen.
 
 		A teljes számítási kapacitás kihasználása azonban lényeges erõfeszítést igényelhet programozói oldalról, ugyanis a program írása során szakítani kell szokványos szekvenciális gondolkodásmóddal. Számos probléma esetén a fejlesztõnek figyelni kell a párhuzamosan futó programrészek közti szinkronizációra, közös erõforráshasználatára, adatintegritásra.
 
@@ -41,12 +41,11 @@
 	%----------------------------------------------------------------------------
 	\section*{A dolgozat felépítése}
 	%----------------------------------------------------------------------------
-		\towrite{Ide kellene egy kb fél oldal a diploma tartalmáról}
-
-		Diplomamunkám során különféle párhuzamosítási technikákat mutatok be és próbálok ki.
-
-		A soronkövetkezõ 2. fejezetben röviden ismertetem a választott párhuzamosítandó feladato: az N-test problémát.
-
-		A 3. fejezetben bemutatom a kiválasztott NVIDIA GPU-kat és az azokat tartalmazó rendszereket, mind hardveres, mind szoftveres tekintetben.
-
-		A 4. fejezetben az implementáció részleteit és folyamatát ismertetem.
+		Az elsõ fejezet a gravitációs N-test probléma kerül ismerteti. A probléma általános megfogalmazásán túl levezetésre kerülnek a megvalósítandó összefüggések, a legelterjedett algoritmusok, valamint az elõtérbe kerülõ nehézségek.
+		
+		A második fejezet a grafikus processzorok belsõ felépítését és használatukat tartalmazza, kiemelve legfontosabb fogalmakat. A heterogén számítási rendszerek bemutatását, követi a GPU hardverének az ismertetése, majd pedig a CUDA használata példakódokon keresztül.
+		
+		A harmadik fejezet tartalmazza a diplomamunka keretein belül készített szimulátor leírását, a fejlesztés során szembejövõ nehézségeket és feloldásukat.
+		
+		A negyedik fejezet az futási eredményeket foglalja össze, valamint ábrázolja az egyes párhuzamosítási technikák által nyújtott számítási teljesítményeket.
+		
