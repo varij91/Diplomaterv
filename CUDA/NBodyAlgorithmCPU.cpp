@@ -241,11 +241,10 @@ void NBodyAlgorithmCPU::calculateAccelerationWithColor(const float3(&posI)[8], c
 
 }
 
-
-/*void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, float* accI) {
-    __m128 pix = _mm_set_ps(posI[0].x, posI[1].x, posI[2].x, posI[3].x);
-    __m128 piy = _mm_set_ps(posI[0].y, posI[1].y, posI[2].y, posI[3].y);
-    __m128 piz = _mm_set_ps(posI[0].z, posI[1].z, posI[2].z, posI[3].z);
+void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, float *accI) {
+    __m128 pix = _mm_set_ps(posI[3].x, posI[2].x, posI[1].x, posI[0].x);
+    __m128 piy = _mm_set_ps(posI[3].y, posI[2].y, posI[1].y, posI[0].y);
+    __m128 piz = _mm_set_ps(posI[3].z, posI[2].z, posI[1].z, posI[0].z);
 
     __m128 pjx = _mm_set_ps1(posJ.x);
     __m128 pjy = _mm_set_ps1(posJ.y);
@@ -270,13 +269,13 @@ void NBodyAlgorithmCPU::calculateAccelerationWithColor(const float3(&posI)[8], c
     __m128 aiz = _mm_mul_ps(rz, rabsInv);
 
     //TODO KICSOMAGOLNI SIMA FLOATBA
-    _mm_storer_ps(accI, aix);
-    _mm_storer_ps(accI + 4, aiy);
-    _mm_storer_ps(accI + 8, aiz);
+    _mm_store_ps(accI, aix);
+    _mm_store_ps(accI + 4, aiy);
+    _mm_store_ps(accI + 8, aiz);
 }
 
 
-void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, __m128 accIx, __m128 accIy, __m128 accIz, float *accI) {
+/*void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, __m128 accIx, __m128 accIy, __m128 accIz, float *accI) {
     __m128 pix = _mm_set_ps(posI[0].x, posI[1].x, posI[2].x, posI[3].x);
     __m128 piy = _mm_set_ps(posI[0].y, posI[1].y, posI[2].y, posI[3].y);
     __m128 piz = _mm_set_ps(posI[0].z, posI[1].z, posI[2].z, posI[3].z);
