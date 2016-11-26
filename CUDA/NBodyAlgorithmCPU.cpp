@@ -268,12 +268,43 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4], const floa
     __m128 aiy = _mm_mul_ps(ry, rabsInv);
     __m128 aiz = _mm_mul_ps(rz, rabsInv);
 
-    //TODO KICSOMAGOLNI SIMA FLOATBA
     _mm_store_ps(accI, aix);
     _mm_store_ps(accI + 4, aiy);
     _mm_store_ps(accI + 8, aiz);
 }
 
+void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8], const float massJ, const float3 posJ, float *accI) {
+    __m256 pix = _mm256_set_ps(posI[7].x, posI[6].x, posI[5].x, posI[4].x, posI[3].x, posI[2].x, posI[1].x, posI[0].x);
+    __m256 piy = _mm256_set_ps(posI[7].y, posI[6].y, posI[5].y, posI[4].y, posI[3].y, posI[2].y, posI[1].y, posI[0].y);
+    __m256 piz = _mm256_set_ps(posI[7].z, posI[6].z, posI[5].z, posI[4].z, posI[3].z, posI[2].z, posI[1].z, posI[0].z);
+
+    __m256 pjx = _mm256_set1_ps(posJ.x);
+    __m256 pjy = _mm256_set1_ps(posJ.y);
+    __m256 pjz = _mm256_set1_ps(posJ.z);
+
+    __m256 rx = _mm256_sub_ps(pjx, pix);
+    __m256 ry = _mm256_sub_ps(pjy, piy);
+    __m256 rz = _mm256_sub_ps(pjz, piz);
+
+    __m256 eps2 = _mm256_set1_ps(mp_properties->EPS2);
+
+    __m256 rx2 = _mm256_mul_ps(rx, rx);
+    __m256 ry2 = _mm256_mul_ps(ry, ry);
+    __m256 rz2 = _mm256_mul_ps(rz, rz);
+    __m256 rabs = _mm256_sqrt_ps(_mm256_add_ps(_mm256_add_ps(rx2, ry2), _mm256_add_ps(rz2, eps2)));
+
+    __m256 m = _mm256_set1_ps(massJ);
+    __m256 rabsInv = _mm256_div_ps(m, _mm256_mul_ps(_mm256_mul_ps(rabs, rabs), rabs));
+
+    __m256 aix = _mm256_mul_ps(rx, rabsInv);
+    __m256 aiy = _mm256_mul_ps(ry, rabsInv);
+    __m256 aiz = _mm256_mul_ps(rz, rabsInv);
+
+    _mm256_store_ps(accI, aix);
+    _mm256_store_ps(accI + 8, aiy);
+    _mm256_store_ps(accI + 16, aiz);
+
+}
 
 /*void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, __m128 accIx, __m128 accIy, __m128 accIz, float *accI) {
     __m128 pix = _mm_set_ps(posI[0].x, posI[1].x, posI[2].x, posI[3].x);

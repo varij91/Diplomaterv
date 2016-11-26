@@ -9,7 +9,7 @@ void NBodySystemFlat::init() {
     assert(mp_properties->startTime < mp_properties->endTime);
     //assert(!m_systemInitialized);
 
-    srand(mp_properties->seed);
+    mp_initializator->init();
 
     float3 pos;
     pos.x = 0.0f; pos.x = 0.0f; pos.x = 0.0f;

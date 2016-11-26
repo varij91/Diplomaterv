@@ -101,7 +101,7 @@ struct NBodyProperties {
 #endif // OPENMP
 
 #ifndef USE_FLAT_FUNC
-//#define USE_FLAT_FUNC
+#define USE_FLAT_FUNC
 #endif // USE_FLAT_FUNC
 
 #ifndef USE_FLAT_SYSTEM

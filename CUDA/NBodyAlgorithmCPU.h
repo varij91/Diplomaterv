@@ -13,8 +13,9 @@ public:
     float3 calculateAcceleration(const float3 posI, const float massJ, const float3 posJ);
     void calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, float3(&accI)[4]);
     void calculateAcceleration(const float3(&posI)[8], const float massJ, const float3 posJ, float3(&accI)[8]);
-    void calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, float* accI);
 
+    void calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, float* accI);
+    void calculateAcceleration(const float3(&posI)[8], const float massJ, const float3 posJ, float *accI);
     //void calculateAcceleration(const float3(&posI)[4], const float massJ, const float3 posJ, __m128 accIx, __m128 accIy, __m128 accIz, float *accI);
 
     float3 calculateAccelerationWithColor(const float3 posI, const float massJ, const float3 posJ, unsigned int &numNeighbours);

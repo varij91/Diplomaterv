@@ -48,9 +48,9 @@ int main(int argc, char* argv[])
     }
     else if (gp_properties->mode == Mode::BATCH) {
         gp_utility->startStopwatch();
-        gp_system->integrate();
+        //gp_system->integrate();
         //gp_system->integrateFlat();
-        //gp_systemFlat->integrate();
+        gp_systemFlat->integrate();
         gp_utility->endStopwatch();
         gp_utility->printPerformace();
     }

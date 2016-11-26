@@ -46,10 +46,12 @@ void NBodySystem::init() {
 
         m_bodies.at(i).mass = mp_initializator->getNewMass();
         
-        if (mp_properties->formation == SCATTER)
+        m_bodies.at(i).velocity = mp_initializator->getNewVelocity();
+
+        /*if (mp_properties->formation == SCATTER)
             m_bodies.at(i).velocity = mp_initializator->getNewVelocity();
         else if (mp_properties->formation == SPHERE)
-            m_bodies.at(i).velocity = mp_initializator->getNewVelocity(m_bodies.at(i).position);
+            m_bodies.at(i).velocity = mp_initializator->getNewVelocity(m_bodies.at(i).position);*/
 
         m_bodies.at(i).acceleration = zeros;
 
@@ -358,9 +360,9 @@ inline void NBodySystem::integrateFlatAVXCore(int index) {
     m_bodies.at(index + 6).acceleration = zeros;
     m_bodies.at(index + 7).acceleration = zeros;
 
-    for (int j = 0; j < mp_properties->numBody; j++) {
+    float3 accI[8] = { zeros, zeros, zeros, zeros, zeros, zeros, zeros, zeros };
 
-        float3 accI[8] = { zeros, zeros, zeros, zeros, zeros, zeros, zeros, zeros };
+    for (int j = 0; j < mp_properties->numBody; j++) {
 
         __m256 pix = _mm256_set_ps(posI[0].x, posI[1].x, posI[2].x, posI[3].x, posI[4].x, posI[5].x, posI[6].x, posI[7].x);
         __m256 piy = _mm256_set_ps(posI[0].y, posI[1].y, posI[2].y, posI[3].y, posI[4].y, posI[5].y, posI[6].y, posI[7].y);
@@ -394,6 +396,7 @@ inline void NBodySystem::integrateFlatAVXCore(int index) {
             accI[7 - k].z = aiz.m256_f32[k];
         }
 
+#pragma unroll
         for (int k = 0; k < 8; k++) {
             m_bodies.at(index + k).acceleration.x += accI[k].x;
             m_bodies.at(index + k).acceleration.y += accI[k].y;

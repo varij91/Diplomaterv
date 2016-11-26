@@ -274,12 +274,38 @@ inline void NBodyAlgorithmCPUAllPairs::advanceAVXCore(std::vector<Body> &bodies,
     bodies.at(index + 6).acceleration = zeros;
     bodies.at(index + 7).acceleration = zeros;
 
+    float *accI = (float *)(_aligned_malloc(24 * sizeof(float), 32));
     for (int j = 0; j < mp_properties->numBody; j++) {
 
-        float3 accI[8] = { zeros, zeros, zeros, zeros, zeros, zeros, zeros, zeros };
+        //float3 accI[8] = { zeros, zeros, zeros, zeros, zeros, zeros, zeros, zeros };
         calculateAcceleration(posI, bodies.at(j).mass, bodies.at(j).position, accI);
 
-        bodies.at(index).acceleration.x += accI[0].x;
+        bodies.at(index).acceleration.x += accI[0];
+        bodies.at(index).acceleration.y += accI[8];
+        bodies.at(index).acceleration.z += accI[16];
+        bodies.at(index + 1).acceleration.x += accI[1];
+        bodies.at(index + 1).acceleration.y += accI[9];
+        bodies.at(index + 1).acceleration.z += accI[17];
+        bodies.at(index + 2).acceleration.x += accI[2];
+        bodies.at(index + 2).acceleration.y += accI[10];
+        bodies.at(index + 2).acceleration.z += accI[18];
+        bodies.at(index + 3).acceleration.x += accI[3];
+        bodies.at(index + 3).acceleration.y += accI[11];
+        bodies.at(index + 3).acceleration.z += accI[19];
+        bodies.at(index + 4).acceleration.x += accI[4];
+        bodies.at(index + 4).acceleration.y += accI[12];
+        bodies.at(index + 4).acceleration.z += accI[20];
+        bodies.at(index + 5).acceleration.x += accI[5];
+        bodies.at(index + 5).acceleration.y += accI[13];
+        bodies.at(index + 5).acceleration.z += accI[21];
+        bodies.at(index + 6).acceleration.x += accI[6];
+        bodies.at(index + 6).acceleration.y += accI[14];
+        bodies.at(index + 6).acceleration.z += accI[22];
+        bodies.at(index + 7).acceleration.x += accI[7];
+        bodies.at(index + 7).acceleration.y += accI[15];
+        bodies.at(index + 7).acceleration.z += accI[23];
+
+        /*bodies.at(index).acceleration.x += accI[0].x;
         bodies.at(index).acceleration.y += accI[0].y;
         bodies.at(index).acceleration.z += accI[0].z;
         bodies.at(index + 1).acceleration.x += accI[1].x;
@@ -302,8 +328,9 @@ inline void NBodyAlgorithmCPUAllPairs::advanceAVXCore(std::vector<Body> &bodies,
         bodies.at(index + 6).acceleration.z += accI[6].z;
         bodies.at(index + 7).acceleration.x += accI[7].x;
         bodies.at(index + 7).acceleration.y += accI[7].y;
-        bodies.at(index + 7).acceleration.z += accI[7].z;
+        bodies.at(index + 7).acceleration.z += accI[7].z;*/
     }
+    _aligned_free(accI);
 }
 inline void NBodyAlgorithmCPUAllPairs::advanceAVXCoreGUI(std::vector<Body> &bodies, int index) {
     float3 zeros;
