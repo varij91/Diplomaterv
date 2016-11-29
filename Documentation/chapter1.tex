@@ -101,16 +101,18 @@
 			Megjegyzendõ, hogy a korábban feltett $j \neq i$ a továbbiakban nem szükséges, ugyanis $F_{ii}=0$, ha $\varepsilon^2 > 0$. Bár elsõ ránézésre feleslegesnek tûnik elvégezni a számításokat $j=i$ esetben, azonban SIMD jellegû adatfeldolgozás esetén érdemes elkerülni az elágazó utasításokat a hatékonyság érdekében~\cite{GPUGems}.
 
 		%----------------------------------------------------------------------------
-		\subsection{Integrálás}
+		\subsection{Integrálás}\label{sect:NBody_integrateSect}
 		%----------------------------------------------------------------------------
 			Numerikus integrálás során lépésrõl-lépésre meghatározzuk a testek új pozícióját és sebességét a kiszámított erõvel arányos gyorsulás alapján, ezzel szimulálva az idõ haladását. A lépésköz általában fix értékû, de a felírt egyenletek megoldhatóak változó lépésközû KDE (közönséges differenciálegyenlet) megoldó használatával is. Háromdimenziós esetben minden testhez 6 differenciálegyenlet rendelhetõ (3 a pozíció-, és 3 a sebességvektor koordinátáiból adódik), vagyis az integrálás komplexitása $O(N)$. Az $i.$ test gyorsulása a dinamika alapegyenlete $a_i = \frac{F_i}{m_i}$  alapján a következõ módon alakul:
 			\begin{align}
+				\label{eq:NBody_accEq}
 				\mathbf{a_{i}} \approx G \sum_{j = 1}^{N} \frac{m_{j}\mathbf{r_{ij}}}{\left ( \left \| \mathbf{r_{ij}} \right \|^{2} + \varepsilon^{2} \right )^{\frac{3}{2}}}
 			\end{align}
 			Numerikus integráció elvégzésére számos lehetõség adódik. Az egyik legegyszerûbb megoldás az úgynevezett Verlet-módszer (Verlet-integrator) használata. A szimuláció során választott integrálási módszer befolyásolja mind sebességet, mind pontosságot, így a vizsgált probléma természete nem hagyható figyelmen kívül a döntés során.
 			
 			A Verlet-módszer gyakran alkalmazott módszer Newton-féle mozgásegyenletek alkalmazásánál, valamint objektum röppályája meghatározása során.
 			\begin{align}
+				\label{eq:NBody_integrateEq}
 				\mathbf{x_{i}}\left ( t + \Delta t \right ) := \mathbf{x_{i}}\left ( t \right ) + \mathbf{v_{i}}\left ( t  \right )\Delta t + \frac{1}{2}\mathbf{a_{i}}\left ( t \right )\Delta t^{2}
 			\end{align}
 			\begin{align}
@@ -144,7 +146,7 @@
 		Az N-test szimulációt terhelõ hiba meghatározása nagyon nehéz feladat. Minden algoritmustípus másként viselkedik. Az algoritmus futási sebessége és a szimuláció pontossága egymással fordított arányban áll, így az alkalmazáshoz elengedhetetlen egy számunkra megfelelõ kompromisszum kötése.
 		
 		%----------------------------------------------------------------------------
-		\subsection{Direkt módszer}
+		\subsection{Direkt módszer}\label{sect:nbody_direct}
 		%----------------------------------------------------------------------------
 			A legegyszerûbb és legkézenfekvõbb megoldás a számítás elvégzésére, ha minden egyes kölcsönhatást kiszámolunk. $N$ darab test esetén minden egyes test hat a másikra, tehát egy kiszemelt test esetében $N - 1$ kölcsönhatást kell kiszámolnunk. Így összességében $N(N - 1)$ erõ kiszámítása szükséges egy idõpillanatban. Newton 3. axiómája értelmében, ha két test erõvel hat egymásra, akkor az az erõ mindkét testre ugyanolyan nagyságú és ellentétes irányú. Ez lehetõséget biztosít a szükséges számítások mennyiségének csökkentésére. Azonban párhuzamosított algoritmusok esetén nehezen kihasználható, ugyanis szükségessé teszi az eredetileg egymástól független számításokat végzõ szálak közti kommunikációt, ami jelentõsen lassíthatja a számítást végzõ program futását.
 

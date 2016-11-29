@@ -1,0 +1,97 @@
+%----------------------------------------------------------------------------
+\section{AVX}
+%----------------------------------------------------------------------------
+	Az AVX (Advanced Vector eXtension) az SSE-hez hasonló SIMD jellegû utasításkészlet kiegészítés. 2011-ben jelent az Intel Sandy Bridge mikroarchitektúrájával. A felhasznált regiszterek itt már 256 bit szélesek, vagyis egyszerre akár 8 \verb+float+ típusú adat is kezelhetõ vele párhuzamosan. Ezekhez is van fordítókba beépített intrinsic header, vagyis programozása elméletben nem okoz különösebb nehézséget az SSE után. A kód ugyanúgy nehezen olvasható.
+
+	\begin{lstlisting}
+void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8],
+	const float massJ, const float3 posJ, float *accI) {
+	// A két test pozícióvektorának betöltése, külön szedve az x, y és z koordinátákat
+	__m256 pix = _mm256_set_ps(posI[7].x, posI[6].x, posI[5].x, posI[4].x, posI[3].x, posI[2].x, posI[1].x, posI[0].x);
+	__m256 piy = _mm256_set_ps(posI[7].y, posI[6].y, posI[5].y, posI[4].y, posI[3].y, posI[2].y, posI[1].y, posI[0].y);
+	__m256 piz = _mm256_set_ps(posI[7].z, posI[6].z, posI[5].z, posI[4].z, posI[3].z, posI[2].z, posI[1].z, posI[0].z);
+
+	__m256 pjx = _mm256_set1_ps(posJ.x);
+	__m256 pjy = _mm256_set1_ps(posJ.y);
+	__m256 pjz = _mm256_set1_ps(posJ.z);
+	
+	// Távolságvektorok kiszámítása
+	__m256 rx = _mm256_sub_ps(pjx, pix);
+	__m256 ry = _mm256_sub_ps(pjy, piy);
+	__m256 rz = _mm256_sub_ps(pjz, piz);
+	
+	__m256 eps2 = _mm256_set1_ps(mp_properties->EPS2);
+
+	// Távolságvektorok hosszának számítása
+	__m256 rx2 = _mm256_mul_ps(rx, rx);
+	__m256 ry2 = _mm256_mul_ps(ry, ry);
+	__m256 rz2 = _mm256_mul_ps(rz, rz);
+	__m256 rabs = _mm256_sqrt_ps(_mm256_add_ps(_mm256_add_ps(rx2, ry2), _mm256_add_ps(rz2, eps2)));
+
+	// Képlet nevezõjének meghatározása
+	__m256 m = _mm256_set1_ps(massJ);
+	__m256 rabsInv = _mm256_div_ps(m, _mm256_mul_ps(_mm256_mul_ps(rabs, rabs), rabs));
+
+	// Gyorsulás értékek kiszámítása
+	__m256 aix = _mm256_mul_ps(rx, rabsInv);
+	__m256 aiy = _mm256_mul_ps(ry, rabsInv);
+	__m256 aiz = _mm256_mul_ps(rz, rabsInv);
+
+	// Gyorsulás értékékek visszamásolása a megadott float tömbbe (x,...,x,y,...,y,z,...,z) formában
+	_mm256_store_ps(accI, aix);
+	_mm256_store_ps(accI + 8, aiy);
+	_mm256_store_ps(accI + 16, aiz);
+}
+	\end{lstlisting}
+	
+	A típusnév és a függvénynevek kiegészültek egy 256-os jelzõvel, de az alapelképzelés mit sem változott az SSE variációhoz képest.
+
+	Viszont amikor lefuttattam a szimulációt ugyanazon konfigurációval, mint az SSE-t, nem tapasztaltam semmi javulást a futási idõben. Sõt, az eredmények azt mutatták, hogy az SSE a gyorsabb.
+
+	Eleinte, valami projekt beállítási problémára gyanakodtam, de miután nem találtam semmit a kódban kerestem a hibát. Arra a következtetésre jutottam, hogy valahol egy olyan ,,bottleneck'' van a programban, ami nem hagyja, hogy a teljes rendelkezésre álló számítási kapacitás ki legyen használni. Ennek oka lehet például adatmozgatási, függvényhívási probléma, melyek visszavezethetõ memória tranzakciókra.
+
+	Végsõ soron ebben az irányban kezdtem el megoldást keresni: valamilyen formában csökkentenem kell a memória hozzáférések számát és javítanom kell a testek adattárolási módján. A jelenlegi AoS megoldás, nem a legjobb megvalósítás a cache szempontjából.
+
+	Felmerülhet a kérdés, hogy ha ilyen korlát van és volt a programban, akkor vajon a referenciamodell és az SSE implementáció teljesítménye, mennyire közelíti meg a maximálisan elérhetõt?
+
+	A következõ alfejezetekben olyan megoldásokkal próbálkoztam, melyeknél a teljesítményt tartottam szem elõtt és feláldoztam a program osztályait. Ezeket teljes mértékben próbaképp, ideiglenesen hoztam létre, így nem biztosítottam lehetõséget a felhasználó számára ezek bekapcsolására.
+
+	Itt megjegyezném, hogy több projektet is létrehoztam a diplomamunkám során, s akárcsak korábbi egy alkalommal, azt tapasztaltam, hogy a Visual Studio-ban létrehozott, SSE és AVX kódot is tartalmazó NVIDIA CUDA projekt nem teljesít olyan jól. A ,,sima'' projekt, ahol csak CPU-n futtatható kódot írtam, az SSE és AVX sokkal jobb futási eredményeket produkált, így a továbbiakban a vektorizációs eredményeket ez alapján mutatom be. A két projekt SSE és AVX része között nincs sok eltérés és a profiler sem ad magyarázatot erre a jelenségre.
+
+	%----------------------------------------------------------------------------
+	\subsection{Kibontott algoritmus}
+	%----------------------------------------------------------------------------
+		\emph{\textbf{Cél:} A függvényhívásokból eredõ overhead-ek megszüntetése.}
+
+		Elsõ próbálkozásom a teljesítmény javítására az algoritmus osztályok kiiktatása. Létrehoztam egy \verb+integrateFlat+ nevezetû metódust a \verb+BodySystem+ osztályon belül, mely imlementálja az algoritmus osztályokban található \verb+advance+ és \verb+calculateAcceleration+ tagfüggvényeket.
+
+		Az eredmény egy körülbelül $30\%$-os teljesítménybeli javulás.
+		
+	%----------------------------------------------------------------------------
+	\subsection{Dinamikus tömbök}
+	%----------------------------------------------------------------------------
+		\emph{\textbf{Cél:} Az std::vector használatának mellõzése, jobb cache kihasználás.}
+
+		Létrehoztam egy \verb+NBodySystemFlat+ nevû osztályt, melyben \verb+std::vector+ helyett dinamikus tömböket használok a testek adatainak tárolására, ezzel valósítva meg a SoA-ként kezelve az információkat.
+
+		A kódban sokszor vannak olyan részek, melynél egymást követõ testeknek azonos típusú információjához (pl.: pozíció vektorhoz) szeretnének hozzáférni. Ez struktúrák esetén azt jelenti, hogy memóriában ,,ugrálni'' kell. A cache-be a legutóbb hozzáfért memóriarekesz tartalma és annak környezete is bekerül. Jelen esetben ez azt jelenti, hogy a pozícióérték hozzáférésekor betöltõdött a cache-be, a sebesség- és gyorsulásvektor is. Mivel a cache mérete limitált, így elõfordulhat, hogy felesleges memória tranzakciókat kénytelen végigvárni a program, ami teljesítményromlást okoz.
+
+		Dinamikus tömbök esetében, viszont az egyes pozíciók egy tömböt alkotnak a memóriában, ami azt eredményezi, hogy folytonos címen helyezkednek el a pozícióvektorok.
+
+		Az \verb+std::vector+ tárolók használata esetén van némi overhead. A dinamikus tömbök használata ezt is megszünteti, viszont ezentúl a programozónak kell figyelni a lefoglalt helyek felszabadítására.
+
+		Az elõzõ kibontott algoritmusos megoldással együtt a teljesítménynövekedés az eredeti programhoz képest körülbelül $100\%$-os, ami igencsak jelentõs.
+	%----------------------------------------------------------------------------
+	\subsection{Végeredmény}
+	%----------------------------------------------------------------------------
+		Az SSE és az AVX teljesítménybeli különbségein a fenti két próbálkozás semmit sem változtatott. Az SSE ugyanúgy, vagy még jobban teljesített, mint az AVX.
+
+		Némi keresgélés után az Intel egyik fórumán, találtam némi információt arra vonatkozóan, hogy mi lehet a probléma \cite{intelforum}:
+
+		\begin{quote}
+			It is not at all unusual for AVX code on Sandy Bridge \& Ivy Bridge to be slightly slower than SSE code for data that is not contained in the L1 cache...
+		\end{quote}
+		
+		Az Intel egyik szoftverfejlesztõje által elvégzett kísérletek azt mutatták, hogy az AVX-et bemutató architektúrákon, az AVX teljesítménye kisebb volt, mint az SSE teljesítménye, abban az esetben, ha a szükséges adatok nem állnak rendelkezésre L1 cache-ben.
+
+		\towrite{Ha marad idõ a vTune}

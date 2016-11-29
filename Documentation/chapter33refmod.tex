@@ -1,0 +1,106 @@
+%----------------------------------------------------------------------------
+\section{C++ referencia modell}
+%----------------------------------------------------------------------------
+	Az egy szálon futó C++ referenciamodell megvalósítást a MATLAB-ban megírt verzió alapján kezdtem el. Célja, hogy viszonyítási alapként szolgáljon a különbözõ párhuzamosítást alkalmazó implementációkhoz, ezzel lehetõvé téve a számszerû/grafikus ábrázolását a sebességnövekedésnek.
+
+	A párhuzamosítást a CPU-n fõként a legbelsõ, gyorsulás értékeket kiszámító \verb+calculateAcceleration+ függvény módosításával értem el. A megvalósított képlet mindig az \sectref{NBody_integrateSect} fejezetben bemutatott \eqref{NBody_accEq} összefüggés.
+
+	Az alábbi kódrészlet a teljesen natív C++ megvalósítás:
+	
+	\begin{lstlisting}
+float3 NBodyAlgorithmCPU::calculateAcceleration(
+const float3 posI, 	 // A test, melynek a gyorsulás értékének egy darabját számoljuk
+const float massJ, 	 // A másik test tömege
+const float3 posJ) { // A másik test pozíciója
+   
+	float3 r, accI;
+
+	// A két test távolságvektora
+	r.x = posJ.x - posI.x;
+	r.y = posJ.y - posI.y;
+	r.z = posJ.z - posI.z;
+
+	// A két test skaláris távolsága belekalkulálva az ún. softening factor-t
+	float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + mp_properties->EPS2);
+	// A képletben megadott nevezõ kiszáítása
+	float rabsInv = 1.0f / (rabs * rabs * rabs);
+
+	// A j. test tömegébe bele van olvasztva a G értéke,
+	// hogy ne kelljen mindig összeszorozni.
+	float temp = massJ * rabsInv;
+
+	// A képlet második tagja.
+	// Az i. testen a j. test által okozott gyorsulás
+	accI.x = r.x * temp;
+	accI.y = r.y * temp;
+	accI.z = r.z * temp;
+
+	return accI;
+}
+	\end{lstlisting}
+	
+	Összesen 17 egyszeres pontosságú lebegõpontos mûveletet (FLOP - Floating Point Operation) hajt végre, egy testpár közötti gyorsulás kiszámításához és még 3 összeadást a függvényen kívül, az akkumuláláshoz. Ezt a függvényt kell $N^2$-szer meghívni minden testpárra, ahol $N$ a testek száma.
+
+	Az alábbi kódrészleteket az egyik elsõ verzióból való azok közül, amit írtam. A többi egy kicsit jobban feldarabolt a párhuzamosítás miatt. Viszont az alapelv változatlan és ebben a formában könnyebben értelmezhetõ.
+
+	A testeket egy \verb+vector+ konténerben tárolom, ami a dinamikus tömbkezelés problémáit (allokáció, reallokáció, felszabadítás) nehézségeit veszi le a fejlesztõk válláról.
+
+	A \verb+bodies vector+$ i.$ elemét, vagyis az i. testet, valamint annak a gyorsulását az alábbiak szerint érjük el:
+	
+	\begin{lstlisting}
+bodies						// a testeket tartalmazó vector
+bodies.at(i)				// az i. test (Body struktúrával tér vissza)
+bodies.at(i).acceleration   // az i. test gyorsulásvektora (float3)
+bodies.at(i).acceleration.x // az i. test x irányú gyorsulás értéke (float)
+	\end{lstlisting}
+
+	A már említett \verb+advance+ függvény belsejében található kettõ, egymásba ágyazott for ciklus. A külsõ ciklus mindig az éppen gyorsulás szempontjából frissítendõ testet jelöli ki, míg a belsõ a párját. A ciklusmag mindig az elõzõ szimulációs iterációban kiszámolt gyorsulás értékek kinullázásával kezdõdik.
+
+	\begin{lstlisting}
+void NBodyAlgorithmCPUAllPairs::advance(std::vector<Body> &bodies) {
+	...
+	for (int i = 0; i < mp_properties->numBody; i++) {
+		// Az elõzõ iterációban kiszámolt gyorsulásvektor kinullázása
+		float3 zeros = float3(0.0f, 0.0f, 0.0f);
+		
+		bodies.at(i).acceleration = zeros;
+
+		float3 acc = zeros;
+		for (int j = 0; j < mp_properties->numBody; j++) {
+			// 17 FLOP
+			acc = calculateAcceleration(bodies.at(i).position, bodies.at(j).mass, bodies.at(j).position);
+			// 3 FLOP
+			bodies.at(i).acceleration.x += acc.x;
+			bodies.at(i).acceleration.y += acc.y;
+			bodies.at(i).acceleration.z += acc.z;
+		}
+	}
+	...
+}
+	\end{lstlisting}
+	
+	Annak érdekében, hogy az egyes gyorsulás értékek, konzisztens pozícióadatokból legyen kiszámítva, az integrálás (\eqref{NBody_integrateEq} képlet) végrehajtását egy másik ciklusban kell elvégezni. Összesen $N$-szer végrehajtani a ciklust, iterációnként ez 21 FLOP-ot jelent. Ebbõl 3 FLOP-ot, hoz be egy gyorsulás értékét csökkentõ plusz konstans, melynek feladata, hogy a szimuláció során ne hagyja a testeket egymástól nagyon eltávolodni. A grafikus megjelenítés rögzített, nem mozdítható vagy forgatható és gyakran jönnek, mennek az ablak szélén a testek.
+
+	\begin{lstlisting}
+float stepTime2 = 0.5f * mp_properties->stepTime * mp_properties->stepTime;
+
+for (int i = 0; i < mp_properties->numBody; i++) {
+	// Pozícióvektor frissítése
+	// 3*4 FLOP
+	bodies.at(i).position.x += bodies.at(i).velocity.x * mp_properties->stepTime +
+		bodies.at(i).acceleration.x * stepTime2;
+	bodies.at(i).position.y += bodies.at(i).velocity.y * mp_properties->stepTime +
+		bodies.at(i).acceleration.y * stepTime2;
+	bodies.at(i).position.z += bodies.at(i).velocity.z * mp_properties->stepTime +
+		bodies.at(i).acceleration.z * stepTime2;
+
+	// Sebességvektor frissítése
+	//3*3 FLOP
+	bodies.at(i).velocity.x = bodies.at(i).velocity.x * mp_properties->VELOCITY_DAMPENING +
+		bodies.at(i).acceleration.x * mp_properties->stepTime;
+	bodies.at(i).velocity.y = bodies.at(i).velocity.y * mp_properties->VELOCITY_DAMPENING +
+		bodies.at(i).acceleration.y * mp_properties->stepTime;
+	bodies.at(i).velocity.z = bodies.at(i).velocity.z * mp_properties->VELOCITY_DAMPENING +
+		bodies.at(i).acceleration.z * mp_properties->stepTime;
+}
+	\end{lstlisting}

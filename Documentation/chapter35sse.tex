@@ -1,0 +1,126 @@
+%----------------------------------------------------------------------------
+\section{SSE}
+%----------------------------------------------------------------------------
+	A következõ CPU-s párhuzamosítási lehetõség már megkövetelte a legbelsõ, gyorsulást számító függvény módosítását.
+
+	Az Intel SSE (Streaming SIMD Extensions) egy utasításkészlet kiegészítés, mely beépített speciális 128 bit széles vektorregiszterekkel dolgozik. A neve is tartalmazza az általa megvalósított SIMD (Single Instruction Multiple Data) modellt. Korábbi fejezetben említésre került, hogy ez egyben egy csoportosítás, a Flynn féle taxonómia része. Lényege, hogy egyszerre \emph{több, azonos típusú adaton} egyszerre végrehajtódik ugyanaz az \emph{egy darab utasítás}, ezzel adatszintû párhuzamosítást valósítva meg. Elõnye az egyszerû (SISD) számítógépekkel szemben egyértelmûen a kevesebb utasítás-felhozatal, vagyis kevesebb memóriamûvelet, ami gyakori korlát párhuzamos programok írása esetén.
+
+	SSE esetében betölthetõ a 128 bites regiszterbe 4 darab egyszeres pontosságú lebegõpontos szám, melyen végrehajthatók a vektorutasítások. Az \figref{Impl_SIMD} ábrán egy SIMD példa látható SSE regisztereken végzett összeadás segítségével.
+
+	\begin{figure}[!ht]
+	\centering
+	\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_SSE_SIMD.pdf}
+	\caption{SIMD modell}
+	\label{fig:Impl_SIMD}
+	\end{figure}
+
+	Ahhoz, hogy ne kelljen x86 ASM programot írni a fordítók biztosítanak úgynevezett \emph{intrinsic header} fájlokat, melyek elfedik, és közvetlenül használhatóvá teszik az SSE utasításokat \cite{sse}.
+
+	A korábbiakban használt tömbelemek összeadás maradva:
+	
+	\begin{lstlisting}
+for(int i = 0; i < N; i += 4) {
+	// Operandusok betöltése
+	__m128 av =  _mm_set_ps(a[i+3], a[i+2], a[i+1], a[i]);
+	__m128 bv =  _mm_set_ps(b[i+3], b[i+2], b[i+1], b[i]);
+
+	// Egy összedás mûvelet elvégzése a két változón
+	__m128 cv =  _mm_add_ps(av, bv);
+
+	// Eredmények betöltése a c tömbbe
+	_mm_strore_ps(&c[i], cv);
+}
+	\end{lstlisting}
+	
+	Itt azért lényeges változásokon esett át a kód. Elõször is látható, hogy kevésbé olvasható lett. Ez sajnos az SSE intrinsic használatának egy rossz mellékhatása. Elõször (\verb+_mm_set_ps+) betöltünk négy egymást követõ és egymástól független (\verb+float+) változót \verb+a+, \verb+b+ tömbbõl egy-egy 128 bites regiszterbe. A két regiszter ezután összeadjuk (\verb+_mm_add_ps+) és az \figref{Impl_SIMD} ábrának megfelelõ eredményvektort kapjuk. Ezt követõen történik a 4 elem másolása (\verb+_mm_strore_ps+) az eredményt tartalmazó \verb+c+ tömbbe. Egy megkötés sajnos van. A \verb+c+ tömböt úgy kell deklarálni, hogy az egy $128$-tal osztható kezdõcímre mutasson, máskülönben futási idejû hibát kapunk (access violation). Ez az SSE egy sajátossága, amennyiben az egyik operandus egy a rendszermemóriában helyezkedik el.
+
+	\begin{lstlisting}
+float *c = (float *)(_aligned_malloc(N * sizeof(float), 16));
+...
+_aligned_free(c);
+	\end{lstlisting}
+	
+	Másik eltérés is látható a \verb+for+ ciklus paraméterei között. A ciklus változó néggyel növekedik, ugyanis egy iteráció során egyszerre 4 elem feldolgozása történik. Jelen példában egy \verb+N%4 == 0+ megkötéssel érdemes élni.
+
+	Átültetve az eddigiekben elmondottak az intrinsic-et használó \verb+calculateAcceleration+ metódus az alábbiak szerint alakul:
+
+	\begin{lstlisting}
+void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4],
+	const float massJ, const float3 posJ, float *accI) {
+
+	// A két test pozícióvektorának betöltése, külön szedve az x, y és z koordinátákat
+	__m128 pix = _mm_set_ps(posI[3].x, posI[2].x, posI[1].x, posI[0].x);
+	__m128 piy = _mm_set_ps(posI[3].y, posI[2].y, posI[1].y, posI[0].y);
+	__m128 piz = _mm_set_ps(posI[3].z, posI[2].z, posI[1].z, posI[0].z);
+
+	__m128 pjx = _mm_set_ps1(posJ.x);
+	__m128 pjy = _mm_set_ps1(posJ.y);
+	__m128 pjz = _mm_set_ps1(posJ.z);
+
+	// Távolságvektorok kiszámítása
+	__m128 rx = _mm_sub_ps(pjx, pix);
+	__m128 ry = _mm_sub_ps(pjy, piy);
+	__m128 rz = _mm_sub_ps(pjz, piz);
+
+	__m128 eps2 = _mm_set_ps1(mp_properties->EPS2);
+
+	// Távolságvektorok hosszának számítása
+	__m128 rx2 = _mm_mul_ps(rx, rx);
+	__m128 ry2 = _mm_mul_ps(ry, ry);
+	__m128 rz2 = _mm_mul_ps(rz, rz);
+	__m128 rabs = _mm_sqrt_ps(_mm_add_ps(_mm_add_ps(rx2, ry2), _mm_add_ps(rz2, eps2)));
+
+	// Képlet nevezõjének meghatározása
+	__m128 m = _mm_set_ps1(massJ);
+	__m128 rabsInv = _mm_div_ps(m, _mm_mul_ps(_mm_mul_ps(rabs, rabs), rabs));
+
+	// Gyorsulás értékek kiszámítása
+	__m128 aix = _mm_mul_ps(rx, rabsInv);
+	__m128 aiy = _mm_mul_ps(ry, rabsInv);
+	__m128 aiz = _mm_mul_ps(rz, rabsInv);
+
+	// Gyorsulás értékékek visszamásolása a megadott float tömbbe (x,x,x,x,y,y,y,y,z,z,z,z) formában
+	_mm_store_ps(accI, aix);
+	_mm_store_ps(accI + 4, aiy);
+	_mm_store_ps(accI + 8, aiz);
+}
+	\end{lstlisting}
+	
+	A függvény elején történik a változók betöltése az \verb+_mm_set_ps+ és az \verb+_mm_set_ps1+ függvények segítségével. Ez utóbbi mind a négy ,,rekeszt'' feltölti a megadott \verb+float+ értékkel. A vektor változókkal ezután ugyanúgy a számítások következnek, mint az összeadós példában, majd az eredmények visszamásolása következik a rendszermemóriába. Az kiszámolt gyorsulás értékek akkumulálásánál figyelembe kell venni, hogy a tömb elején az $x$, közepén az $y$ és a végén a $z$ koordináták szerepelnek.
+
+	Akár csak a példában a \verb+for+ ciklust is módosítottam:
+
+	\begin{lstlisting}
+...
+// 128-cal osztható kezdõcímû tömb allokálása
+float *accI = (float *)(_aligned_malloc(12 * sizeof(float), 16));
+
+for (int i = 0; i < mp_properties->numBody; i += 4) {
+	for (int j = 0; j < mp_properties->numBody; j++) {
+       
+		calculateAcceleration(bodies.at(i).position, bodies.at(j).mass, bodies.at(j).position, accI);
+
+		// Akkumulálás
+		bodies.at(i).acceleration.x += accI[0];
+		bodies.at(i).acceleration.y += accI[4];
+		bodies.at(i).acceleration.z += accI[8];
+		bodies.at(i + 1).acceleration.x += accI[1];
+		bodies.at(i + 1).acceleration.y += accI[5];
+		bodies.at(i + 1).acceleration.z += accI[9];
+		bodies.at(i + 2).acceleration.x += accI[2];
+		bodies.at(i + 2).acceleration.y += accI[6];
+		bodies.at(i + 2).acceleration.z += accI[10];
+		bodies.at(i + 3).acceleration.x += accI[3];
+		bodies.at(i + 3).acceleration.y += accI[7];
+		bodies.at(i + 3).acceleration.z += accI[11];
+	}
+}
+_aligned_free(accI);
+...
+	\end{lstlisting}
+	
+	A kiszámolt gyorsulás értékeket tartalmazó tömböt a 128-cal osztható címre allokáltam, mert az lesz a \verb+_mm_store_ps+ utasítás célpontja. Az akkumulálást rész direkt van teljesen kibontva. Ciklussal is le lehet ugyan írni, ami szebb, de az a megoldás lassabb lesz. OpenMP unroll direktívás megoldás egy kicsivel volt csak rosszabb ennél. Tekintve, hogy az akkumulálást végzõ \verb+for+ ciklus $N \cdot N/4$-szer futna le, nagy $N$ esetére sok control-flow jellegû utasítást jelent.
+
+	Az integrálást végzõ kódrészletet nem módosítottam SSE függvényekkel, ugyanis ,,nagy'' $N$ mellett a nyert sebességnövekedés elenyészõ, tekintve, hogy testszámmal lineáris a komplexitása.
+
+	Az SSE intrinsic függvények használatának nagy problémája, hogy a kód sokkal nehezebben olvasható és ellenõrizhetõ. Hátránya még, hogy nem minden algoritmus vektorizálható egyszerûen, valamint az automatikus, fordító általi vektorizáció legtöbbször nem ad optimális megoldást, gyakran hardverközeli programozás szükséges a megfelelõ teljesítmény eléréséhez. Ezt C/C++ kódba ágyazott SSE ASM betétek (kódblokkok) használatával tehetjük meg.
