@@ -1,0 +1,305 @@
+%----------------------------------------------------------------------------
+\section{GPU}
+%----------------------------------------------------------------------------
+	A kernel tervezése és fejlesztése során segítséget nyújtottak az NVIDIA által a CUDA mellé adott példa projektek, melyek között található N-test szimulációt is végrehajtó program \cite{CUDAsamples}.
+	
+	%----------------------------------------------------------------------------
+	\subsection{Kiindulás}
+	%----------------------------------------------------------------------------
+		A N-test probléma felépítése párhuzamosítás szempontjából, nagyon hasonlít a mátrix szorzás problémájára. Az \figref{Impl_GPU_Matrix} ábrán látható négyzetek egy-egy gyorsulás értéket reprezentálnak. A besötétített $(i,~j)$ négyzet, a $j.$ test által az $i.$ testen okozott gyorsulást jelenti. A forrás és a célpont testek listája azonos, az elrendezés csupán az ábrázolást segíti.
+
+		\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_GPU_Matrix.pdf}
+		\caption{A probléma mátrixos elrendezése}
+		\label{fig:Impl_GPU_Matrix}
+		\end{figure}
+
+		A CUDA lehetõséget biztosít nagyon sok\footnote{Egy rácsban maximum $65536 \cdot 65536 \cdot 65536$ blokk, blokkonként maximum 1024 szál. Ez egy elméleti érték, a rendelkezésre álló hardver erõforrás korlátozhat.} szál elindítására, így kernel írásakor gyakori megközelítés lehet, hogy minden szál egy apró részmûveletet végezzen. A probléma leképezhetõ egy kernelre a fenti formában egy az egyben, de közel sem fog optimális eredményt adni.
+		
+		Az elsõ probléma, ami szembe jön, hogy az a memória hozzáférések száma. Ha minden szál csak egy testpár között gyorsulást számol, akkor egy testet összes ki kell olvasni a globális memóriából $(2N-2)$-ször. $(N-1)$-szer, mert õ a célpont $N$-szer (önmagával vett interakció esete miatt jön be a $(-1)$) és a szálakat függetlennek tekintjük egymástól, valamit $(N-1)$-szer, mert $N$ másik testre hat. És bár rendelkezésre áll valamennyi cache, a tranzakciók száma így is nagy, ami hátráltatni fogja a számításokat és a korlátot nem a számítási kapacitás elérése fogja jelenteni, hanem a memória sávszélessége.
+	
+	%----------------------------------------------------------------------------
+	\subsection{Feldarabolás}
+	%----------------------------------------------------------------------------
+		Elsõ lépésként érdemes nagyobb csoportokra (\emph{tile}) bontani a problémát (\figref{Impl_GPU_Tile} ábra). Célja a feldarabolásnak, hogy az egy az egyben egy TB-hez rendelhetõk legyenek a darabok, melyben elhelyezkedõ szálak képesek az egymás közötti adatmegosztásra, ezzel optimalizálva a memória hozzáférések számát.
+
+		\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_GPU_Tile.pdf}
+		\caption{Felbontott, tile-os elrendezés}
+		\label{fig:Impl_GPU_Tile}
+		\end{figure}
+
+		Az ábrán beszürkített $4\cdot4$-es tile esetén összesen 8 testhez tartozó információ egyszeri felhozatala lenne szükséges, a $16$ helyett, ha el tudnánk az információt tárolni a blokk által közösen használ \emph{shared memóriában}. A szálak a számítást már csak akkor kezdenék el, amikor minden test adata már betöltõdött oda.
+		
+		Ezzel csökkenteni lehetett a globális memóriához való hozzáférések számát, és egy olyan memóriába került a szükséges információ, mely párhuzamos hozzáférést elõsegítõ bankokba van szervezve. Amíg az egy warp-on belüli szálak más-más bankhoz próbálnak hozzáférni (vagy többen egy bankon belül ugyanahhoz a rekeszhez), addig jó teljesítményt lehet elérni.
+	
+	%----------------------------------------------------------------------------
+	\subsection{Párhuzamosság csökkentése}
+	%----------------------------------------------------------------------------
+		Az N-test szimuláció és példaként felhozott mátrixszorzás is remek, $N^2$-es párhuzamosítási lehetõséget biztosít. Azonban mindkét esetben szükséges az egyes részeredmények összegzése.
+		
+		N-test szimuláció esetén ez azt jelenti, hogy minden szál számoljon ki egy testpár közötti interakció által behozott gyorsulás értéket, majd egy kijelölt szál/szálak csoportja akkumulálja az eredményeket. Habár maga az akkumulálás folyamata megvalósítható $O(logN)$ komplexitású redukciós algoritmussal, a szálak közti kommunikáció és szinkronizáció igencsak jelentõs. Nem beszélve az akkumulációt végzõ kijelölt szálak által behozott száldivergenciáról.
+		
+		Mivel a szálon belüli kommunikáció, adatmozgatás lényegesen gyorsabb, mint a szálak közti, a megoldást az jelentheti, ha minden szál egy célponthoz tartozó gyorsulást számol. Vagyis minden létrehozott szál pontosan $N$ interakciót hajt végre és akkumulálja az eredményeket, ezzel csökkenthetve a szálak közti szinkronizációs és kommunikációs folyamatok számát.
+		
+		Összesen tehát $N \cdot N$ szál és a kommunikáció intenzív megoldás helyett, $N$ szálat létrehozva megoldható a probléma. Az \figref{Impl_GPU_LessParallel} ábrán látható bejelölve az $i.$ szál által elvégzendõ számítások, a haladási irányt feltüntetve.
+
+		\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_GPU_LessParallel.pdf}
+		\caption{Az egy szál által elvégzendõ feladatok}
+		\label{fig:Impl_GPU_LessParallel}
+		\end{figure}
+
+		Ezzel a lépéssel csökkentettük a feladat párhuzamosságát, több munkát adva egy szál számára, de cserébe megszüntettük szálak közti kommunikációt. Kisméretû szimulációk esetén nem biztos, hogy ez a megoldás adja a legjobb teljesítményt. Néhány ezer test kell legalább, hogy jól ki legyenek használva a GPU erõforrásai.
+		
+		Egy darabja a mátrixnak (tile), egy TB-nak feleltethetõ meg.
+	
+	%----------------------------------------------------------------------------
+	\subsection{Konklúzió}
+	%----------------------------------------------------------------------------
+		A két fenti változtatást egyberakva, egy TB az \figref{Impl_GPU_TB} ábra alapján fog mûködni.
+
+		\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_GPU_TB.pdf}
+		\caption{Egy threadBlock mûködése}
+		\label{fig:Impl_GPU_TB}
+		\end{figure}
+
+		Minden TB egy dimenziós lesz pontosan $P$ darab szállal (ez pontosan a $blockDim.x$ beépített változó értékét fogja meghatározni). Minden szál betölti a regisztereibe azt az egy testet, amely minden számítás során dolgozni fog. Majd betölt a saját beépített $threadIdx.x$ és az éppen aktuális tile sorszáma alapján, egy darab testet a shared memóriába. Ha jól van eltárolva az adat a globális memóriában, akkor egy warp (32 szál) képes felhozni egy olvasással $32$ \verb+float+ adatot és eltárolni azt bank konfliktus nélkül a shared memóriába.
+		
+		Ahhoz, hogy a számítás elindulhasson, be kell várni, míg minden szál betölti a hozzárendelt testet. Ezt \verb+__syncthreads()+ függvény segítségével felállított szinkronizációs pontokkal tehetjük meg. Az azonos TB-n belüli szálak az ilyen pontoknál mindig bevárják egymást.
+		
+		Amint véget ért az adott tile-on az gyorsulás értékek meghatározása (szintén szinkronizáció kell), újrakezdõdik a folyamat a következõ P darab test betöltésével. Összesen $2 \cdot N/P$ szinkronizációs pont lesz egy TB futása során.
+		
+		A következõ feladat a P értékének meghatározása. Ehhez figyelembe kell venni az eszközünk paramétereit is. Ha P értéke túl kicsi, az azt eredményezi, hogy az esetemben egy SM-en elhelyezhetõ maximális 8 TB fog korlátozó tényezõ lenni, és a rendelkezésre álló regiszterek, shared memória, stb. nem lesznek kihasználva. Ha P értéke nagy (maximum 1024), akkor meg más korlátozó tényezõ fog közbeszólni (pl.: regiszterek), melyek miatt kevesebb, mint 8 TB-t tud csak egy SM-en belül párhuzamosan létezni.
+		
+		Kell keresni egy középutat. Ezt elsõsorban kísérletezéssel lehet megtenni. Ökölszabályként elmondható, hogy a TB-ben lévõ szálak száma legyen a 32-nek egész számú többszöröse, és legalább 128. Így elérhetõ, hogy az eszköz a lehetõ legjobban le legyen foglalva (occupancy). Azonban sosem szabad teljes mértékben a foglaltságot szem elõtt tartani, ugyanis lehet, hogy egy kisebb occupancy-val rendelkezõ nagyobb kernel jobb teljesítményt nyújt. Viszont az alacsony ($50\%$ alatti) például valószínû, hogy nem az ideális eredményt adja.
+	
+	%----------------------------------------------------------------------------
+	\subsection{A kód}
+	%----------------------------------------------------------------------------
+		Az \figref{Impl_Algorithm} ábrán látható felépítést követve, elõször a \verb+NBodyAlgorithmGPU+ osztály megvalósítását kezdtem el. Úgy terveztem, hogy \verb+__device__+ jelzõvel rendelkezõ, egymástól jól elkülöníthetõ függvényeket hozok létre. Ez a \verb+__global__+ kernel jelzõhöz hasonló szerepet tölt be. Megjelöli, hogy az adott függvény csak és kizárólag egy GPU-n futtatandó kernelbõl hívható.
+	
+		Body osztály használata helyett kicsomagoltam float3, float és float4 tömbökbe az attribútumokat a jobb teljesítmény, memória-, és regiszter felhasználás érdekében.
+	
+		Több kernelt megvalósítottam, hogy össze tudjam hasonlítani, milyen módon tudom elérni a legjobb teljesítményt. Ebbõl a legjobb futási idõvel rendelkezõt mutatom be.
+		
+		Elõször szépen \verb+float3+-mal próbálkoztam a pozíció értékek és \verb+float+-tal a tömegek eltárolására, de egy jobb megoldásnak bizonyul, ha float4-et alkalmazok. Ennek oka lehet, hogy globális memóriában a \verb+float4+-ek kitöltenek egy teljes szegmenst, míg a \verb+float3+-ak nem. Ezért \verb+float3+-nál több szegmens kiolvasása történhet meg, ha a szükséges adat két szegmensbe is belóg. A \verb+float4+ negyedik mezõjében (w) került eltárolása a tömeg.
+
+		\begin{lstlisting}
+__device__ float3 calculateAccelerationWithFloat4(float4 posI, float4 posJ, float3 accI) {
+	float3 r;
+
+	// A két test távolságvektora
+	r.x = posJ.x - posI.x;
+	r.y = posJ.y - posI.y;
+	r.z = posJ.z - posI.z;
+
+
+	// A két test skaláris távolsága
+	float rabs = sqrt(r.x * r.x + r.y * r.y + r.z * r.z + d_EPS2);
+
+	// A képlet nevezõje
+	float rabsInv = 1.0f / (rabs * rabs * rabs);
+	float temp = posJ.w * rabsInv;
+
+	// MAC mûvelet, gyorsulás meghatározása
+	accI.x += r.x * temp;
+	accI.y += r.y * temp;
+	accI.z += r.z * temp;
+
+	return accI;
+}
+		\end{lstlisting}
+	
+		A kód nagyon hasonlít a referencia megvalósításra, azonban a korábbiakhoz képest a calculateAcceleration végzi el a gyorsulásértékek akkumulálást is. Szorzás és összegzés (MAC - Multiply and Accumulate) mûvelet egy utasítást tesz ki és dedikált végrehajtó egysége is van, így nem érdemes szétválasztani õket.
+		
+		A \verb+d_EPS2+ egy az eszköz konstans memóriájában eltárolt érték.
+		
+		\begin{lstlisting}
+__device__ float3 advanceWithFloat4(float4 posI, float4 *g_pos) {
+	extern __shared__ float4 sh_pm[];
+
+	//Akkumulátor
+	float3 accI = { 0.0f, 0.0f, 0.0f };
+
+	// Tile-ok iterációja
+	for (int i = 0, tile = 0; i < d_NUM_BODY; i += blockDim.x, tile++) {
+		// Betöltendõ adat pozíciójának meghatározása
+		int tileID = tile * blockDim.x + threadIdx.x;
+
+		// Pozíció és tömeg betöltése a meghatározott tileID alapján
+		sh_pm[threadIdx.x] = g_pos[tileID];
+
+		//Szinkronizációs pont: shared memória töltése
+		__syncthreads();   
+
+		// Tile-okon belüli interakciók kiszámítása
+		#pragma unroll 128
+		for (int j = 0; j < blockDim.x; j++) {
+			accI = calculateAccelerationWithFloat4(posI, sh_pm[j], accI);
+		}
+		//Szinkronizációs pont: számítások vége
+		__syncthreads();    
+	}
+
+	return accI;
+}
+		\end{lstlisting}
+
+		Az \verb+advanceWithFloat4+ függvényben tartja számon a szál, hogy éppen megint tile elemein kell elvégezni a számításokat. Minden szál a meghatározott \verb+tileID+ alapján kikeresi a számára betöltendõ testet, így egy TB-n belül egy szál pontosan 1 elemét tölti be az osztott memóriába. A másolást követõen látható az elsõ szinkronizációs pont, melynek célja, hogy a szálak bevárják az összes test betöltõdését. A számítást követõen látható a második szinkronizáció, mely a következõ tile-ra lépést, és ezzel az osztott memória újratöltését akadályozza, míg van számítást végzõ szál.
+	
+		A még kiemelendõ rész az \verb+extern+ \verb+__shared__+ \verb+float4+ \verb+sh_pm[]+ sor. Ez a shared memóriát reprezentáló változó. Az \verb+extern+ kulcsszó jelöli meg, hogy az adott változó mérete kívülrõl kerül beállításra, futási idõben. Ezt a kernel futtatási konfigurációjánál kell megadni, a TB méretének megadása után. A \verb+__shared__+ jelöli, hogy az osztott memóriában helyezkedik el a \verb+sh_pm+ változó.
+	
+		Elõször külön shared változót szerettem volna létrehozni a tömeg és a pozíciók számára, de a futtatási paraméterekben csak egy tömbnek lehet megadni a méretét, a második mindig inicializálatlan marad. Ez is indokolta a \verb+float4+ típus használatát a globális memória szegmensei mellett.
+		
+		Shared memória megfelelõ használatának egy fontos eleme a bankkonfliktus elkerülése, mely során biztosítjuk, hogy a warp-on belüli szálak, más-más bank 32 bites rekeszeihez szeretnének hozzáférni. Ez a fenti kódban a \verb+float4+ használata miatt sajnos nem teljesül.
+
+		% Table generated by Excel2LaTeX from sheet 'Bank konfliktus'
+		\begin{table}[htbp]
+		  \centering
+		  \caption{Float4 tömb elhelyezkedése shared memóriában}
+			\begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}
+			\hline
+			Bank  & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & ...     & 30 & 31 & 0 & 1 \\
+			\hline
+			Test  & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 2 & 2 &...     & 7 & 7 & 8 & 8 \\
+			\hline
+			Adat  & x     & y     & z     & w     & x     & y     & z     & w     & x     & y     & ...     & z     & w     & x     & y \\
+			\hline
+			\end{tabular}%
+		  \label{tab:GPU_shared_float4}%
+		\end{table}%
+
+		Elsõ tranzakció során a testek pozíciójának $x$ koordinátája kerül beírásra, ugyanis warpon belüli szálak kötötten, egyszerre kerülnek végrehajtásra. A $0.$ szál beírja $0.$ test pozíciójának $x$ koordinátáját a $0.$ bankba, azonban az $1.$ szál nem a soron következõt fogja írni, hanem a $4$-et. Ez a hozzáférést eltolt (strided) hozzáférésnek is nevezik. A problémát a $8.$ szál fogja okozni. Az általa írt rekesz ugyanis a $0.$ szál által hozzáfért $0.$ bankban helyezkedik el. A lánc folytatódik tovább, így belátható, hogy a 32 bankból mindössze 8 lesz kihasználva. A további koordináták és a tömeg írásánál is ez történik. Eltolt hozzáférés esetén akkor oldható fel teljes egészében a bankkonfliktus, ha az eltolás mértéke egy páratlan szám. A \verb+float3+ típus viszont osztott memória sokkal kedvezõbb.
+
+		% Table generated by Excel2LaTeX from sheet 'Bank konfliktus'
+		\begin{table}[htbp]
+		  \centering
+		  \caption{Float3 tömb elhelyezkedése shared memóriában}
+			\begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|l|}
+			\hline
+			Bank  & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & ...     & 30 & 31 & 0 & 1 \\
+			\hline
+			Test  & 0 & 0 & 0 & 1 & 1 & 1 & 2 & 2 & 2 & 3 &...     & 10 & 10 & 10 & 11 \\
+			\hline
+			Adat  & x     & y     & z     & x     & y     & z     & x     & y     & z     & x     & ...     & x     & y     & z     & x \\
+			\hline
+			\end{tabular}%
+		  \label{tab:GPU_shared_float3}%
+		\end{table}%
+
+		A globális memória olvasása és a szegmenshatárok betartása miatt azonban teljesítményben lényegesen jobban teljesít ez a kernel. A bankkonfliktusok feloldása prioritásban alacsonyabb pozíciót foglal el, mint a globális memória sávszélesség optimalizálása, tekintve, hogy utóbbi jóval nagyobb hatással van a kernel futási teljesítményére.
+	
+		A belsõ \verb+for+ ciklus eleinte egy külön függvény, de egy idõ után zavarónak tartottam, így kiszedtem. Az \verb+unroll+ hatására növekedik a kód mérete, és a felhasznált regiszterek száma, ami azt eredményezi, hogy kevesebb TB fog elférni egyszerre egy SM-en belül, de az összteljesítmény növekedett.
+		
+		\begin{lstlisting}
+__global__ void integrateKernelWithFloat4(float4 *g_posOld, float4 *g_posNew, float4 *g_vel) {
+	// A célpont test sorszámának meghatározása
+	int globalThreadID = blockIdx.x * blockDim.x + threadIdx.x;
+
+	// A felesleges szálak deaktiválása
+	if (globalThreadID > d_NUM_BODY) return;
+
+	float stepTime2 = 0.5f * d_STEP_TIME * d_STEP_TIME;
+
+	// Célpont test adatainak beolvasása regiszterekbe
+	float4 posI = g_posOld[globalThreadID]; // coalesced
+	float4 velI = g_vel[globalThreadID];    // coalesced
+	float3 accI;
+
+	accI = advanceWithFloat4(posI, g_posOld);
+
+	// Pozíció frissítése
+	posI.x += velI.x * d_STEP_TIME; +accI.x * stepTime2;
+	posI.y += velI.y * d_STEP_TIME; +accI.y * stepTime2;
+	posI.z += velI.z * d_STEP_TIME; +accI.z * stepTime2;
+
+	// Sebesség frissítése
+	velI.x = velI.x * d_VELOCITY_DAMPENING + accI.x * d_STEP_TIME;
+	velI.y = velI.y * d_VELOCITY_DAMPENING + accI.y * d_STEP_TIME;
+	velI.z = velI.z * d_VELOCITY_DAMPENING + accI.z * d_STEP_TIME;
+
+	// Eredmények visszaolvasása a globális memóriába
+	g_posNew[globalThreadID] = posI;
+	g_vel[globalThreadID] = velI;
+	//g_acc[globalThreadID] = accI;
+}
+		\end{lstlisting}
+
+		A kernel elõször a szál sorszámának meghatározásával kezdõdik. Ez egyben meghatározza, hogy melyik testnek kell kiszámolnia az adatait. Amennyiben több szálat indítottunk, mint amennyi testünk van, a felesleges szálak deaktiválásra kerülnek. Ilyen helyzet áll elõ, ha a testek száma nem osztható a TB-ben lévõ szálak számával.
+	
+		A szálak által közösen használt változók \verb+d_NUM_BODY+, \verb+d_VELOCITY_DAMPENING+, \verb+d_STEP_TIME+ mindegyike konstans memóriában vannak eltárolva. Kiszámításra kerül a \verb+steptime+ négyzete, ami egy kezdetlegesebb kernel hagyatéka, és így utólag belegondolva célszerûbb lett volna konstans memóriába betölteni a host-ból. Eleinte azonban problémák adódtak a konstans memória használatával. Egyrészt osztály tagváltozójaként nem lehet deklarálni, fordítási idõben léteznie kell, másrész az õsosztály header fájljában deklarálva, a \verb+cudaMemcpyToSymbol+ (konstans memóriába másolás) nem tudott bele értéket írni.
+	
+		A célpont adatait egyszerû változó deklarációval és értékadással belerakjuk a gyors hozzáférésû regiszterekbe. Ha a regiszterek elfogytak, akkor kerül használatra a lassú, de cache-sel rendelkezõ lokális memória. Mivel az azonos típusú elemek egy tömböt alkotnak és nem test szerint vannak a globális memóriában rendezve az adatok, a \verb+float4+ értékek kiolvasása \emph{coalesced}. Ez azt jelenti, hogy warp-on belüli szálak sorfolytonos memóriarekeszekhez szeretnének hozzáférni, így minimalizálva a szükséges memória tranzakciók számát. Ha \verb+Body+ struktúrák tömbje lenne a globális memóriába másolva, akkor a kiolvasás \emph{strided} lenne, melynek eredménye, hogy az adott pillanatban felesleges, tömeg, gyorsulásvektor és sebességvektor is beolvasásra kerül. Ezzel a felhozott memóriaszegmensek száma lényegesen nagyobb lenne.
+	
+		A kiszámolt adatok visszaírása felvet egy problémát. Mivel az egyes szálak, egymástól függetlenül (kommunikáció nélkül) futnak, ezért az új pozícióértékek visszaírása gondot jelent. Elõfordulhat olyan helyzet, hogy egy szál már befejezte a mûködését, visszaírta az eredményt, de egy másik szál még csak akkor kezdi a számítását. Ahhoz, hogy mindig konzisztens adatokkal tudjanak dolgozni, a közösen felhasznált pozícióvektorokat bufferelni kell. Kell két \verb+float4+ tömb a globális memóriában, melyek közül az egyiket csak olvassa, a másikat pedig csak írja a kernel. Kernel újrahívásakor (a következõ iteráció kezdetén) a host a két buffert kicseréli: amit legutóbb írt a kernel, azt fogja olvasni.
+	
+		A nagyobb futási sebesség eléréséhez gyorsulásvektor visszaírása ki van kommentezve a fenti kódban, mert az értéke minden iterációban felül lesz írva. A host oldal pedig jelenleg nem dolgozik a kiszámolt értékekkel, a megjelenítés és a referenciamodell számára csak a pozícióértékek a relevánsak.
+
+		\begin{lstlisting}
+...
+integrateKernelWithFloat4 <<< m_gridSize, m_threadBlockSize, m_sharedMemorySize >>> (mpd_position4[1 - m_writeable], mpd_position4[m_writeable], mpd_velocity4);
+
+// Kernelhívás státuszának ellenõrzése
+cudaError_t kernelStatus = cudaGetLastError();
+if (kernelStatus != cudaSuccess) {
+	std::cerr << "Kernel launch failed: " << cudaGetErrorString(kernelStatus) << std::endl;
+}
+
+// Várakozás a kernel befejezésére
+checkCudaError(cudaDeviceSynchronize());
+
+// Pozícióértékek visszaolvasása további feldolgozása
+checkCudaError(cudaMemcpy(mph_position, mpd_position[m_writeable], mp_properties->numBody * sizeof(float3), cudaMemcpyDeviceToHost));
+checkCudaError(cudaMemcpy(mph_position4, mpd_position4[m_writeable], mp_properties->numBody * sizeof(float4), cudaMemcpyDeviceToHost));
+
+// érték invertálás, buffer váltása
+m_writeable = 1 - m_writeable; 
+...
+		\end{lstlisting}
+
+		A kernel konfigurációs listájában szerepel $3.$ paraméterként a shared memória mérete bájtokban megadva. Ennek értéke a futtatandó szálak számától változik. 256 szál esetén, egyszerre 256 test adatai lesznek betöltve a shared memóriába, így $256 \cdot 4 \cdot sizeof(float)$, azaz 4 kB lesz.
+	
+		Az argumentumban látható a dupla bufferelés megoldása. Az \verb+m_writeable+ változó $0$ vagy $1$ értéket vehet, ezzel megszabva, hogy a kernelben melyik \verb+mpd_position4+ lesz az új, melyik a régi értékeket tároló tömb. Az eredmények visszamásolását követõen történik a bufferek váltása az \verb+m_writeable+ értékének invertálásával.
+	
+		Az egyes CUDA függvényhívások elõtt látható egy \verb+checkCudaError+ nevû \verb+define+, mely az alábbi kódrészlet szerint ellenõrzi, hogy a visszatérési érték \verb+cudaSuccess+-e. Amennyiben eltérést tapasztal, lekérdezi a hiba okát, kiírja azt, majd kilép a programból.
+
+		\begin{lstlisting}
+#define checkCudaError(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true) {
+	if (code != cudaSuccess) {
+		std::cerr << "CUDA failure: " << cudaGetErrorString(code) << " in " << file << " at line " << line << std::endl;
+		if (abort)
+			exit(code);
+	}
+}
+		\end{lstlisting}
+		
+		A kernel méretét a setKernelParameters függvény csinálja, mely beolvassa a rendelkezésre álló GPU információit és az alapján próbál egy legalább $75\%$-os kihasználtságú futtatási konfigurációt beállítani. Ez volt a tervem legalábbis. A nagyszámú regisztereket használó kernelem azonban ezt megnehezítette. Próbálkozások során a legjobb eredményt a 256 szállal rendelkezõ TB-ok adták. A TB-ok darabszámát (rács méretét) a testek száma osztva a TB méretével adja ki.
+	
+		A kernel futásának végét a cudaDeviceSynchronize függvény segítségével tudjuk bevárni, lehetõvé téve, hogy az eredmények visszamásolhatók legyenek.
+		
+	%----------------------------------------------------------------------------
+	\subsection{Problémák}
+	%----------------------------------------------------------------------------
+		%----------------------------------------------------------------------------
+		\subsubsection{Watchdog}
+		%----------------------------------------------------------------------------
+			Ha a szimuláció tovább tartott, mint $2$ másodperc a Windows watchdog-szerû mûködés szerint újraindította és alaphelyzetbe állította a videokártya drivert, és vele együtt a GPU-t. Ezt a registry-ben található határérték módosításával kiküszöböltem.
+		
+		%----------------------------------------------------------------------------
+		\subsubsection{NSight debugger}
+		%----------------------------------------------------------------------------
+			Technikai problémába ütköztem, amikor a GPU kernelt debugolni próbáltam. Folyton hibaüzenettel véget ért a debug mód:
+			\begin{quote}
+			CUDA context was created on a GPU that is not currently debuggable.
+			\end{quote}
+			A számítógépemben található kettõ GPU közül csak az egyik CUDA kompatibilis, a másik egy integrált Intel GPU. Az NVIDIA NSight debugger, akkor mûködik, ha a monitor vezérlését nem a vizsgálat alatti GPU végzi.
+			
+			Elõször megpróbáltam a megjelenítést kizárólagosan az integrált Intel GPU-ra bízni, ám ez nem segített. Aztán fórumokon olvasott javaslatok alapján frissítettem a CUDA-t 7.0-ról 8.0-ra, ezzel együtt az NSight debuggert 4.5-rõl 5.2-re. Ezzel együtt a driver frissítése is szükségessé vált, ugyanis az új NVCC-vel fordított kódot nem tudta futtatni. Minden erõfeszítésem ellenére nem sikerült mûködésre bírni az NSight debuggert. Maradtam a régi módszernél, hogy kiíratom a változók értékét konzolra.
+
