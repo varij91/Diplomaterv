@@ -1,9 +1,9 @@
 %----------------------------------------------------------------------------
 \section{OpenMP}
 %----------------------------------------------------------------------------
-	Elsõ lépésben az egyik legegyszerûbben elérhetõ és relatíve kevés munkát igénylõ OpenMP felhasználásával igyekeztem a munkát szétosztani szálak között. Kiválóan alkalmazható olyan problémák esetén, ahol a párhuzamosítandó részek mérete futási idõben dõl el.
+	Elsõ lépésben az egyik legegyszerûbben elérhetõ és relatíve kevés kód írást igénylõ OpenMP felhasználásával igyekeztem a munkát szétosztani szálak között. Kiválóan alkalmazható olyan problémák esetén, ahol a párhuzamosítandó részek mérete futási idõben dõl el.
 
-	Az OpenMP (Open Multi-Processing) egy specifikáció, a kiegészítése a C és C++ nyelveknek, mely már igen széleskörû támogatottságot élvez a nagy hardver- és szoftvergyártók részérõl. 
+	Az OpenMP (Open Multi-Processing) egy specifikáció, kiegészítése a C és C++ nyelveknek, mely már igen széleskörû támogatottságot élvez a nagy hardver- és szoftvergyártók részérõl. 
 
 	A kiegészítés elsõsorban fordító direktívákat definiál, melyek használatával kijelölhetõk a kódban azok a program részek, amelyeket szeretnénk, ha a fordító megpróbálna párhuzamosítani. Az úgynevezett \emph{fork-join} modellt valósítja meg az OpenMP, melyben a teljes program felosztható egymást követõ szekvenciális és párhuzamos részekre. A program sorosan végrehajtandó kóddal indul, majd elágazik egymástól független részekre és végül újra egyesül \cite{omp}.
 
@@ -14,7 +14,7 @@
 	\label{fig:Impl_ForkJoin}
 	\end{figure}
 
-	Bizonyos helyzetekben elég néhány sort beírni egy teljesen szekvenciális programba és máris számottevõ növekedést lehet elérni. Mind minden párhuzamosítási technológiánál itt is figyelni kell a közös használatú változókra, amennyiben van ilyen. Bizonyos fordítók automatikusan szétosztják a feladatokat a processzormagok között.
+	Bizonyos helyzetekben elég néhány sort beírni egy teljesen szekvenciális programba és máris számottevõ növekedést lehet elérni. Mint minden párhuzamosítási technológiánál itt is figyelni kell a közös használatú változókra, amennyiben van ilyen. Bizonyos fordítók automatikusan szétosztják a feladatokat a processzormagok között.
 
 	Az egyik legjobban párhuzamosítható programrész, az egymástól \emph{független adatokkal dolgozó ciklus}. A megoldás itt az jelenti, ha a ciklust feldaraboljuk, annyi kisebb ciklusra ahány szálat szeretnénk létrehozni. A keletkezett kisebb ciklusok végrehajtását pedig szétosztjuk a magok között:
 
@@ -31,7 +31,7 @@ for(int i = N/2; i < 3*N/4 ; i++) {...} // 3. mag
 for(int i = 3*N/4; i < N ; i++) {...}   // 4. mag
 	\end{lstlisting}
 
-	A magok közötti szétosztást a fenti módszerrel még nem tettük meg, viszont így látható, hogy milyen irányból közelíti meg a problémát az OpenMP. Az alábbi \verb+pragma+ direktívával kiegészített kód hatására a fordító párhuzamosítani fogja a közvetlenül utána következõ \verb+for+ ciklust. Minden szálhoz létrehoz egy ciklusváltozót lokálisan, a többi korábban deklarált változó $(N, a, b, c)$ viszont közös használatú. a \verb+num_threads(x)+ határozza meg a létrehozandó szálak számát. Amennyiben nincs megadva az alapértelmezett érték a maximum elérhetõ szálszám lesz. Esetemben ez az \tabref{szgspecifikacio} táblázat alapján 8.
+	A magok közötti szétosztást a fenti módszerrel még nem tettük meg, viszont így látható, hogy milyen irányból közelíti meg a problémát az OpenMP. Az alábbi \verb+pragma+ direktívával kiegészített kód hatására a fordító párhuzamosítani fogja a közvetlenül utána következõ \verb+for+ ciklust. Minden szálhoz létrehoz egy ciklusváltozót lokálisan, a többi korábban deklarált változó $(N, a, b, c)$ viszont közös használatú. a \verb+num_threads(x)+ határozza meg a létrehozandó szálak számát. Amennyiben nincs megadva az alapértelmezett érték a maximum elérhetõ szálszám lesz. Esetemben ez a \tabref{szgspecifikacio} táblázat alapján 8.
 
 	\begin{lstlisting}
 #pragma omp parallel for num_threads(4)
@@ -84,7 +84,7 @@ for(int i = 0; i < N ; i += 4) {
 }
 	\end{lstlisting}
 
-	Ezzel a vezérlõ (control-flow) utasítások aránya csökkent, a ciklus mag utasításainak számához képest. A fordítók sokszor automatikusan élnek ezzel a megoldással. Ha N kicsi elõfordulhat, hogy a ciklus teljes mértékben ki lesz bontva. Egyetlen hátránya az \verb+unroll+-nak, hogy a kód hosszabb lesz és több helyet foglal fordítás után.
+	Ezzel a vezérlõ (control-flow) utasítások aránya csökkent, a ciklus mag utasításainak számához képest. A fordítók sokszor automatikusan élnek ezzel a megoldással. Ha $N$ kicsi elõfordulhat, hogy a ciklus teljes mértékben ki lesz bontva. Egyetlen hátránya az \verb+unroll+-nak, hogy a kód hosszabb lesz és több helyet foglal fordítás után.
 
 	Látható, hogy a szimulátor számításigényesebb részeit mindösszesen két sor beírásával sikerült párhuzamosítani, a probléma jellegébõl adódóan. A független számításokat tartalmazó kódrészletek, nagyon hatékonyan párhuzamosíthatók OpenMP segítségével. A profilert eredménye látható a \figref{Impl_basic_vs_omp} ábrán, a négy magos CPU kihasználtsága jelentõsen megnövekedett és a futási idõ lerövidült.
 

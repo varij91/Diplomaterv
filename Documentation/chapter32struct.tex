@@ -8,7 +8,7 @@
 	\begin{itemize}
 		\item Legyen könnyen karbantartható, az implementált osztályhierarchia legyen nyitott a késõbbi kiegészítésekre és módosításokra.
 		\item Minél jobb párhuzamosítási eredmény elérése.
-		\item Futtatási paraméterek (konfiguráció) kívülrõl legyenek beállíthatók a felhasználó által, újrafordítás nélkül.
+		\item Futtatási paraméterek (konfiguráció) legyenek a felhasználó által, újrafordítás nélkül állíthatók.
 		\item Egy szálon futó referenciamodell biztosítása az eredmények számszerû ellenõrzéséhez.
 		\item Grafikus megjelenítés az ellenõrzéshez.
 		\item Számítási teljesítmény mérése és kijelzése.
@@ -53,7 +53,7 @@
 			\hline
 			Attribútum & Leírás \\
 			\hline \hline
-			mode  & Program felhasználás szempontjából a legalapvetõbb beállítás, mellyel megadható, hogy grafikus kijelzést vagy teljesítménymérést szeretnénk végezni a futtatás során.  \\
+			mode  & Program felhasználásának szempontjából a legalapvetõbb beállítás, mellyel megadható, hogy grafikus kijelzést vagy teljesítménymérést szeretnénk végezni a futtatás során.  \\
 			\hline
 			algorithm & Az algoritmus típusát választhatjuk ki. Jelenleg csak ALL\_PAIRS opció a támogatott, mely az \sectref{nbody_direct} fejezetben bemutatott direkt módszernek felel meg. \\
 			\hline
@@ -83,7 +83,7 @@
 			\hline
 			startTime & Szimuláció kezdés idõpontja. Jelenleg nem sok mindent befolyásol. Tipikusan 0 értékû. \\
 			\hline
-			stepTime & Szimulációs lépésköz. Új pozíció, sebességértékek meghatározásánál van fontos szerepe. \\
+			stepTime & Szimulációs lépésköz. Új pozíció- és sebességértékek meghatározásánál van fontos szerepe. \\
 			\hline
 			endTime & A szimuláció végidõpontja. A startTime és a stepTime segítségével kalkulálódik ki a szimulációs iterációk száma. \\
 			\hline
@@ -119,7 +119,7 @@
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyAlgorithm}
 		%----------------------------------------------------------------------------
-			Egy absztrakt õsosztály, mely egy egységes interfész szerepét tölti be. A program szimulációért felelõs osztálya egy ilyen típusú pointerrel rendelkezik, ami ténylegesen egy tagfüggvény implementációkat már tartalmazó, leszármazott osztály egy objektumára mutat.
+			Egy absztrakt õsosztály, mely az egységes interfész szerepét tölti be. A program szimulációért felelõs osztálya egy ilyen típusú pointerrel rendelkezik, ami ténylegesen egy tagfüggvény implementációkat már tartalmazó, leszármazott osztály egy objektumára mutat.
 			
 			Az \verb+advance+ metódus meghívásával minden testre kiszámításra kerülnek az új gyorsulás értékek, valamint ezek függvényében frissül a pozíció- és a sebességvektor is. A program futása során ebben a metódusban tölti el a legtöbb idõt.
 			
@@ -128,9 +128,9 @@
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyAlgorithmCPU}
 		%----------------------------------------------------------------------------
-			Szintén egy absztrakt osztály, melynek leglényegesebb feladata, hogy a testpárok közötti gyorsulás értékeket kiszámító \verb+calculateAcceleration+ tagfüggvények definícióit tartalmazza. Két test közötti interakció mértékének kiszámítása ugyanis teljes egészében algoritmus független.
+			Szintén egy absztrakt osztály, mely a testpárok közötti gyorsulás értékeket kiszámító \verb+calculateAcceleration+ tagfüggvények definícióit tartalmazza. Két test közötti interakció mértékének kiszámítása ugyanis teljes egészében algoritmus független.
 			
-			Az \figref{Impl_Algorithm} ábrán csak egy metódust jelöltem meg, azonban ténylegesen 6 \verb+calculateAcceleration+ került megvalósításra. Ebbõl 3 a teljesítményméréshez, 3 pedig a grafikus kijelzéshez használatos; 1-1 sor plusz kódot (szomszédok számának meghatározása) és argumentumot leszámítva páronként azonosak. A három tagfüggvénybõl kettõ használ speciális párhuzamosítási technikákat, a harmadik natív C++ referenciafüggvény. Sima C++ megvalósítás esetén 1, SSE esetén egyszerre $4$, AVX esetén pedig egyszerre 8 gyorsulás érték kerül kiszámításra.
+			Az \figref{Impl_Algorithm} ábrán csak egy metódust jelöltem meg, azonban ténylegesen 6 \verb+calculateAcceleration+ került megvalósításra. Ebbõl 3 a teljesítményméréshez, 3 pedig a grafikus kijelzéshez használatos; 1-1 sor plusz kódot (szomszédok számának meghatározása) és argumentumlistát leszámítva páronként azonosak. A három tagfüggvénybõl kettõ használ speciális párhuzamosítási technikákat, a harmadik natív C++ referenciafüggvény. Sima C++ megvalósítás esetén 1, SSE esetén egyszerre $4$, AVX esetén pedig egyszerre 8 gyorsulás érték kerül kiszámításra.
 			
 			A különbözõ N-test algoritmus implementációk ebbõl az osztályból származnak le. A következõ lépés lehetne egy \verb+NBodyAlgorithmCPUBarnesHut+ osztály megvalósítása például.
 
@@ -188,7 +188,7 @@
 		%----------------------------------------------------------------------------
 			Szintén egy próbálkozás volt a teljesítmény növelésére. A \verb+Body+ osztály használata és AoS megoldás helyett, egyszerû, dinamikusan allokált tömböket hoztam létre. Látható, hogy nem tartalmaz referenciát semmilyen algoritmusra, ugyanis az \verb+integrate+ függvényben valósítottam meg a számításokat. A teljesítménynövekedés számottevõ volt, melyrõl majd a késõbbiekben beszámolok.
 		
-			Ez az osztály csak a programkód módosításával példányosítható és használható.
+			Ez az osztály csak a programkód módosításával példányosítható és használható, a felhasználó által nem.
 
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyInitializator}
@@ -204,11 +204,11 @@
 		%----------------------------------------------------------------------------
 			Az osztály teljesen statikus, példány nem hozható létre. Erre a \emph{callback} függvények használata miatt volt szükség, melyeket az OpenGL használ, miután meghívódott a vezérlõ ciklusát tartalmazó függvénye. 
 		
-			Az \verb+initGL+ tagfüggvény állítja be a legfontosabb paremétereket, pl.: ablak méret, háttérszín, élsimítás bekapcsolása.
+			Az \verb+initGL+ tagfüggvény állítja be a legfontosabb paremétereket, pl.: ablak méret, háttérszín, élsimítás.
 		
 			A \verb+renderCallback+ az, ami meghívja a példányosított \verb+NBodySystem+ \verb+advance+ metódusát és méri az eltelt szimulációs idõt. Miután kiszámításra kerültek az új pozícióértékek, meghívja a \verb+renderSystem+ nevû függvényt, mely kirajzoltatja az egyes pontokat a képernyõre. Ez használja fel a \verb+getColor+ nevû segédfüggvényt, mely minden testnek beállítja a színét, a közelében elhelyezkedõ testek száma alapján. Minél több ,,szomszédja'' van annál világosabb a színe.
 		
-			A \verb+main+ függvény az amely ezt példányosíthatja. Grafikus kijelzésnél nincs idõ- és teljesítménymérés.
+			A \verb+main+ függvény az, amely ezt példányosíthatja. Grafikus kijelzésnél nincs idõ- és teljesítménymérés.
 
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyUtility}
@@ -224,7 +224,7 @@
 		%----------------------------------------------------------------------------
 			Itt kerül példányosításra minden központi osztály, melyek aztán \verb+shared pointer+-rel hivatkoznak egymásra.
 		
-			Ha grafikus kijelzés be lett állítva, akkor az \verb+NBodyRenderer+ \verb+renderMainLoop+ statikus tagfüggvénye veszi át a vezérlést. Teljesítménymérés üzemmód esetén pedig az \verb+NBodySystem+ \verb+integrate+ metódusa lesz végzi a szimulációt.
+			Ha grafikus kijelzés be lett állítva, akkor az \verb+NBodyRenderer+ \verb+renderMainLoop+ statikus tagfüggvénye veszi át a vezérlést. Teljesítménymérés üzemmód esetén pedig az \verb+NBodySystem+ \verb+integrate+ metódusa végzi a szimulációt.
 
 			A \figref{Impl_ProgramInitSeq} és a \figref{Impl_SimulationSeq} ábra a szimulátor mûködését mutatja be. Az egyes fázisok egymást követik, de külön-külön jobban ábrázolhatók.
 

@@ -119,7 +119,7 @@
 				\mathbf{v_{i}}\left ( t + \Delta t \right ) := \mathbf{v_{i}}\left ( t \right ) + \mathbf{a_{i}}\left ( t  \right )\Delta t
 			\end{align}
 			
-			A fentiekbõl látható, hogy a lépésköz megválasztásával állítható a meghatározott pozíciók és sebességértékek felbontása. Azonban a lépésköz csökkentésével elkerülhetetlenül növekszik a szimuláció során elvégzendõ számítások mennyisége, így a lépésköz helyes megválasztása mindig kiemelt fontosságú feladat.
+			A fentiekbõl látható, hogy a lépésköz megválasztásával állítható a meghatározott pozíciók és sebességértékek felbontása. A lépésköz csökkentésével azonban elkerülhetetlenül növekszik a szimuláció során elvégzendõ számítások mennyisége, így a lépésköz helyes megválasztása mindig kiemelt fontosságú feladat.
 			
 			Ahhoz, hogy a fent levezetett képletek használhatók legyenek, minden testnek kell rendelkeznie kezdeti feltételekkel. A szimuláció elõtt minden test számára megadandó értékek:
 			\begin{itemize}
@@ -148,7 +148,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Direkt módszer}\label{sect:nbody_direct}
 		%----------------------------------------------------------------------------
-			A legegyszerûbb és legkézenfekvõbb megoldás a számítás elvégzésére, ha minden egyes kölcsönhatást kiszámolunk. $N$ darab test esetén minden egyes test hat a másikra, tehát egy kiszemelt test esetében $N - 1$ kölcsönhatást kell kiszámolnunk. Így összességében $N(N - 1)$ erõ kiszámítása szükséges egy idõpillanatban. Newton 3. axiómája értelmében, ha két test erõvel hat egymásra, akkor az az erõ mindkét testre ugyanolyan nagyságú és ellentétes irányú. Ez lehetõséget biztosít a szükséges számítások mennyiségének csökkentésére. Azonban párhuzamosított algoritmusok esetén nehezen kihasználható, ugyanis szükségessé teszi az eredetileg egymástól független számításokat végzõ szálak közti kommunikációt, ami jelentõsen lassíthatja a számítást végzõ program futását.
+			A legegyszerûbb és legkézenfekvõbb megoldás a számítás elvégzésére, ha minden egyes kölcsönhatást kiszámolunk. $N$ darab test esetén minden egyes test hat a másikra, tehát egy kiszemelt test esetében $N - 1$ kölcsönhatást kell kiszámolnunk. Így összességében $N(N - 1)$ erõ kiszámítása szükséges egy idõpillanatban. Newton 3. axiómája értelmében, ha két test erõvel hat egymásra, akkor az az erõ mindkét testre ugyanolyan nagyságú és ellentétes irányú. Ez lehetõséget biztosít a szükséges számítások mennyiségének csökkentésére. A párhuzamosított algoritmusok esetén azonban nehezen kihasználható, ugyanis szükségessé teszi az eredetileg egymástól független számításokat végzõ szálak közti kommunikációt, ami jelentõsen lassíthatja a számítást végzõ program futását.
 
 			Az algoritmus komplexitása a testek számával négyzetes növekszik, így ez megfelelõ számítási kapacitás hiányában csak korlátozott mértékben használható módszer.
 			

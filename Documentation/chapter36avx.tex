@@ -45,25 +45,27 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8],
 	\end{lstlisting}
 	
 	A típusnév és a függvénynevek kiegészültek egy 256-os jelzõvel, de az alapelképzelés mit sem változott az SSE variációhoz képest.
+	%----------------------------------------------------------------------------
+	\subsection{Probléma}
+	%----------------------------------------------------------------------------
+		Amikor lefuttattam a szimulációt ugyanazon konfigurációval, mint az SSE-t, nem tapasztaltam semmi javulást a futási idõben. Sõt, az eredmények azt mutatták, hogy az SSE a gyorsabb.
 
-	Viszont amikor lefuttattam a szimulációt ugyanazon konfigurációval, mint az SSE-t, nem tapasztaltam semmi javulást a futási idõben. Sõt, az eredmények azt mutatták, hogy az SSE a gyorsabb.
+		Eleinte, valami projekt beállítási problémára gyanakodtam, de miután nem találtam semmit, a kódban kerestem a hibát. Arra a következtetésre jutottam, hogy valahol egy olyan ,,bottleneck'' van a programban, ami nem hagyja, hogy a teljes rendelkezésre álló számítási kapacitás ki legyen használva. Ennek oka lehet például adatmozgatási, függvényhívási probléma, melyek visszavezethetõ memória tranzakciókra.
 
-	Eleinte, valami projekt beállítási problémára gyanakodtam, de miután nem találtam semmit a kódban kerestem a hibát. Arra a következtetésre jutottam, hogy valahol egy olyan ,,bottleneck'' van a programban, ami nem hagyja, hogy a teljes rendelkezésre álló számítási kapacitás ki legyen használni. Ennek oka lehet például adatmozgatási, függvényhívási probléma, melyek visszavezethetõ memória tranzakciókra.
+		Végsõ soron ebben az irányban kezdtem el megoldást keresni: valamilyen formában csökkentenem kell a memória hozzáférések számát és javítanom kell a testek adattárolási módján. A jelenlegi AoS megoldás, nem a legjobb megvalósítás a cache szempontjából.
 
-	Végsõ soron ebben az irányban kezdtem el megoldást keresni: valamilyen formában csökkentenem kell a memória hozzáférések számát és javítanom kell a testek adattárolási módján. A jelenlegi AoS megoldás, nem a legjobb megvalósítás a cache szempontjából.
+		Felmerülhet a kérdés, hogy ha ilyen korlát van és volt a programban, akkor vajon a referenciamodell és az SSE implementáció teljesítménye, mennyire közelíti meg a maximálisan elérhetõt?
 
-	Felmerülhet a kérdés, hogy ha ilyen korlát van és volt a programban, akkor vajon a referenciamodell és az SSE implementáció teljesítménye, mennyire közelíti meg a maximálisan elérhetõt?
+		A következõ alfejezetekben olyan megoldásokkal próbálkoztam, melyeknél a teljesítményt tartottam szem elõtt és feláldoztam a program osztályait. Ezeket teljes mértékben próbaképp, ideiglenesen hoztam létre, így nem biztosítottam lehetõséget a felhasználó számára ezek bekapcsolására.
 
-	A következõ alfejezetekben olyan megoldásokkal próbálkoztam, melyeknél a teljesítményt tartottam szem elõtt és feláldoztam a program osztályait. Ezeket teljes mértékben próbaképp, ideiglenesen hoztam létre, így nem biztosítottam lehetõséget a felhasználó számára ezek bekapcsolására.
-
-	Itt megjegyezném, hogy több projektet is létrehoztam a diplomamunkám során, s akárcsak korábbi egy alkalommal, azt tapasztaltam, hogy a Visual Studio-ban létrehozott, SSE és AVX kódot is tartalmazó NVIDIA CUDA projekt nem teljesít olyan jól. A ,,sima'' projekt, ahol csak CPU-n futtatható kódot írtam, az SSE és AVX sokkal jobb futási eredményeket produkált, így a továbbiakban a vektorizációs eredményeket ez alapján mutatom be. A két projekt SSE és AVX része között nincs sok eltérés és a profiler sem ad magyarázatot erre a jelenségre.
+		Itt megjegyezném, hogy több projektet is létrehoztam a diplomamunkám során, s akárcsak korábbi egy alkalommal, azt tapasztaltam, hogy a Visual Studio-ban létrehozott, SSE és AVX kódot is tartalmazó NVIDIA CUDA projekt nem teljesít olyan jól. A ,,sima'' projekt, ahol csak CPU-n futtatható kódot írtam, az SSE és AVX sokkal jobb futási eredményeket produkált, így a továbbiakban a vektorizációs eredményeket ez alapján mutatom be. A két projekt SSE és AVX része között nincs sok eltérés és a profiler sem ad magyarázatot erre a jelenségre.
 
 	%----------------------------------------------------------------------------
 	\subsection{Kibontott algoritmus}
 	%----------------------------------------------------------------------------
 		\emph{\textbf{Cél:} A függvényhívásokból eredõ overhead-ek megszüntetése.}
 
-		Elsõ próbálkozásom a teljesítmény javítására az algoritmus osztályok kiiktatása. Létrehoztam egy \verb+integrateFlat+ nevezetû metódust a \verb+BodySystem+ osztályon belül, mely imlementálja az algoritmus osztályokban található \verb+advance+ és \verb+calculateAcceleration+ tagfüggvényeket.
+		Elsõ próbálkozásom a teljesítmény javítására az algoritmus osztályok kiiktatása volt. Létrehoztam egy \verb+integrateFlat+ nevezetû metódust a \verb+BodySystem+ osztályon belül, mely implementálja az algoritmus osztályokban található \verb+advance+ és \verb+calculateAcceleration+ tagfüggvényeket.
 
 		Az eredmény egy körülbelül $30\%$-os teljesítménybeli javulás.
 		
@@ -72,7 +74,7 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8],
 	%----------------------------------------------------------------------------
 		\emph{\textbf{Cél:} Az std::vector használatának mellõzése, jobb cache kihasználás.}
 
-		Létrehoztam egy \verb+NBodySystemFlat+ nevû osztályt, melyben \verb+std::vector+ helyett dinamikus tömböket használok a testek adatainak tárolására, ezzel valósítva meg a SoA-ként kezelve az információkat.
+		Létrehoztam egy \verb+NBodySystemFlat+ nevû osztályt, melyben \verb+std::vector+ helyett dinamikus tömböket használok a testek adatainak tárolására, ezzel a SoA-ként kezelve az információkat.
 
 		A kódban sokszor vannak olyan részek, melynél egymást követõ testeknek azonos típusú információjához (pl.: pozíció vektorhoz) szeretnének hozzáférni. Ez struktúrák esetén azt jelenti, hogy memóriában ,,ugrálni'' kell. A cache-be a legutóbb hozzáfért memóriarekesz tartalma és annak környezete is bekerül. Jelen esetben ez azt jelenti, hogy a pozícióérték hozzáférésekor betöltõdött a cache-be, a sebesség- és gyorsulásvektor is. Mivel a cache mérete limitált, így elõfordulhat, hogy felesleges memória tranzakciókat kénytelen végigvárni a program, ami teljesítményromlást okoz.
 
@@ -86,12 +88,12 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8],
 	%----------------------------------------------------------------------------
 		Az SSE és az AVX teljesítménybeli különbségein a fenti két próbálkozás semmit sem változtatott. Az SSE ugyanúgy, vagy még jobban teljesített, mint az AVX.
 
-		Némi keresgélés után az Intel egyik fórumán, találtam némi információt arra vonatkozóan, hogy mi lehet a probléma \cite{intelforum}:
+		Némi keresgélés után az Intel egyik oldalán, találtam némi információt arra vonatkozóan, hogy mi lehet a probléma \cite{intelforum}:
 
 		\begin{quote}
 			It is not at all unusual for AVX code on Sandy Bridge \& Ivy Bridge to be slightly slower than SSE code for data that is not contained in the L1 cache...
 		\end{quote}
 		
-		Az Intel egyik szoftverfejlesztõje által elvégzett kísérletek azt mutatták, hogy az AVX-et bemutató architektúrákon, az AVX teljesítménye kisebb volt, mint az SSE teljesítménye, abban az esetben, ha a szükséges adatok nem állnak rendelkezésre L1 cache-ben.
+		Az Intel szoftverfejlesztõje által elvégzett kísérletek azt mutatták, hogy az AVX-et bemutató architektúrákon, az AVX teljesítménye kisebb volt, mint az SSE teljesítménye, abban az esetben, ha a szükséges adatok nem állnak rendelkezésre L1 cache-ben.
 
 		\towrite{Ha marad idõ a vTune}

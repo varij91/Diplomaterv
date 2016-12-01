@@ -5,7 +5,7 @@ inline void NBodyAlgorithmCPUAllPairs::updateBodies(std::vector<Body> &bodies, i
     bodies.at(index).position.x += bodies.at(index).velocity.x * mp_properties->stepTime + bodies.at(index).acceleration.x * stepTime2;
     bodies.at(index).position.y += bodies.at(index).velocity.y * mp_properties->stepTime + bodies.at(index).acceleration.y * stepTime2;
     bodies.at(index).position.z += bodies.at(index).velocity.z * mp_properties->stepTime + bodies.at(index).acceleration.z * stepTime2;
-    //3*2 FLOPS
+    //3*3 FLOPS
     bodies.at(index).velocity.x = bodies.at(index).velocity.x * mp_properties->VELOCITY_DAMPENING + bodies.at(index).acceleration.x * mp_properties->stepTime;
     bodies.at(index).velocity.y = bodies.at(index).velocity.y * mp_properties->VELOCITY_DAMPENING + bodies.at(index).acceleration.y * mp_properties->stepTime;
     bodies.at(index).velocity.z = bodies.at(index).velocity.z * mp_properties->VELOCITY_DAMPENING + bodies.at(index).acceleration.z * mp_properties->stepTime;

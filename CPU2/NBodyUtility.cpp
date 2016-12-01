@@ -42,7 +42,7 @@ void NBodyUtility::printPerformace() {
     unsigned long long int numForcesTotal = numForcesPerTicks * ticks;
 
     long long int totalTime = getStopwatchTimeMilliseconds().count();
-    unsigned long long int totalFlops = numForcesTotal * 23 + mp_properties->numBody * 18;
+    unsigned long long int totalFlops = numForcesTotal * 20 + mp_properties->numBody * 21;
     std::cout << "--------------------------------------------" << std::endl;
     std::cout << "Number of calculated forces: " << ticks * mp_properties->numBody * mp_properties->numBody << std::endl;
     std::cout << "Simulation ticks:            " << ticks << std::endl;
@@ -58,7 +58,7 @@ void NBodyUtility::printPerformace(int scale) {
     unsigned long long int numForcesTotal = numForcesPerTicks * ticks;
     
     long long int totalTime = getStopwatchTimeMilliseconds().count();
-    unsigned long long int totalFlops = numForcesTotal * 23 + mp_properties->numBody * 18;
+    unsigned long long int totalFlops = numForcesTotal * 20 + mp_properties->numBody * 21;
     std::cout << "--------------------------------------------" << std::endl;
     std::cout << "Number of calculated forces: " << numForcesTotal *scale << std::endl;
     std::cout << "Simulation ticks:            " << ticks * scale << std::endl;
