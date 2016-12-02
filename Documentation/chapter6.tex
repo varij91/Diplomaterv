@@ -1,0 +1,24 @@
+%----------------------------------------------------------------------------
+\chapter{Eredmények kiértékelése}
+%----------------------------------------------------------------------------
+init fázis kimaradt a teljesítménymérésbõl
+
+	[KÉP: Lebegõpontos mûveletvégzés teljesítménye] vagy [KÉP: Másodpercenkénti iterációk száma (FPS)]
+
+	[KÉP: Futási idõk összehasonlítása]
+
+	\section{CPU}
+		% Elméleti határ???
+		% OpenMP Hyperthread nem ad mindig jobb eredményt mint a 4x-es növekedés
+
+	\section{GPU}
+		A legtöbb test amivel a szimulációt megpróbáltam az 32768 test volt, aminél 49 GFLOPS számítási teljesítényt sikerült elérnem. A elméleti korlátnak ez sajnos csak közel a fele.
+		% Elméleti határ 110 GFLOPS
+		Theorethical peak performance [GFLOPS] = num of Core * Core clk[MHz] * 2 / 1000
+			2, mert 2 utasítást hajt végre órajel ciklusonként
+			1000 a nagyságrend miatt.
+		% Profiler eredmények bemutatása
+
+%----------------------------------------------------------------------------
+\chapter{Összefoglalás}
+%----------------------------------------------------------------------------

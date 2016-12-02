@@ -58,8 +58,8 @@ int main(int argc, char* argv[])
         for (int i = 0; i < gp_properties->performanceRuns; i++) {
             gp_utility->startStopwatch();
             //gp_system->integrate();
-            gp_system->integrateFlat(); // BUG--> újra init kell a testeknek!!!!
-            //gp_systemFlat->integrate();
+            //gp_system->integrateFlat(); // BUG--> újra init kell a testeknek!!!!
+            gp_systemFlat->integrate();
             gp_utility->endStopwatch();
             gp_properties->currentTime = gp_properties->startTime;
         }

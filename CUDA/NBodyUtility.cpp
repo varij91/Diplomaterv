@@ -70,7 +70,7 @@ void NBodyUtility::printPerformace(int scale) {
     unsigned long long int numForcesPerTicks = mp_properties->numBody * mp_properties->numBody;
     unsigned long long int numForcesTotal = numForcesPerTicks * ticks;
     
-    long long int totalTime = getStopwatchTimeMilliseconds().count();
+    float totalTime = getStopwatchTimeMilliseconds().count();
     unsigned long long int totalFlops = numForcesTotal * 23 + mp_properties->numBody * 18;
     std::cout << "--------------------------------------------" << std::endl;
     std::cout << "Number of calculated forces: " << numForcesTotal *scale << std::endl;
@@ -78,8 +78,8 @@ void NBodyUtility::printPerformace(int scale) {
     std::cout << "Total time:                  " << totalTime << " ms" << std::endl;
     std::cout << "Average time:                " << totalTime / scale << " ms" << std::endl;
     std::cout << "Total FLOPS                  " << totalFlops << std::endl;
-    std::cout << "Forces/Second:               " << numForcesTotal / totalTime * 1e3 * scale << std::endl;
-    std::cout << "GFLOPS:                      " << totalFlops / totalTime * 1e-6 * scale << std::endl; // 1e3*1e-9 = 1e-6
+    std::cout << "Forces/Second:               " << numForcesTotal / (totalTime + 1e-6f) * 1e3 * scale << std::endl;
+    std::cout << "GFLOPS:                      " << totalFlops / (totalTime + 1e-6f) * 1e-6 * scale << std::endl; // 1e3*1e-9 = 1e-6
 }
 
 void NBodyUtility::printProgramUsage(std::string name) {

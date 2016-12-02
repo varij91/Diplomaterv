@@ -14,3 +14,28 @@ Jelen dokumentum egy diplomaterv sablon, amely formai keretet ad a BME Villamosm
 This document is a \LaTeX-based skeleton for BSc/MSc~theses of students at the Electrical Engineering and Informatics Faculty, Budapest University of Technology and Economics. The usage of this skeleton is optional. It has been tested with the \emph{TeXLive} \TeX~implementation, and it requires the PDF-\LaTeX~compiler.
 \vfill
 
+
+
+
+%----------------------------------------------------------------------------
+\chapter{Kivonat}
+%----------------------------------------------------------------------------
+	% Probléma ismertetése
+		% Párhuzamos programozás elõtérbe került
+		% Fizikai szimulációk
+		% Gravitációs N-test probléma jól párhuzamosítható
+	% 1 éves munkám
+		Dolgozatom a gravitációs N-test probléma elméleti bemutatásával indul, melyben levezetem a megvalósítandó összefüggéseket és rövid ismertetõt adok a gyakran használt algoritmusokról.
+		Ezt követõen a párhuzamosítási lehetõségek közül kiemelem az NVIDIA grafikus processzorokat (GPU), és általánosan ismertetem hardveres felépítésüket, valamint a hozzájuk tartozó CUDA programozási modellt.
+		
+		Célom egy olyan szimulátor program megvalósítása, mely teljesen szekvenciális megvalósítás mellett különbözõ párhuzamosítási technológiákat is képes felhasználni és ezeket teljesítmény szempontjából összehasonlítani.
+	% Elõremutató konklúzió
+		%Jelen idõ kellene
+		Munkám során bemutatom a megtervezett N-test szimulátort, mely felhasznál 
+		
+		Munkám során megterveztem és megvalósítottam egy N-test szimulációt végzõ programot, majd felgyorsítottam alkalmazva az OpenMP többszálúsítás és SSE/AVX vektorizáció által nyújtott lehetõségeket. A CPU-s implementáció után áttértem az NVIDIA CUDA platformra és GPU-n futtatható verziót is készítettem. A szimulációt OpenGL felhasználásával grafikusan megjelenítve, valamint számszerûen is ellenõriztem. Dolgozatom a futási eredmények összehasonlításával és a fejlesztés kiértékelésével zártam. 
+%----------------------------------------------------------------------------
+\chapter{Abstract}
+%----------------------------------------------------------------------------
+
+A modern processzorok döntõ többsége rendelkezik a párhuzamos programvégrehajtás képességével, mellyel jelentõs számítási potenciált hordoznak magukban. Megfelelõ kihasználása azonban sok esetben nem egyszerû feladat. Nehézséget jelent például programozásuk során a szekvenciális gondolkodásmódtól való eltérés, adatintegritás megõrzése, párhuzamosan futó programrészek közötti kommunikáció megvalósítása, valamint a rendelkezésre álló hardverkörnyezet ismerete. Általános célú processzorok (CPU) mellett lehetõség van speciálisan párhuzamos programvégrehajtásra, adatfeldolgozásra kialakított processzor/feldolgozóegység alkalmazására is. Ilyen például az egyre nagyobb teljesítménnyel rendelkezõ és manapság könnyedén hozzáférhetõ grafikus processzor (GPU), mely általános célú felhasználásra is kifejezetten alkalmasnak bizonyult.
