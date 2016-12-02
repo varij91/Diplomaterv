@@ -6,7 +6,7 @@
 	%----------------------------------------------------------------------------
 	\subsection{Kiindulás}
 	%----------------------------------------------------------------------------
-		A N-test probléma felépítése párhuzamosítás szempontjából, nagyon hasonlít a mátrix szorzás problémájára. Az \figref{Impl_GPU_Matrix} ábrán látható négyzetek egy-egy gyorsulás értéket reprezentálnak. A besötétített $(i,~j)$ négyzet, a $j.$ test által az $i.$ testen okozott gyorsulást jelenti. A forrás és a célpont testek listája azonos, az elrendezés csupán az ábrázolást segíti.
+		A N-test probléma felépítése párhuzamosítás szempontjából, nagyon hasonlít a mátrix szorzás problémájára. Az \figref{Impl_GPU_Matrix} ábrán látható négyzetek egy-egy gyorsulásértéket reprezentálnak. A besötétített $(i,~j)$ négyzet, a $j.$ test által az $i.$ testen okozott gyorsulást jelenti. A forrás és a célpont testek listája azonos, az elrendezés csupán az ábrázolást segíti.
 
 		\begin{figure}[!ht]
 		\centering
@@ -17,7 +17,7 @@
 
 		A CUDA lehetõséget biztosít nagyon sok\footnote{Egy rácsban maximum $65536 \cdot 65536 \cdot 65536$ blokk, blokkonként maximum 1024 szál. Ez egy elméleti érték, a rendelkezésre álló hardver erõforrás korlátozhat.} szál elindítására, így kernel írásakor gyakori megközelítés lehet, hogy minden szál egy apró részmûveletet végezzen. A probléma leképezhetõ egy kernelre a fenti formában egy az egyben, de közel sem fog optimális eredményt adni.
 		
-		Az elsõ probléma, ami szembe jön, hogy az a memória hozzáférések száma. Ha minden szál csak egy testpár között gyorsulást számol, akkor egy testet összes ki kell olvasni a globális memóriából $(2N-2)$-ször. $(N-1)$-szer, mert õ a célpont $N$-szer (önmagával vett interakció esete miatt jön be a $(-1)$) és a szálakat függetlennek tekintjük egymástól, valamit $(N-1)$-szer, mert $N$ másik testre hat. És bár rendelkezésre áll valamennyi cache, a tranzakciók száma így is nagy, ami hátráltatni fogja a számításokat és a korlátot nem a számítási kapacitás elérése fogja jelenteni, hanem a memória sávszélessége.
+		Az elsõ probléma, ami szembe jön, az a memória hozzáférések száma. Ha minden szál csak egy testpár közötti gyorsulást számol, akkor egy testet összes ki kell olvasni a globális memóriából $(2N-2)$-ször. Egy test $N$-szer célpont, és $N$-szer hat másik testre. A $(-2)$ pedig az önmagával vett interkaciók miatt jön be. És bár rendelkezésre áll valamennyi cache, a tranzakciók száma így is nagy, ami hátráltatni fogja a számításokat és a korlátot nem a számítási kapacitás fogja jelenteni, hanem a memória sávszélessége.
 	
 	%----------------------------------------------------------------------------
 	\subsection{Feldarabolás}
@@ -40,7 +40,7 @@
 	%----------------------------------------------------------------------------
 		Az N-test szimuláció és példaként felhozott mátrixszorzás is remek, $N^2$-es párhuzamosítási lehetõséget biztosít, azonban mindkét esetben szükséges az egyes részeredmények összegzése.
 		
-		N-test szimuláció esetén ez azt jelenti, hogy minden szál kiszámol egy testpár közötti interakció által behozott gyorsulás értéket, majd egy kijelölt szál/szálak csoportja akkumulálja az eredményeket. Habár maga az akkumulálás folyamata megvalósítható $O(logN)$ komplexitású redukciós algoritmussal, a szálak közti kommunikáció és szinkronizáció igencsak jelentõs. Nem beszélve az akkumulációt végzõ kijelölt szálak által behozott száldivergenciáról.
+		N-test szimuláció esetén ez azt jelenti, hogy minden szál kiszámol egy testpár közötti interakció által behozott gyorsulásértéket, majd egy kijelölt szál/szálak csoportja akkumulálja az eredményeket. Habár maga az akkumulálás folyamata megvalósítható $O(logN)$ komplexitású redukciós algoritmussal, a szálak közti kommunikáció és szinkronizáció igencsak jelentõs. Nem beszélve az akkumulációt végzõ kijelölt szálak által behozott száldivergenciáról.
 		
 		Mivel a szálon belüli kommunikáció, adatmozgatás lényegesen gyorsabb, mint a szálak közti, a megoldást az jelentheti, ha minden szál egy célponthoz tartozó gyorsulást számol. Vagyis minden létrehozott szál pontosan $N$ interakciót hajt végre és akkumulálja az eredményeket, ezzel csökkenthetve a szálak közti szinkronizációs és kommunikációs folyamatok számát.
 		
@@ -73,7 +73,7 @@
 		
 		Ahhoz, hogy a számítás elindulhasson, be kell várni, míg minden szál betölti a hozzárendelt testet. Ezt \verb+__syncthreads()+ függvény segítségével felállított szinkronizációs pontokkal tehetjük meg. Az azonos TB-n belüli szálak az ilyen pontoknál mindig bevárják egymást.
 		
-		Amint véget ért az adott tile-on az gyorsulás értékek meghatározása (szintén szinkronizáció kell), újrakezdõdik a folyamat a következõ P darab test betöltésével. Összesen $2 \cdot N/P$ szinkronizációs pont lesz egy TB futása során.
+		Amint véget ért az adott tile-on az gyorsulásértékek meghatározása (szintén szinkronizáció kell), újrakezdõdik a folyamat a következõ P darab test betöltésével. Összesen $2 \cdot N/P$ szinkronizációs pont lesz egy TB futása során.
 		
 		A következõ feladat a P értékének meghatározása. Ehhez figyelembe kell venni az eszközünk paramétereit is. Ha P értéke túl kicsi, az azt eredményezi, hogy az esetemben egy SM-en elhelyezhetõ maximális 8 TB fog korlátozó tényezõ lenni, és a rendelkezésre álló regiszterek, shared memória, stb. nem lesznek kihasználva. Ha P értéke nagy (maximum 1024), akkor meg más korlátozó tényezõ fog közbeszólni (pl.: regiszterek), melyek miatt kevesebb, mint 8 TB-t tud csak egy SM-en belül párhuzamosan létezni.
 		
@@ -88,7 +88,7 @@
 	
 		Több kernelt megvalósítottam, hogy össze tudjam hasonlítani, milyen módon tudom elérni a legjobb teljesítményt. Ebbõl a legjobb futási idõvel rendelkezõt mutatom be.
 		
-		Elõször szépen \verb+float3+-mal próbálkoztam a pozíció értékek és \verb+float+-tal a tömegek eltárolására, de egy jobb megoldásnak bizonyul, ha \verb+float4+-et alkalmazok. Ennek oka lehet, hogy globális memóriában a \verb+float4+-ek kitöltenek egy teljes szegmenst, míg a \verb+float3+-ak nem. Ezért \verb+float3+-nál több szegmens kiolvasása történhet meg, ha a szükséges adat két szegmensbe is belóg. A \verb+float4+ negyedik mezõjében (w) került eltárolásra a tömeg.
+		Elõször szépen \verb+float3+-mal próbálkoztam a pozícióértékek és \verb+float+-tal a tömegek eltárolására, de egy jobb megoldásnak bizonyul, ha \verb+float4+-et alkalmazok. Ennek oka lehet, hogy globális memóriában a \verb+float4+-ek kitöltenek egy teljes szegmenst, míg a \verb+float3+-ak nem. Ezért \verb+float3+-nál több szegmens kiolvasása történhet meg, ha a szükséges adat két szegmensbe is belóg. A \verb+float4+ negyedik mezõjében (w) került eltárolásra a tömeg.
 
 		\begin{lstlisting}
 __device__ float3 calculateAccelerationWithFloat4(float4 posI, float4 posJ, float3 accI) {

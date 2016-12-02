@@ -32,12 +32,12 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8],
 	__m256 m = _mm256_set1_ps(massJ);
 	__m256 rabsInv = _mm256_div_ps(m, _mm256_mul_ps(_mm256_mul_ps(rabs, rabs), rabs));
 
-	// Gyorsulás értékek kiszámítása
+	// Gyorsulásértékek kiszámítása
 	__m256 aix = _mm256_mul_ps(rx, rabsInv);
 	__m256 aiy = _mm256_mul_ps(ry, rabsInv);
 	__m256 aiz = _mm256_mul_ps(rz, rabsInv);
 
-	// Gyorsulás értékékek visszamásolása a megadott float tömbbe (x,...,x,y,...,y,z,...,z) formában
+	// Gyorsulásértékékek visszamásolása a megadott float tömbbe (x,...,x,y,...,y,z,...,z) formában
 	_mm256_store_ps(accI, aix);
 	_mm256_store_ps(accI + 8, aiy);
 	_mm256_store_ps(accI + 16, aiz);

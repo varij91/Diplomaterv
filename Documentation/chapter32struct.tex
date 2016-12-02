@@ -1,5 +1,5 @@
 %----------------------------------------------------------------------------
-\section{Program felépítése}
+\section{C++ implementáció}
 %----------------------------------------------------------------------------
 	GPU programozásnál a C és C++ programozási nyelvek a legtámogatottabbak; relatíve alacsonyszintûek és jó teljesítmény érhetõ el velük. A szimulátor megírásához mindenképpen objektumorientált nyelvet szerettem volna alkalmazni, így a C++-ra esett a választásom.
 
@@ -121,23 +121,23 @@
 		%----------------------------------------------------------------------------
 			Egy absztrakt õsosztály, mely az egységes interfész szerepét tölti be. A program szimulációért felelõs osztálya egy ilyen típusú pointerrel rendelkezik, ami ténylegesen egy tagfüggvény implementációkat már tartalmazó, leszármazott osztály egy objektumára mutat.
 			
-			Az \verb+advance+ metódus meghívásával minden testre kiszámításra kerülnek az új gyorsulás értékek, valamint ezek függvényében frissül a pozíció- és a sebességvektor is. A program futása során ebben a metódusban tölti el a legtöbb idõt.
+			Az \verb+advance+ metódus meghívásával minden testre kiszámításra kerülnek az új gyorsulásértékek, valamint ezek függvényében frissül a pozíció- és a sebességvektor is. A program futása során ebben a metódusban tölti el a legtöbb idõt.
 			
 			Az \verb+init+ és a \verb+destroy+ tagfüggvények az eszköz memóriaterületének allokációját, valamint felszabadítását végzik.
 		
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyAlgorithmCPU}
 		%----------------------------------------------------------------------------
-			Szintén egy absztrakt osztály, mely a testpárok közötti gyorsulás értékeket kiszámító \verb+calculateAcceleration+ tagfüggvények definícióit tartalmazza. Két test közötti interakció mértékének kiszámítása ugyanis teljes egészében algoritmus független.
+			Szintén egy absztrakt osztály, mely a testpárok közötti gyorsulásértékeket kiszámító \verb+calculateAcceleration+ tagfüggvények definícióit tartalmazza. Két test közötti interakció mértékének kiszámítása ugyanis teljes egészében algoritmus független.
 			
-			Az \figref{Impl_Algorithm} ábrán csak egy metódust jelöltem meg, azonban ténylegesen 6 \verb+calculateAcceleration+ került megvalósításra. Ebbõl 3 a teljesítményméréshez, 3 pedig a grafikus kijelzéshez használatos; 1-1 sor plusz kódot (szomszédok számának meghatározása) és argumentumlistát leszámítva páronként azonosak. A három tagfüggvénybõl kettõ használ speciális párhuzamosítási technikákat, a harmadik natív C++ referenciafüggvény. Sima C++ megvalósítás esetén 1, SSE esetén egyszerre $4$, AVX esetén pedig egyszerre 8 gyorsulás érték kerül kiszámításra.
+			Az \figref{Impl_Algorithm} ábrán csak egy metódust jelöltem meg, azonban ténylegesen 6 \verb+calculateAcceleration+ került megvalósításra. Ebbõl 3 a teljesítményméréshez, 3 pedig a grafikus kijelzéshez használatos; 1-1 sor plusz kódot (szomszédok számának meghatározása) és argumentumlistát leszámítva páronként azonosak. A három tagfüggvénybõl kettõ használ speciális párhuzamosítási technikákat, a harmadik natív C++ referenciafüggvény. Sima C++ megvalósítás esetén 1, SSE esetén egyszerre $4$, AVX esetén pedig egyszerre 8 gyorsulásérték kerül kiszámításra.
 			
 			A különbözõ N-test algoritmus implementációk ebbõl az osztályból származnak le. A következõ lépés lehetne egy \verb+NBodyAlgorithmCPUBarnesHut+ osztály megvalósítása például.
 
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyAlgorithmCPUAllPairs}
 		%----------------------------------------------------------------------------
-			Az \sectref{nbody_direct} fejezetben bemutatott direkt módszert megvalósító osztály. A futtatási beállításoktól függõen, ciklikusan meg kell hívnia a megfelelõ, õsosztályban implementált \verb+calculateAcceleration+ metódust. Miután minden testre kiszámolta az új gyorsulás értékeket, jön az integrálás, vagyis a pozíció- és sebességértékek frissítése (\verb+updateBodies+ tagfüggvény).
+			Az \sectref{nbody_direct} fejezetben bemutatott direkt módszert megvalósító osztály. A futtatási beállításoktól függõen, ciklikusan meg kell hívnia a megfelelõ, õsosztályban implementált \verb+calculateAcceleration+ metódust. Miután minden testre kiszámolta az új gyorsulásértékeket, jön az integrálás, vagyis a pozíció- és sebességértékek frissítése (\verb+updateBodies+ tagfüggvény).
 
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyAlgorithmGPU}

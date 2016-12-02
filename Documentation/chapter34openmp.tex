@@ -40,7 +40,7 @@ for(int i = 0; i < N ; i++) {
 }
 	\end{lstlisting}
 	
-	A referencia algoritmusban bemutatott két \verb+for+ ciklus közül a külsõt érdemes párhuzamosítani. Ezzel minden mag különbözõ testnek fogja a gyorsulás értékeit frissíteni, s nem lesz szükséges semmiféle szinkronizáció vagy atomi mûvelet használata. A ciklusváltozó és a gyorsulásértékek ideiglenes tárolására létrehozott belül lett deklarálva, így minden szál számára lokális változók lesznek.
+	A referencia algoritmusban bemutatott két \verb+for+ ciklus közül a külsõt érdemes párhuzamosítani. Ezzel minden mag különbözõ testnek fogja a gyorsulásértékeit frissíteni, s nem lesz szükséges semmiféle szinkronizáció vagy atomi mûvelet használata. A ciklusváltozó és a gyorsulásértékek ideiglenes tárolására létrehozott belül lett deklarálva, így minden szál számára lokális változók lesznek.
 
 	Mivel fordításidejû párhuzamosításról van szó, annak megoldását, hogy ez a funkció ki-bekapcsolható legyen, némi redundancia segítségével értem el:
 	

@@ -1,20 +1,37 @@
 %----------------------------------------------------------------------------
-\chapter{Ellenõrzés}
+\chapter{Eredmények kiértékelése}
 %----------------------------------------------------------------------------
-	%----------------------------------------------------------------------------
-	\section{Megjelenítés}
-	%----------------------------------------------------------------------------
-		OpenGL
-		Sûrûség alapú színezés
-		3D-s megjelenítést szerettem volna, de idõm nem engedte
-		[KÉP: Sorozatkép néhány szimulációról]
-		GUI mode
+	A szimulációt lefuttattam, minden felhasznált technológiával, illetve kombinációikkal, az XXX táblázat szerinti paraméterezéssel.
 	
-	%----------------------------------------------------------------------------
-	\section{Hibaszámítás}
-	%----------------------------------------------------------------------------
-		Referenciamodell használata során feltételezzük, hogy az egy szálon futó CPU-s megvalósítás eredményei a helyesek.
-		Pozícióadatokat hasonlítha össze egymással
-		Float-okat
-		A CPU-s modellek eredményei teljes mértékben megegyeztek. Eltérés elõször a CPU-s és GPU-s megoldások között mutatkozott. Ennek oka lehet a lebegõpontos számítások
-		Az eltérés minden iterációval nõtt, a végére már lényesen eltérések adódtak. Ez a 
+	[Táblázat]
+	
+	A mérések tisztán csak az iterációkat tartalmazzák, az program kezdeti inicializációs fázisát nem, mely nagy testszám esetén sokáig is eltarthat.
+	
+	Az XXX ábrán látható az egyes implementációk által nyújtott
+
+	[KÉP: Lebegõpontos mûveletvégzés teljesítménye] vagy [KÉP: Másodpercenkénti iterációk száma (FPS)]
+
+	[KÉP: Futási idõk összehasonlítása]
+
+	\section{CPU}
+		% Elméleti határ???
+		% OpenMP Hyperthread nem ad mindig jobb eredményt mint a 4x-es növekedés
+		A referenciamodellem gyorsan elérte a futási teljesítményének határát
+		
+	\section{GPU}
+		A rendelkezésemre álló NVIDIA GeForce 525M elméleti teljesítményét a következõ összefüggés alapján kaphatjuk meg:
+		
+		\begin{align}
+			P_T = \frac{n \cdot f \cdot 2}{1000}
+		\end{align}
+		
+		Ahol $n$ jelöli a CUDA magok számát, $f$ az órajelük frekvenciáját. A $2$ szorzó az órajel ciklusonként végrehajtott 2 darab utasítás miatt jön be.
+		A legtöbb test amivel a szimulációt lefuttattam az 32768 test volt, aminél 49 GFLOPS számítási teljesítényt sikerült elérnem. A elméleti korlátnak ez sajnos csak közel a fele.
+		% Elméleti határ 110 GFLOPS
+		Theorethical peak performance [GFLOPS] = num of Core * Core clk[MHz] * 2 / 1000
+			2, mert 2 utasítást hajt végre órajel ciklusonként
+			1000 a nagyságrend miatt.
+		% Profiler eredmények bemutatása
+		
+		Az eredményekbõl látható, hogy alacsony testszám (szálszám) mellett a GPU nem teljesített kiemelkedõen.
+

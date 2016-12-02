@@ -3,13 +3,13 @@
 %----------------------------------------------------------------------------
 	Az egy szálon futó C++ referenciamodell megvalósítást a MATLAB-ban megírt verzió alapján kezdtem el. Célja, hogy viszonyítási alapként szolgáljon a különbözõ párhuzamosítást alkalmazó implementációkhoz, ezzel lehetõvé téve a számszerû/grafikus ábrázolását a sebességnövekedésnek.
 
-	A párhuzamosítást a CPU-n fõként a legbelsõ, gyorsulás értékeket kiszámító \verb+calculateAcceleration+ függvény módosításával értem el. A megvalósított képlet mindig az \sectref{NBody_integrateSect} fejezetben bemutatott \eqref{NBody_accEq} összefüggés.
+	A párhuzamosítást a CPU-n fõként a legbelsõ, gyorsulásértékeket kiszámító \verb+calculateAcceleration+ függvény módosításával értem el. A megvalósított képlet mindig az \sectref{NBody_integrateSect} fejezetben bemutatott \eqref{NBody_accEq} összefüggés.
 
 	Az alábbi kódrészlet a teljesen natív C++ megvalósítás:
 	
 	\begin{lstlisting}
 float3 NBodyAlgorithmCPU::calculateAcceleration(
-const float3 posI,   // A test, melynek a gyorsulás értékének egy darabját számoljuk
+const float3 posI,   // A test, melynek a gyorsulásértékének egy darabját számoljuk
 const float massJ,   // A másik test tömege
 const float3 posJ) { // A másik test pozíciója
    
@@ -54,7 +54,7 @@ bodies.at(i).acceleration   // az i. test gyorsulásvektora (float3)
 bodies.at(i).acceleration.x // az i. test x irányú gyorsulás értéke (float)
 	\end{lstlisting}
 
-	A már említett \verb+advance+ függvény belsejében található kettõ, egymásba ágyazott \verb+for+ ciklus. A külsõ ciklus mindig az éppen gyorsulás szempontjából frissítendõ testet jelöli ki, míg a belsõ a párját. A ciklusmag mindig az elõzõ szimulációs iterációban kiszámolt gyorsulás értékek kinullázásával kezdõdik.
+	A már említett \verb+advance+ függvény belsejében található kettõ, egymásba ágyazott \verb+for+ ciklus. A külsõ ciklus mindig az éppen gyorsulás szempontjából frissítendõ testet jelöli ki, míg a belsõ a párját. A ciklusmag mindig az elõzõ szimulációs iterációban kiszámolt gyorsulásértékek kinullázásával kezdõdik.
 
 	\begin{lstlisting}
 void NBodyAlgorithmCPUAllPairs::advance(std::vector<Body> &bodies) {
@@ -79,7 +79,7 @@ void NBodyAlgorithmCPUAllPairs::advance(std::vector<Body> &bodies) {
 }
 	\end{lstlisting}
 	
-	Annak érdekében, hogy az egyes gyorsulás értékek, konzisztens pozícióadatokból legyen kiszámítva, az integrálás (\eqref{NBody_integrateEq} képlet) végrehajtását egy másik ciklusban kell elvégezni. Összesen $N$-szer végrehajtani a ciklust, iterációnként ez 21 FLOP-ot jelent. Ebbõl 3 FLOP-ot hoz be egy gyorsulás értékét csökkentõ plusz konstans, melynek feladata, hogy a szimuláció során ne hagyja a testeket egymástól nagyon eltávolodni. A grafikus megjelenítés rögzített, nem mozdítható vagy forgatható és gyakran jönnek, mennek az ablak szélén a testek.
+	Annak érdekében, hogy az egyes gyorsulásértékek, konzisztens pozícióadatokból legyen kiszámítva, az integrálás (\eqref{NBody_integrateEq} képlet) végrehajtását egy másik ciklusban kell elvégezni. Összesen $N$-szer végrehajtani a ciklust, iterációnként ez 21 FLOP-ot jelent. Ebbõl 3 FLOP-ot hoz be egy gyorsulás értékét csökkentõ plusz konstans, melynek feladata, hogy a szimuláció során ne hagyja a testeket egymástól nagyon eltávolodni. A grafikus megjelenítés rögzített, nem mozdítható vagy forgatható és gyakran jönnek, mennek az ablak szélén a testek.
 
 	\begin{lstlisting}
 float stepTime2 = 0.5f * mp_properties->stepTime * mp_properties->stepTime;
