@@ -1,20 +1,28 @@
 %----------------------------------------------------------------------------
 \chapter{Ellenõrzés}
 %----------------------------------------------------------------------------
+	Az elsõ ellenérzési forma, amit megvalósítottam az az OpenGL alapú grafikus megjelenítés. Ezzel könnyen felderíthetõ, ha valamelyik képlet implementálása során hibát vétettem. Ezt követõen létrehoztam az \verb+NBodySystem+ osztályon belül a referencia algoritmus példányosításához szükséges változókat. Kiegészítettem a szimulációt a referencia iterációval, valamint a testek pozícióját ellenõrzõ függvény meghívásával.
 	%----------------------------------------------------------------------------
 	\section{Megjelenítés}
 	%----------------------------------------------------------------------------
-		OpenGL
-		Sûrûség alapú színezés
-		3D-s megjelenítést szerettem volna, de idõm nem engedte
+		Eleinte 3D-s megjelenítést szeretettem volna megvalósítani, de sajnos az idõm nem engedte, illetve nem is ezen volt a diplomamunkám hangsúlya. A szimulátor jelleget fenntartva, azonban igyekeztem javítani a látványon, a testek sûrûségalapú kiszínezésével, valamint különbözõ kezdeti feltételek megadásának lehetõségével. Az XXX ábrán egy néhány felvétel a program futásáról grafikus módban.
+
 		[KÉP: Sorozatkép néhány szimulációról]
-		GUI mode
 	
 	%----------------------------------------------------------------------------
 	\section{Hibaszámítás}
 	%----------------------------------------------------------------------------
-		Referenciamodell használata során feltételezzük, hogy az egy szálon futó CPU-s megvalósítás eredményei a helyesek.
-		Pozícióadatokat hasonlítha össze egymással
-		Float-okat
-		A CPU-s modellek eredményei teljes mértékben megegyeztek. Eltérés elõször a CPU-s és GPU-s megoldások között mutatkozott. Ennek oka lehet a lebegõpontos számítások
-		Az eltérés minden iterációval nõtt, a végére már lényesen eltérések adódtak. Ez a 
+		Referenciamodell használata során feltételezzük, hogy az egy szálon futó CPU-s megvalósítás eredményei a helyesek. Az összehasonlítást végzõ függvény az \verb+NBodyUtility+ osztályban kapott helyet. Két testeket tároló tömböt hasonlít össze pozícióadatok alapján, az elsõ nagyobb eltérésnél, kijelzi az eltérés értékét és kilép.
+		
+		A CPU-s modellek eredményei teljes mértékben megegyeztek. Eltérés elõször a CPU-s és GPU-s megoldások között mutatkozott. Ennek oka a lebegõpontos számítások hardveres megvalósításában keresendõ \cite{CUDAFloat}.
+		
+		\begin{itemize}
+			\item GPU rendelkezik szorzás-összegzés (MAC) elvégzésére alkalmas hardverrel, míg a CPU nem. Ezzel az egyes utasításokat más sorrendbe rakhatja a fordító optimalizálás során.
+			\item CPU pontosabb számítási eredményeket produkálhat, ugyanis gyakran hosszabb lebegõpontos mantisszával dolgozik.
+			\item A hibákat ezenkívül még kerekítésbeli eltérés is okozhatja.
+		\end{itemize}
+		
+		A hiba halmozódásával az eltérés minden iterációval növekszik és egy idõ után igencsak számottevõvé válik.
+		
+		
+		% The GPU has fused multiply-add while the CPU does not. Parallelizing algorithms may rearrange operations, yielding different numeric results. The CPU may be computing results in a precision higher than expected. Finally, many common mathematical functions are not required by the IEEE 754 standard to be correctly rounded so should not be expected to yield identical results between implementations.
