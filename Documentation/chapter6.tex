@@ -1,3 +1,31 @@
 %----------------------------------------------------------------------------
-\chapter{Összefoglalás}
+\chapter{Összefoglalás és továbbfejlesztés}
 %----------------------------------------------------------------------------
+	%----------------------------------------------------------------------------
+	\section{Összefoglalás}
+	%----------------------------------------------------------------------------
+		A kitûzött feladatot legjobb tudásom szerint megvalósítottam, a projekt során kitûzött célokat elértem.
+
+		Igyekeztem rugalmas, egyszerûen bõvíthetõ osztálystruktúrával rendelkezõ programot létrehozni. A szimulátort kiegészítettem grafikus megjelenítéssel, mely mind a látványhoz, mind az ellenõrzéshez hozzájárult.
+
+		Diplomamunkám elkészítéséhez szükséges mértékben megismertem az N-test problémát, algoritmusait és a nehézségeit, melyekre figyeltem az implementáció során.
+
+		Az N-test szimulációt különbözõ párhuzamosítási technológiákat felhasználva megvalósítottam és a program futási sebességét sikerült nagymértékben javítani a kezdeti szekvenciális megoldáshoz képest. Elsajátítottam az OpenMP direktívákat és megtanultam használni a CPU-ban található SSE, AVX vektorregisztereket, valamint a hozzájuk tartozó intrinsic függvényeket. Diplomamunkám jelentõs részét kitette a GPU programozása, mely során a hardverarchitektúrákon túl, a CUDA programozási modellel is megismerkedtem.
+
+		Összességében elkészítettem egy mûködõképes N-test szimulátor programot és bemutattam a fejlesztésének folyamatát.
+	
+	%----------------------------------------------------------------------------
+	\section{Továbbfejlesztési lehetõségek}
+	%----------------------------------------------------------------------------
+		Számos továbblépés lehetséges, mind a szimuláció pontosítása és javítása, mind a teljesítmény irányában. Néhány lehetséges példa:
+		\begin{itemize}
+			\item Az AVX problémáját kellene kivizsgálni elsõ körben. Ha valóban a korábban említett L1 cache miss okozza a lassú futást, akkor megfelelõ profiler program (pl.: Intel vTune) alkalmazásával felderíthetõ.
+			
+			\item GPU által behozott ,,felesleges'' vezérlõ utasításokat ki kellene küszöbölni, ezzel javítva az aritmetikai mûveletek arányát a kernelben. Ezt valószínûleg csak a CUDA fájlokból generált PTX kódok átnézésével lehetne felderíteni.
+			
+			\item CUDA mellett az OpenCL megvalósítást is lehetne készíteni, mely támogatná a nem csak NVIDIA által gyártott GPU-k használatát is.
+			
+			\item A szimuláció sebességét és az elért FPS-t más, a \sectref{NBody_algorithmSect} alfejezetben bemutatott algoritmusok javításával lehetne még javítani.
+			
+			\item Felhasználói felület szempontjából lehetne javítani a kijelzésen, látványosabbá tenni, valamint lehetõséget adni a futási eredmények, pozícióértékek szöveges lementésére (egy logger megvalósítása) késõbbi feldolgozásra.
+		\end{itemize}

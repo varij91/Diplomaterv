@@ -1,37 +1,34 @@
 %----------------------------------------------------------------------------
 \appendix
 %----------------------------------------------------------------------------
-\chapter*{Függelék}\addcontentsline{toc}{chapter}{Függelék}
-\setcounter{chapter}{6}  % a fofejezet-szamlalo az angol ABC 6. betuje (F) lesz
-\setcounter{equation}{0} % a fofejezet-szamlalo az angol ABC 6. betuje (F) lesz
-\numberwithin{equation}{section}
-\numberwithin{figure}{section}
-\numberwithin{lstlisting}{section}
-%\numberwithin{tabular}{section}
+	\chapter*{Függelék}\addcontentsline{toc}{chapter}{Függelék}
+	\setcounter{chapter}{6}  % a fofejezet-szamlalo az angol ABC 6. betuje (F) lesz
+	\setcounter{equation}{0} % a fofejezet-szamlalo az angol ABC 6. betuje (F) lesz
+	%\numberwithin{equation}{section}
+	%\numberwithin{figure}{section}
+	%\numberwithin{lstlisting}{section}
+	%\numberwithin{tabular}{section}
 
 %----------------------------------------------------------------------------
-\section{A TeXnicCenter felülete}
+%\section{Futási eredmények}
 %----------------------------------------------------------------------------
-\begin{figure}[!ht]
-\centering
-\includegraphics[width=150mm, keepaspectratio]{figures/TeXnicCenter.png}
-\caption{A TeXnicCenter Windows alapú \LaTeX-szerkesztõ.} 
-\end{figure}
+	\begin{figure}[!ht]
+		\centering
+		\includegraphics[height=180mm, keepaspectratio]{figures/Performance/FPS.pdf}
+		\caption{Frame rate 4096 test esetén}
+		\label{fig:Perf_FPS}
+	\end{figure}
 
-%----------------------------------------------------------------------------
-\clearpage\section{Válasz az ,,Élet, a világmindenség, meg minden'' kérdésére}
-%----------------------------------------------------------------------------
-A Pitagorasz-tételbõl levezetve
-\begin{align}
-c^2=a^2+b^2=42.
-\end{align}
-A Faraday-indukciós törvénybõl levezetve
-\begin{align}
-\rot E=-\frac{dB}{dt}\hspace{1cm}\longrightarrow \hspace{1cm}
-U_i=\oint\limits_\mathbf{L}{\mathbf{E}\mathbf{dl}}=-\frac{d}{dt}\int\limits_A{\mathbf{B}\mathbf{da}}=42.
-\end{align}
+	\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=165mm, keepaspectratio]{figures/Performance/GFLOPS.pdf}
+		\caption{Különbözõ konfigurációk számítási teljesítménye}
+		\label{fig:Perf_GFLOPS}
+	\end{figure}
 
-
-
-
-
+	\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=165mm, keepaspectratio]{figures/Performance/FUTAS.pdf}
+		\caption{Különbözõ konfigurációk futási ideje}
+		\label{fig:Perf_FUTAS}
+	\end{figure}

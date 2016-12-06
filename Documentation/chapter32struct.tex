@@ -16,7 +16,7 @@
 
 	Megfelelõ grafikai ismeret híján, egy viszonylag egyszerû megjelenítést szerettem volna létrehozni. A rendelkezésre álló segédanyag, illetve ajánlások alapján az \emph{OpenGL}-t (Open Graphics Library) választottam.
 
-	Az egyszerûbb bemutathatóság érdekében feldaraboltam a programom osztályszerkezetét három logikailag egybefüggõ csoportra. Az osztályokat tartalmazó ábrákon az tagváltozók és a tagfüggvények csak részlegesen vannak feltüntetve, valamint az átláthatóság érdekében a függvény argumentumlisták üresek. A fejezetnek nem célja, hogy részletességében felérjen egy teljes értékû dokumentációval.
+	Az egyszerûbb bemutathatóság érdekében feldaraboltam a programom osztályszerkezetét három logikailag egybefüggõ csoportra. Az osztályokat tartalmazó ábrákon a tagváltozók és a tagfüggvények csak részlegesen vannak feltüntetve, valamint az átláthatóság érdekében a függvény argumentumlisták üresek. A fejezetnek nem célja, hogy részletességében felérjen egy teljes értékû dokumentációval.
 
 	Az oszályokat és struktúrákat egy \verb+NBody+ prefixummal láttam el, valamint az osztály tagváltozók nevében használtam kiegészítõ jelöléseket:
 	
@@ -215,7 +215,7 @@
 		%----------------------------------------------------------------------------
 			Kiegészítõ, segédosztály szerepet tölt be. Feladatai a felhasználó beállítások értelmezése (\verb+commandLineParse+ függvény), az idõ- és teljesítménymérés, valamint a hibaszámítás.
 		
-			Az program felállása után a \verb+*Stopwatch+ nevû függvényi segítségével méri le a szimuláció hosszát. Kiszámolja, hogy összesen hány erõt kellett kiszámolni, hány lebegõpontos operációt végzett el összesen a program és ezek függvényében írja ki a futási teljesítményt.
+			A program a felállás után a \verb+*Stopwatch+ kifejezést tartalmazó függvények segítségével méri le a szimuláció hosszát. Kiszámolja, hogy összesen hány erõt kellett kiszámolni, hány lebegõpontos operációt végzett el összesen a program és ezek függvényében írja ki a futási teljesítményt.
 		
 			Amennyiben referenciamodellt használunk, minden iteráció után meghívódik a \verb+calculateError+ metódus, ami minden testnek összehasonlítja a pozícióját és jelzi azonnal, ha lényeges értékbeli eltérést tapasztalt.
 

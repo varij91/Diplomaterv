@@ -1,38 +1,90 @@
 %----------------------------------------------------------------------------
 \chapter{Eredmények kiértékelése}
 %----------------------------------------------------------------------------
-	A szimulációt lefuttattam, minden felhasznált technológiával, illetve kombinációikkal, az XXX táblázat szerinti paraméterezéssel. A mérések tisztán csak az iterációkat tartalmazzák, az program kezdeti inicializációs fázisát nem, mely nagy testszám esetén sokáig is eltarthat.
+	A szimulációt lefuttattam, minden felhasznált technológiával, illetve kombinációikkal, azonos paraméterezéssel. Az eredményeket egy Excel táblázatban hasonlítottam össze és jelenítettem meg. Összesen 7 különbözõ testszámmal végeztem el a teszteket: 8 ,256, 512, 1024, 2048, 4096, 16384. Mindegyik teszt összesen 20 napnyi idõintervallumot szimulál, 1 napos lépésközzel, tehát összesen 20 szimulációs ,,tick'' történt. A mérések tisztán csak a ,,hasznos'' iterációkat tartalmazzák, a program kezdeti inicializációs fázisát nem, mely nagy testszám esetén sokáig is eltarthat.
 	
-	[Táblázat: Tesztelési paraméterek]
+	Az ábrákat méretük miatt a függelékben helyeztem el. Az ábrákon látható értékek 20 futásnak (szimulációnak) az átlaga adta ki ezzel eltüntetve, az ideiglenes számítógép terheltségébõl adódó ingadozásokat. Az \figref{Perf_GFLOPS} ábrán látható az egyes implementációk által másodpercenként elvégzett milliárd lebegõpontos számítások (GFLOPS) száma. Egy talán megfoghatóbb jellemzés lehet a másodpercenként elvégzett iterációk száma, mely lényegében tekinthetõ FPS-nek (Frames Per Second). Ez látható a \figref{Perf_FPS} ábrán 4096 esetére.
 	
-	Az XXX ábrán látható az egyes implementációk által nyújtott
-
-	[KÉP: Lebegõpontos mûveletvégzés teljesítménye]
+	A futási idõket a jobb ábrázolhatóság érdekében logaritmikus skálán jelenítettem meg (\figref{Perf_FUTAS} ábra).
 	
-	A fenti összehasonlítás 
-	[KÉP: Másodpercenkénti iterációk száma (FPS)]
+	MATLAB prototípus futási eredményeit nem ábrázoltam, mert szkriptnyelvrõl lévén szó nagyságrendekkel kisebb teljesítményt produkált így lényegében nem is látszódna a grafikonon.
 
-	[KÉP: Futási idõk összehasonlítása]
-
+	%----------------------------------------------------------------------------
 	\section{CPU}
-		% Elméleti határ???
-		% OpenMP Hyperthread nem ad mindig jobb eredményt mint a 4x-es növekedés
-		A referenciamodellem gyorsan elérte a futási teljesítményének határát
+	%----------------------------------------------------------------------------
+		A referenciamodellem gyorsan elérte a futási teljesítményének határát. A 8 test mozgásának szimulálása során a referenciamodell teljesített a legjobban.
 		
+		SSE és AVX közti probléma is jól látható, sajnos nem sikerült elérnem, hogy az AVX papírforma szerint túlteljesítse elõdjét.
+		
+		Bár elvileg 8 szál futtatására képes a processzorom, de valójában a 4 magon megvalósított Intel szálkezelõ megoldás (HyperThreading) -- mely kontextusváltást gyorsítja -- idõosztásos alapon mûködik. A sebességnövekedés OpenMP használatával így körülbelül 4x-es lehetne maximum. Az OpenMP használatával nyert eredmények, a megvalósítás során bemutatott \figref{Impl_basic_vs_omp} ábrán láthatók.
+		
+		Feltüntettem az ideiglenes megoldások, próbálkozások nyújtotta eredményeket, melyeket az AVX felhasználást bemutató \sectref{Impl_AVXSect} alfejezetben részleteztem. Az eredményekbõl leolvasható, hogy a dinamikus tömböket alkalmazó \verb+NBodySystemFlat+ kétszeres sebességnövekedést ért el a SSE-t és OpenMP-t együttesen felhasználó eredeti megoldáshoz képest.
+		
+		Összegezve elmondható, hogy alacsony testszámú szimulációs esetben mindenképp egy CPU-s implementációt érdemes használni.
+	%----------------------------------------------------------------------------
 	\section{GPU}
-		A rendelkezésemre álló NVIDIA GeForce 525M elméleti teljesítményét a következõ összefüggés alapján kaphatjuk meg:
+	%----------------------------------------------------------------------------
+		A GPU futási
+		%----------------------------------------------------------------------------
+		\subsection{Elméleti teljesítmény}
+		%----------------------------------------------------------------------------
+		Az eredményekbõl látható, hogy alacsony testszám (szálszám) mellett a GPU nem teljesített kiemelkedõen. A rendelkezésemre álló NVIDIA GeForce 525M elméleti teljesítményét (Theorethical Peak Performance) a következõ összefüggés alapján kaphatjuk meg:
+		
+		\begin{align}
+			P_T = \frac{n \cdot f \cdot 2}{1000} = \frac{96 \cdot 600 \cdot 2}{1000} = 115,2~GFLOPS
+		\end{align}
+		
+		Ahol $n$ jelöli a CUDA magok számát, $f$ az órajelük frekvenciáját (MHz). A $2$ szorzó az órajel ciklusonként végrehajtott 2 darab utasítás miatt jön be.
 		
 		\begin{align}
 			P_T = \frac{n \cdot f \cdot 2}{1000}
 		\end{align}
 		
-		Ahol $n$ jelöli a CUDA magok számát, $f$ az órajelük frekvenciáját. A $2$ szorzó az órajel ciklusonként végrehajtott 2 darab utasítás miatt jön be.
-		A legtöbb test amivel a szimulációt lefuttattam az 32768 test volt, aminél 49 GFLOPS számítási teljesítényt sikerült elérnem. A elméleti korlátnak ez sajnos csak közel a fele.
-		% Elméleti határ 110 GFLOPS
-		Theorethical peak performance [GFLOPS] = num of Core * Core clk[MHz] * 2 / 1000
-			2, mert 2 utasítást hajt végre órajel ciklusonként
-			1000 a nagyságrend miatt.
-		% Profiler eredmények bemutatása
-		
-		Az eredményekbõl látható, hogy alacsony testszám (szálszám) mellett a GPU nem teljesített kiemelkedõen.
+		32768 volt a legtöbb test, amivel a szimulációt lefuttattam, aminél 49 GFLOPS számítási teljesítményt sikerült elérnem. A elméleti korlátnak ez sajnos csak közel a fele. A profiler eredményekbõl látszik, hogy elég sok a control-flow jellegû utasítás a kernelben, melyre a generált kód megismerése és elemzése adhatna magyarázatot.
 
+		%----------------------------------------------------------------------------
+		\subsection{Visual Profiler eredményei}
+		%----------------------------------------------------------------------------
+		% Profiler eredmények bemutatása
+		A GPU-s implementáció futását az NVIDIA Visual Profiler programjával elemeztem ki. A futási idõdiagrammját tartalmazza az \figref{Perf_visual_prof_1} és az \figref{Perf_visual_prof_2} ábra kettõ, egymást követõ részletben.
+		
+		Az elsõ ábrán történik az inicializáció, mely során az eszköz memóriájában megtörténik az allokáció a \verb+cudaMalloc+ függvény segítségével.
+		
+		A második részben látható a kezdeti adatok átmásolása az eszköz memóriájába majd a kernel futása összesen 20-szor. Minden iteráció után megtörténik az meghatározott adatok visszamásolása a rendszermemóriába. A legvégén pedig az alaphelyzetbe állító függvény a \verb+cudaDeviceReset+ fut le.
+		
+		\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/Performance/visual_prof_1.png}
+			\caption{Inicializáció és allokáció}
+			\label{fig:Perf_visual_prof_1}
+		\end{figure}
+		
+		\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/Performance/visual_prof_2.png}
+			\caption{Kernel futása és a szimuláció befejezése}
+			\label{fig:Perf_visual_prof_2}
+		\end{figure}
+		
+		A profiler szerint a kernelem legnagyobb korlátját a megfelelõ számítási kapacitás hiánya okozza\footnote{Másik gyakori korlátozó tényezõ a kernelek esetén a memóriasávszélesség.}.
+		
+		\begin{quote}
+			For device ,,GeForce GT 525M'' the kernel's memory utilization is significantly lower than the its compute utilization. These utilization levels indicate that the performance of the kernel is most likely being limited by computation on the SMs.
+		\end{quote}
+		Az analízis során kiderült, hogy a vezérlõ (control-flow) jellegû utasítások aránya viszonylag magas, a ,,hasznos'' aritmetikai utasításokhoz képest. Az arányokat az \figref{Perf_utilization} ábra jelzi.
+		
+		\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=150mm, keepaspectratio]{figures/Performance/utilization.png}
+			\caption{Utasítások eloszlása}
+			\label{fig:Perf_utilization}
+		\end{figure}
+
+		A megfelelõ GPU kihasználtságot (Occupancy) jelenleg a regiszter felhasználás korlátozza. Minden szál 34 regisztert használ fel, így 128 szálból álló TB esetén 4352 regisztert foglal le egy TB. Így összesen 7 TB fér el egy SM-en a maximális 8-ból, ami nem rossz. Az egyszerre aktív warpok száma azonban lényegesen alacsonyabb, mindössze $23/48$, ugyanis a TB-k mérete relatíve kicsi. Azonban a fenti [128,1,1] dimenzióval rendelkezõ kernel produkálta a legjobb eredményeket. Az elért GPU kihasználtság így mindössze 48\%, ahogy az \figref{Perf_kernel_properties} ábra is mutatja.
+		
+		\begin{figure}[!ht]
+			\centering
+			\includegraphics[width=100mm, keepaspectratio]{figures/Performance/kernel_properties.png}
+			\caption{A kernel tulajdonságai}
+			\label{fig:Perf_kernel_properties}
+		\end{figure}
