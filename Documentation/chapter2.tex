@@ -7,11 +7,7 @@
 	%----------------------------------------------------------------------------
 	\section{Heterogén számítási rendszerek}
 	%----------------------------------------------------------------------------
-		Heterogén számítási rendszer alatt olyan processzoros rendszert értünk, mely több, különbözõ típusú és célú processzort használ közös buszrendszerre integrálva. A manapság kapható asztali számítógépek és laptopok is ide tartoznak. Elõnye és a célja az ilyen rendszereknek, hogy hatékonyabbá tegye az energiafelhasználást, növelje az egységnyi teljesítményre jutó számítási kapacitást.
-		
-		A GPU rengeteg, elsõsorban kijelzéshez, grafikához kapcsolódó, párhuzamosan számítandó terhet vesz le a CPU válláról.
-
-		\towrite{Ide még kellene valamit írni...}
+		Heterogén számítási rendszer alatt olyan processzoros rendszert értünk, mely több, különbözõ típusú és célú processzort használ közös buszrendszerre integrálva. A manapság kapható asztali számítógépek és laptopok is ide tartoznak. Elõnye és a célja az ilyen rendszereknek, hogy hatékonyabbá tegyék az energiafelhasználást, növeljék az egységnyi teljesítményre jutó számítási kapacitást.
 		
 		%\begin{figure}[!ht]
 		%\centering
@@ -20,26 +16,26 @@
 		%\label{fig:PC}
 		%\end{figure}
 
-		Az alfejezet további részében a CPU-k és GPU-k felépítés- és használatbeli eltéréseit mutatom be teljesen általánosan, a legfontosabb szempontokat kiemelve. Elõfordulhatnak olyan fogalmak, melyeket csak a dolgozat késõbbi fejezeteiben ismertetek részletesebben.
+		Az alfejezet további részében a CPU-k és GPU-k felépítésbeli és használatbeli eltéréseit mutatom be teljesen általánosan, a legfontosabb szempontokat kiemelve. Elõfordulhatnak olyan fogalmak, melyeket csak a dolgozat késõbbi fejezeteiben ismertetek részletesebben.
 		%----------------------------------------------------------------------------
 		\subsection{Rendszerben betöltött szerep}
 		%----------------------------------------------------------------------------
 			\textbf{CPU}: Ellátott feladatok skálája széles, általános célú felhasználásra rendkívül alkalmas és rugalmas. Mikroarchitektúráját vezérlési feladatokhoz, alacsony késleltetést (latency) szem elõtt tartva tervezik: gyors reagálás, utasítások végrehajtása rövid idõ alatt~\cite{CUDACProg}.
 
 			\noindent
-			\textbf{GPU}: Elsõsorban szolga koprocesszor szerepet tölt be a rendszerben. A feladatot és a feldolgozandó adatokat a CPU-tól kapja. Mikroarchitechtúra szempontjából áteresztõképességre (throughput) optimalizált: nem baj, ha az egyes utasításokat lassabban hajtja végre. Azzal, hogy sok utasításon dolgozik párhuzamosan, képes a késleltetés elfedésére.
+			\textbf{GPU}: Elsõsorban szolga koprocesszor szerepet tölt be a rendszerben. A feladatot és a feldolgozandó adatokat a CPU-tól kapja. Mikroarchitechtúra szempontjából áteresztõképességre (throughput) optimalizált: nem baj, ha az egyes utasításokat lassabban hajtja végre. Azzal, hogy sok utasításon dolgozik párhuzamosan, képes a késleltetés elfedésére. A GPU rengeteg, elsõsorban kijelzéshez, grafikához kapcsolódó, párhuzamosan számítandó terhet vesz le a CPU válláról.
 
 		%----------------------------------------------------------------------------
 		\subsection{Hardver felépítése}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Rendszerint magas frekvenciájú ($2-4$ GHz) órajelen mûködtetett kisszámú, de ,,erõteljes'' processzormagból áll. A flexibilis felhasználhatóság következménye, hogy komplex hardveres vezérlõ logikát (control unit) igényel. Ez az egység felelõs a magok közti feladatok kiosztásáért, az esetleges utasítás-, adat-egymásra hatás kiküszöböléséért. Gyártás szempontjából az egyik legköltségesebb rész a chipfelület körülbelül $30\%$-t kitevõ cache.
+			\textbf{CPU}: Rendszerint magas frekvenciájú ($2-4$ GHz) órajelen mûködtetett kisszámú, de ,,erõteljes'' processzormagból áll. A flexibilis felhasználhatóság következménye, hogy komplex hardveres vezérlõ logikát (control unit) igényel. Ez az egység felelõs a magok közti feladatok kiosztásáért, az esetleges utasítás vagy adat egymásra hatások kiküszöböléséért. Gyártás szempontjából az egyik legköltségesebb rész a chipfelület körülbelül $30\%$-t kitevõ cache.
 
 			\noindent
-			\textbf{GPU}: Kis fogyasztású, azonos felépítésû, egyszerû processzormagokat tartalmaz, melyek relatíve kis frekvencián ($0,8-1,3$ GHz) üzemelnek. A chipfelület legnagyobb részét ezek foglalják el. A magok száma alsó hangon néhány $10$-tõl egészen $1000$-res nagyságrendig terjedhet. A vezérlõ logika is egyszerû, mivel egyes magokon ugyanaz a program fut, csak más adatokkal.
+			\textbf{GPU}: Kis fogyasztású, azonos felépítésû, egyszerû processzormagokat tartalmaz, melyek relatíve kis frekvencián ($0,8-1,3$ GHz) üzemelnek. A chipfelület legnagyobb részét ezek foglalják el. A magok száma alsó hangon néhány $10$-tõl egészen az $1000$-res nagyságrendig terjedhet. A vezérlõ logika is egyszerû, mivel egyes magokon ugyanaz a program fut, csak más adatokkal.
 
 			\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/GPU_vs_CPU.pdf}
+			\includegraphics[width=150mm, keepaspectratio]{figures/GPU/GPU_vs_CPU.pdf}
 			\caption{CPU és GPU mikroarchitektúra} 
 			\label{fig:GPU_vs_CPU}
 			\end{figure}
@@ -47,10 +43,10 @@
 		%----------------------------------------------------------------------------
 		\subsection{Programozás}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Programozásuk viszonylag egyszerû és könnyedén elsajátítható, mindenféle mögöttes hardver ismerete nélkül. A fordító sok esetben automatikusan elvégzi a párhuzamosítást, ha kód tartalmaz egymástól függetlenül végrehajtható programrészeket.
+			\textbf{CPU}: Programozásuk viszonylag egyszerû és könnyedén elsajátítható, mindenféle mögöttes hardver ismerete nélkül. A fordító sok esetben automatikusan elvégzi a párhuzamosítást, ha a kód tartalmaz egymástól függetlenül végrehajtható programrészeket.
 
 			\noindent
-			\textbf{GPU}: A kisebb teljesítményû, egyszerûbb magok miatt a programozási modell is jóval kötöttebb, kevesebb lehetõséget kínál. Jó teljesítményû párhuzamos program írásához a hardver ismerete (a szálak ütemezése, processzormagok számítási kapacitása, memória hierarchia stb.) elengedhetetlen. A párhuzamosság kifejezése a kódban explicite történik.
+			\textbf{GPU}: A kisebb teljesítményû, egyszerûbb magok miatt a programozási modell is kötöttebb, kevesebb lehetõséget kínál. Megfelelõ teljesítményû párhuzamos program írásához a hardver ismerete (a szálak ütemezése, processzormagok számítási kapacitása, memória hierarchia stb.) elengedhetetlen. A párhuzamosság kifejezése a kódban explicite történik.
 
 		%----------------------------------------------------------------------------
 		\subsection{Memória modell}
@@ -63,9 +59,9 @@
 		%----------------------------------------------------------------------------
 		\subsection{Párhuzamosítási modell}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Egy mag képes több szál párhuzamos futtatására idõosztásos alapon (Intel processzorok esetén HyperThreading a neve). Több mag esetén képes ,,valósan'' is párhuzamos, egymástól független szálakat futtatni. Flynn taxonómia\footnote{Az egyik legismertebb csoportosítása a párhuzamos számítógép architektúráknak a Michael J. Flynn által 1966-ban publikált Flynn osztályozás (Flynn's taxonomy), mely a felhasznált utasítás- és adatfolyamok száma (instruction stream, data stream) alapján kategorizálja az egyes számítógépeket. Négy csoport létezik: SISD, SIMD, MISD, MIMD (S - Single, M - Multiple, I - Instruction, D - Data).} (Flynn's taxonomy) szerint ez a MIMD kategóriába esik. Adatfeldolgozás szempontjából nem hatékony, de cserébe flexibilis.
+			\textbf{CPU}: Egy mag képes több szál párhuzamos futtatására idõosztásos alapon (Intel processzorok esetén HyperThreading a neve). Több mag esetén képes ,,valósan'' is párhuzamos, egymástól független szálakat futtatni. Flynn taxonómia\footnote{Az egyik legismertebb csoportosítása a párhuzamos számítógép architektúráknak a Michael J. Flynn által 1966-ban publikált Flynn osztályozás (Flynn's taxonomy), mely a felhasznált utasítás- és adatfolyamok száma (instruction stream, data stream) alapján kategorizálja az egyes számítógépeket. Négy csoport létezik: SISD, SIMD, MISD, MIMD (S - Single, M - Multiple, I - Instruction, D - Data).} (Flynn's taxonomy) szerint ez a MIMD kategóriába esik. Adatfeldolgozás szempontjából nem hatékony, viszont flexibilis.
 
-			SIMD végrehajtásra is képesek a modern CPU-k, ugyanis rendelkeznek speciális utasításokkal és széles (vektor) regiszterekkel, melyekbe egyszerre több adat is betölthetõ. A regiszterekbe helyezett adatokon egyszerre hajtódik végre a beolvasott utasítás. Intel processzorokban például ez a $128$ bites regiszterekkel dolgozó SSE (Streaming SIMD Extensions) és a $256$ bites AVX (Advanced Vector Extensions). Utóbbi 8 egyszeres pontosságú lebegõpontos adaton képes utasítások végrehajtására.
+			SIMD végrehajtásra is képesek a modern CPU-k, ugyanis rendelkeznek speciális utasításkészlettel és széles (vektor) regiszterekkel, melyekbe egyszerre több adat is betölthetõ. A regiszterekbe helyezett adatokon egyszerre hajtódik végre a beolvasott utasítás. Intel processzorokban például ez a $128$ bites regiszterekkel dolgozó SSE (Streaming SIMD Extensions) és a $256$ bites AVX (Advanced Vector Extensions). Utóbbi 8 darab egyszeres pontosságú lebegõpontos adaton képes utasítások végrehajtására.
 
 			\noindent
 			\textbf{GPU}: SIMD jelleghez hasonló, de vektorba rendezett adatok helyett, itt minden adathoz külön szál tartozik és a szálak szinkronban (lockstep) hajtanak végre utasításokat; elnevezése a SIMT (Single Instruction Multiple Thread).
@@ -76,12 +72,12 @@
 			\textbf{CPU}: Futtatott szálak közötti váltás során a kontextuscsere lassú és költséges, ugyanis sok adminisztratív jellegû feladattal (overhead) jár. A szálhoz tartozó egyedi információk (pl.: regiszterek tartalma) kimentésre kerülnek a rendszermemóriába.
 
 			\noindent
-			\textbf{GPU}: Regiszterben gazdag architektúrával teszi lehetõvé a szálak közti gyors váltást, szinte zérus overheaddel. Minden szálhoz dedikált regiszterek tartoznak, melyek regiszterbankokba vannak szervezve, így szálak közti váltás során csupán egy bankváltással elérhetõ.
+			\textbf{GPU}: Regiszterben gazdag architektúrával teszi lehetõvé a szálak közti gyors váltást, szinte zérus overheaddel. Minden szálhoz dedikált regiszterek tartoznak, melyek regiszterbankokba vannak szervezve, így szálak közti váltás során csupán egy bankváltással elérhetõek.
 
 	%----------------------------------------------------------------------------
 	\section{Grafikus processzorok felépítése}
 	%----------------------------------------------------------------------------
-		A GPU-król az eddig általánosságban volt szó. A két nagy, ismert GPU gyártó az NVIDIA és az AMD\footnote{Piacrészesedést tekintve az Intel vezet toronymagasan, az alaplap chipsetjébe integrált kisteljesítményû GPU-i miatt. GPGPU felhasználást tekintve az NVIDIA és az AMD a piacvezetõk.} architektúrái között vannak számottevõ eltérések, azonban mindkettõ bemutatására jelen dolgozat keretei között nincs lehetõség. A számítógépemben egy dedikált NVIDIA GPU található, így NVIDIA architektúrák bemutatása és ezzel együtt az NVIDIA terminológia használata mellett döntöttem.
+		A GPU-ról az eddig általánosságban volt szó. A két nagy, ismert GPU gyártó az \mbox{NVIDIA} és az AMD\footnote{Piacrészesedést tekintve az Intel vezet toronymagasan, az alaplap chipsetjébe integrált kisteljesítményû GPU-i miatt. GPGPU felhasználást tekintve az NVIDIA és az AMD a piacvezetõk.} architektúrái között vannak számottevõ eltérések, azonban mindkettõ bemutatására jelen dolgozat keretei között nincs lehetõség. A számítógépemben egy dedikált NVIDIA GPU található, így NVIDIA architektúrák bemutatása és ezzel együtt az NVIDIA terminológia használata mellett döntöttem.
 
 		Teljesítménybeli összehasonlításukra nincs kiforrott, általánosan elfogadott referenciaprogram (benchmark), így a kérdésre, hogy melyik gyártó GPU-i jobbak, a válasz rendszerint: attól függ. Marketingtõl elvonatkoztatva még azonos gyártó esetén is változik, hogy mely GPU generáció és család ér el jobb relatív teljesítményt egy adott probléma megoldása során.
 
@@ -99,7 +95,7 @@
 			
 			\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/GPU_SM.pdf}
+			\includegraphics[width=150mm, keepaspectratio]{figures/GPU/GPU_SM.pdf}
 			\caption{SM belsõ felépítése és elhelyezkedése a GPU-ban} 
 			\label{fig:GPU_SM}
 			\end{figure}
@@ -137,7 +133,7 @@
 		
 			\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_memoria_hierarchia.pdf}
+			\includegraphics[width=150mm, keepaspectratio]{figures/GPU/CUDA_memoria_hierarchia.pdf}
 			\caption{GPU memória hierarchia} 
 			\label{fig:GPU_mem_hier}
 			\end{figure}
@@ -228,7 +224,7 @@
 
 		\begin{figure}[!ht]
 		\centering
-		\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_feldolgozasi_modell.pdf}
+		\includegraphics[width=150mm, keepaspectratio]{figures/GPU/CUDA_feldolgozasi_modell.pdf}
 		\caption{Feldolgozási modell} 
 		\label{fig:CUDA_feldolgozasi_modell}
 		\end{figure}
@@ -248,11 +244,9 @@
 		%----------------------------------------------------------------------------
 			A program végrehajtás alapegysége a szál (\emph{thread}), melyeket blokkosítva (TB - \emph{Thread Block}) kezel a CUDA és a GPU, ahogy az a \figref{CUDA_szal_hierarchia} ábrán is látható. Egy blokkon belüli szálak képesek egymás közötti relatíve gyors kommunikációra és szinkronizációra. Mérete korlátozott, jelenleg maximum $1024$ szálat tartalmazhat. A blokkokon belül $32$-es szálcsoportok kerülnek kialakításra, melyeket \emph{warp}-oknak nevezünk. Warpon belüli $32$ szál mindig azonos ütemben, egyszerre kerül futtatásra. A blokkok felett van még egy konténer, melyet rácsnak (\emph{thread grid})-nek nevezik~\cite{ShaneCook}.
 		
-			\towrite{Ide lehetne írni, hogy hogyan kerülnek a TB-k kiosztásra az SM-eken}
-		
 			\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_szal_hierarchia.pdf}
+			\includegraphics[width=150mm, keepaspectratio]{figures/GPU/CUDA_szal_hierarchia.pdf}
 			\caption{Szálakból alkotott csoportok}
 			\label{fig:CUDA_szal_hierarchia}
 			\end{figure}
@@ -320,7 +314,7 @@ int idY = blockIdx.y * blockDim.y + threadIdx.y;
 		
 			\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/CUDA_2D_pelda.pdf}
+			\includegraphics[width=150mm, keepaspectratio]{figures/GPU/CUDA_2D_pelda.pdf}
 			\caption{Kétdimenziós példa az egyedi azonosítókra}
 			\label{fig:CUDA_2D_pelda}
 			\end{figure}

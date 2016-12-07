@@ -3,11 +3,11 @@
 %----------------------------------------------------------------------------
 	A szimulációt lefuttattam, minden felhasznált technológiával, illetve kombinációikkal, azonos paraméterezéssel. Az eredményeket egy Excel táblázatban hasonlítottam össze és jelenítettem meg. Összesen 7 különbözõ testszámmal végeztem el a teszteket: 8 ,256, 512, 1024, 2048, 4096, 16384. Mindegyik teszt összesen 20 napnyi idõintervallumot szimulál, 1 napos lépésközzel, tehát összesen 20 szimulációs ,,tick'' történt. A mérések tisztán csak a ,,hasznos'' iterációkat tartalmazzák, a program kezdeti inicializációs fázisát nem, mely nagy testszám esetén sokáig is eltarthat.
 	
-	Az ábrákat méretük miatt a függelékben helyeztem el. Az ábrákon látható értékek 20 futásnak (szimulációnak) az átlaga adta ki ezzel eltüntetve, az ideiglenes számítógép terheltségébõl adódó ingadozásokat. Az \figref{Perf_GFLOPS} ábrán látható az egyes implementációk által másodpercenként elvégzett milliárd lebegõpontos számítások (GFLOPS) száma. Egy talán megfoghatóbb jellemzés lehet a másodpercenként elvégzett iterációk száma, mely lényegében tekinthetõ FPS-nek (Frames Per Second). Ez látható a \figref{Perf_FPS} ábrán 4096 esetére.
+	Az ábrákat méretük miatt a függelékben helyeztem el. Az ábrákon látható értékeket 20 futási eredménynek (szimulációnak) az átlaga adta ki ezzel eltüntetve, az ideiglenes számítógép terheltségébõl adódó ingadozásokat. Az \figref{Perf_GFLOPS} ábrán látható az egyes implementációk által másodpercenként elvégzett milliárd lebegõpontos számítások (GFLOPS) száma. Egy talán megfoghatóbb jellemzés lehet a másodpercenként elvégzett iterációk száma, mely lényegében tekinthetõ FPS-nek (Frames Per Second). Ez látható a \figref{Perf_FPS} ábrán 4096 test esetére.
 	
 	A futási idõket a jobb ábrázolhatóság érdekében logaritmikus skálán jelenítettem meg (\figref{Perf_FUTAS} ábra).
 	
-	MATLAB prototípus futási eredményeit nem ábrázoltam, mert szkriptnyelvrõl lévén szó nagyságrendekkel kisebb teljesítményt produkált így lényegében nem is látszódna a grafikonon.
+	MATLAB prototípus futási eredményeit nem ábrázoltam, mert szkriptnyelvrõl lévén szó nagyságrendekkel kisebb teljesítményt produkált, így lényegében nem is látszódna a grafikonon.
 
 	%----------------------------------------------------------------------------
 	\section{CPU}
@@ -16,7 +16,7 @@
 		
 		SSE és AVX közti probléma is jól látható, sajnos nem sikerült elérnem, hogy az AVX papírforma szerint túlteljesítse elõdjét.
 		
-		Bár elvileg 8 szál futtatására képes a processzorom, de valójában a 4 magon megvalósított Intel szálkezelõ megoldás (HyperThreading) -- mely kontextusváltást gyorsítja -- idõosztásos alapon mûködik. A sebességnövekedés OpenMP használatával így körülbelül 4x-es lehetne maximum. Az OpenMP használatával nyert eredmények, a megvalósítás során bemutatott \figref{Impl_basic_vs_omp} ábrán láthatók.
+		Bár elvileg 8 szál futtatására képes a processzorom, de valójában a 4 magon megvalósított Intel szálkezelõ megoldás (HyperThreading) -- mely kontextusváltást gyorsítja -- idõosztásos alapon mûködik. A sebességnövekedés OpenMP használatával így körülbelül négyszeres lehetne maximum. Az OpenMP használatával nyert eredmények, a megvalósítás során bemutatott \figref{Impl_basic_vs_omp} ábrán láthatók.
 		
 		Feltüntettem az ideiglenes megoldások, próbálkozások nyújtotta eredményeket, melyeket az AVX felhasználást bemutató \sectref{Impl_AVXSect} alfejezetben részleteztem. Az eredményekbõl leolvasható, hogy a dinamikus tömböket alkalmazó \verb+NBodySystemFlat+ kétszeres sebességnövekedést ért el a SSE-t és OpenMP-t együttesen felhasználó eredeti megoldáshoz képest.
 		
@@ -24,7 +24,6 @@
 	%----------------------------------------------------------------------------
 	\section{GPU}
 	%----------------------------------------------------------------------------
-		A GPU futási
 		%----------------------------------------------------------------------------
 		\subsection{Elméleti teljesítmény}
 		%----------------------------------------------------------------------------
@@ -34,7 +33,7 @@
 			P_T = \frac{n \cdot f \cdot 2}{1000} = \frac{96 \cdot 600 \cdot 2}{1000} = 115,2~GFLOPS
 		\end{align}
 		
-		Ahol $n$ jelöli a CUDA magok számát, $f$ az órajelük frekvenciáját (MHz). A $2$ szorzó az órajel ciklusonként végrehajtott 2 darab utasítás miatt jön be.
+		Ahol $n$ jelöli a CUDA magok számát, $f$ az órajelük frekvenciáját (MHz). A $2$ szorzó az órajel ciklusonként végrehajtott 2 darab utasítás miatt jelenik meg.
 		
 		\begin{align}
 			P_T = \frac{n \cdot f \cdot 2}{1000}
@@ -46,7 +45,7 @@
 		\subsection{Visual Profiler eredményei}
 		%----------------------------------------------------------------------------
 		% Profiler eredmények bemutatása
-		A GPU-s implementáció futását az NVIDIA Visual Profiler programjával elemeztem ki. A futási idõdiagrammját tartalmazza az \figref{Perf_visual_prof_1} és az \figref{Perf_visual_prof_2} ábra kettõ, egymást követõ részletben.
+		A GPU-s implementáció futását az NVIDIA Visual Profiler programjával elemeztem ki. A programom idõdiagrammját tartalmazza az \figref{Perf_visual_prof_1} és az \figref{Perf_visual_prof_2} ábra kettõ, egymást követõ részletben.
 		
 		Az elsõ ábrán történik az inicializáció, mely során az eszköz memóriájában megtörténik az allokáció a \verb+cudaMalloc+ függvény segítségével.
 		
@@ -80,7 +79,7 @@
 			\label{fig:Perf_utilization}
 		\end{figure}
 
-		A megfelelõ GPU kihasználtságot (Occupancy) jelenleg a regiszter felhasználás korlátozza. Minden szál 34 regisztert használ fel, így 128 szálból álló TB esetén 4352 regisztert foglal le egy TB. Így összesen 7 TB fér el egy SM-en a maximális 8-ból, ami nem rossz. Az egyszerre aktív warpok száma azonban lényegesen alacsonyabb, mindössze $23/48$, ugyanis a TB-k mérete relatíve kicsi. Azonban a fenti [128,1,1] dimenzióval rendelkezõ kernel produkálta a legjobb eredményeket. Az elért GPU kihasználtság így mindössze 48\%, ahogy az \figref{Perf_kernel_properties} ábra is mutatja.
+		A megfelelõ GPU kihasználtságot (occupancy) jelenleg a regiszter felhasználás korlátozza. Minden szál 34 regisztert használ fel, így 128 szálból álló TB esetén 4352 regisztert foglal le egy TB. Így összesen 7 TB fér el egy SM-en a maximális 8-ból. Az egyszerre aktív warpok száma azonban lényegesen alacsonyabb, mindössze $23/48$, ugyanis a TB-k mérete relatíve kicsi: [128, 1, 1]. Ez a 128 szállal rendelkezõ kernel produkálta a legjobb eredményeket, azonban az elért GPU kihasználtság így mindössze csak 48\%, ahogy az \figref{Perf_kernel_properties} ábra is mutatja.
 		
 		\begin{figure}[!ht]
 			\centering

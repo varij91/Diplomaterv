@@ -1,13 +1,11 @@
 %----------------------------------------------------------------------------
 \chapter{Ellenõrzés}
 %----------------------------------------------------------------------------
-	Az elsõ ellenérzési forma, amit megvalósítottam az az OpenGL alapú grafikus megjelenítés. Ezzel könnyen felderíthetõ, ha valamelyik képlet implementálása során hibát vétettem. Ezt követõen létrehoztam az \verb+NBodySystem+ osztályon belül a referencia algoritmus példányosításához szükséges változókat. Kiegészítettem a szimulációt a referencia iterációval, valamint a testek pozícióját ellenõrzõ függvény meghívásával.
+	Az elsõ ellenõrzési forma, amit megvalósítottam az az OpenGL alapú grafikus megjelenítés. Ezzel könnyen felderíthetõ, ha valamelyik képlet implementálása során hibát vétettem. Ezt követõen létrehoztam az \verb+NBodySystem+ osztályon belül a referencia algoritmus példányosításához szükséges változókat. Kiegészítettem a szimulációt a referencia iterációval, valamint a testek pozícióját ellenõrzõ függvény meghívásával.
 	%----------------------------------------------------------------------------
 	\section{Megjelenítés}
 	%----------------------------------------------------------------------------
-		Eleinte 3D-s megjelenítést szeretettem volna megvalósítani, de sajnos az idõm nem engedte, illetve nem is ezen volt a diplomamunkám hangsúlya. A szimulátor jelleget fenntartva, azonban igyekeztem javítani a látványon, a testek sûrûségalapú kiszínezésével, valamint különbözõ kezdeti feltételek megadásának lehetõségével. Az XXX ábrán egy néhány felvétel a program futásáról grafikus módban.
-
-		[KÉP: Sorozatkép néhány szimulációról]
+		Eleinte 3D-s megjelenítést szeretettem volna megvalósítani, de sajnos az idõm nem engedte, illetve nem is ezen volt a diplomamunkám hangsúlya. A szimulátor jelleget fenntartva, azonban igyekeztem javítani a látványon, a testek sûrûségalapú kiszínezésével, valamint különbözõ kezdeti feltételek megadásának lehetõségével. Az \figref{GUI_sorozat} ábrán néhány felvétel a program futásáról grafikus módban.
 	
 	%----------------------------------------------------------------------------
 	\section{Hibaszámítás}
@@ -23,6 +21,13 @@
 		\end{itemize}
 		
 		A hiba halmozódásával az eltérés minden iterációval növekszik és egy idõ után igencsak számottevõvé válik.
+		
+		\begin{figure}[!ht]
+		\centering
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/GUI_sorozat.png}
+		\caption{Sorozatkép 4096 test szimulációjából}
+		\label{fig:GUI_sorozat}
+		\end{figure}
 		
 		
 		% The GPU has fused multiply-add while the CPU does not. Parallelizing algorithms may rearrange operations, yielding different numeric results. The CPU may be computing results in a precision higher than expected. Finally, many common mathematical functions are not required by the IEEE 754 standard to be correctly rounded so should not be expected to yield identical results between implementations.

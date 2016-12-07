@@ -38,7 +38,7 @@
 		
 		\begin{figure}[!ht]
 		\centering
-		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_Properties.png}
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_Properties-cropped.pdf}
 		\caption{Futtatási beállításokat tároló struktúra és kiegészítõ enumerációi}
 		\label{fig:Impl_Properties}
 		\end{figure}
@@ -110,7 +110,7 @@
 
 		\begin{figure}[!ht]
 		\centering
-		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_Algorithm.png}
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_Algorithm-cropped.pdf}
 		\caption{Az algoritmusokhoz kapcsolódó osztályok}
 		\label{fig:Impl_Algorithm}
 		\end{figure}
@@ -128,7 +128,7 @@
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyAlgorithmCPU}
 		%----------------------------------------------------------------------------
-			Szintén egy absztrakt osztály, mely a testpárok közötti gyorsulásértékeket kiszámító \verb+calculateAcceleration+ tagfüggvények definícióit tartalmazza. Két test közötti interakció mértékének kiszámítása ugyanis teljes egészében algoritmus független.
+			Szintén egy absztrakt osztály, mely a testpárok~~közötti gyorsulásértékeket~~kiszámító \verb+calculateAcceleration+ tagfüggvények definícióit tartalmazza. Két test közötti interakció mértékének kiszámítása ugyanis teljes egészében algoritmus független.
 			
 			Az \figref{Impl_Algorithm} ábrán csak egy metódust jelöltem meg, azonban ténylegesen 6 \verb+calculateAcceleration+ került megvalósításra. Ebbõl 3 a teljesítményméréshez, 3 pedig a grafikus kijelzéshez használatos; 1-1 sor plusz kódot (szomszédok számának meghatározása) és argumentumlistát leszámítva páronként azonosak. A három tagfüggvénybõl kettõ használ speciális párhuzamosítási technikákat, a harmadik natív C++ referenciafüggvény. Sima C++ megvalósítás esetén 1, SSE esetén egyszerre $4$, AVX esetén pedig egyszerre 8 gyorsulásérték kerül kiszámításra.
 			
@@ -156,7 +156,7 @@
 
 		\begin{figure}[!ht]
 		\centering
-		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_System.png}
+		\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_System-cropped.pdf}
 		\caption{ A szimulátor központi osztályai}
 		\label{fig:Impl_System}
 		\end{figure}
@@ -195,9 +195,7 @@
 		%----------------------------------------------------------------------------
 			Feladata a testek kezdeti attribútumait feltölteni véletlenszerûen generált, normális eloszlású értékekkel. A testeket az \verb+NBodyProperties+ \verb+formation+ mezõjében beállított érték alapján helyezi el. Lehetnek az origó körül szétszórtan vagy véletlenszerûen létrehozott pontok környékén, nagyjából egyenletesen szétosztva.
 		
-			A megfelelõ algoritmust is ez az osztály példányosítja és inicializálja
-
-			\towrite{Képeket lehetne ide linkelni, a függelékbõl vagy valahonnan}
+			A megfelelõ algoritmust is ez az osztály példányosítja és inicializálja.
 
 		%----------------------------------------------------------------------------
 		\subsubsection{NBodyRenderer}
@@ -230,14 +228,14 @@
 
 			\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_ProgramInitSeq.png}
+			\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_ProgramInitSeq-cropped.pdf}
 			\caption{A program inicializációs fázisa}
 			\label{fig:Impl_ProgramInitSeq}
 			\end{figure}
 			
 			\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_SimulationSeq.png}
+			\includegraphics[width=150mm, keepaspectratio]{figures/Implementation/Impl_SimulationSeq-cropped.pdf}
 			\caption{A program szimulációs fázisa}
 			\label{fig:Impl_SimulationSeq}
 			\end{figure}

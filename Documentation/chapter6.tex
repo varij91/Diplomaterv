@@ -17,7 +17,7 @@
 	%----------------------------------------------------------------------------
 	\section{Továbbfejlesztési lehetõségek}
 	%----------------------------------------------------------------------------
-		Számos továbblépés lehetséges, mind a szimuláció pontosítása és javítása, mind a teljesítmény irányában. Néhány lehetséges példa:
+		Számos továbblépés lehetséges, mind a szimuláció pontosításának, mind a futási teljesítmény javításának irányában. Néhány lehetséges példa:
 		\begin{itemize}
 			\item Az AVX problémáját kellene kivizsgálni elsõ körben. Ha valóban a korábban említett L1 cache miss okozza a lassú futást, akkor megfelelõ profiler program (pl.: Intel vTune) alkalmazásával felderíthetõ.
 			
@@ -25,7 +25,9 @@
 			
 			\item CUDA mellett az OpenCL megvalósítást is lehetne készíteni, mely támogatná a nem csak NVIDIA által gyártott GPU-k használatát is.
 			
-			\item A szimuláció sebességét és az elért FPS-t más, a \sectref{NBody_algorithmSect} alfejezetben bemutatott algoritmusok javításával lehetne még javítani.
+			\item A szimuláció sebességét és az elért FPS-t más, az \sectref{NBody_algorithmSect} alfejezetben bemutatott algoritmusok implementálásával lehetne még javítani.
 			
-			\item Felhasználói felület szempontjából lehetne javítani a kijelzésen, látványosabbá tenni, valamint lehetõséget adni a futási eredmények, pozícióértékek szöveges lementésére (egy logger megvalósítása) késõbbi feldolgozásra.
+			\item Felhasználói felületet látványosabbá, interaktívabbá lehetne tenni
+			
+			\item Lehetõséget adni a futási eredmények, pozícióértékek szöveges lementésére (egy logger megvalósítása) késõbbi feldolgozásra.
 		\end{itemize}

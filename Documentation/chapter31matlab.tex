@@ -52,7 +52,7 @@
 	%----------------------------------------------------------------------------
 		A beállítások megadása után a rendszert inicializáló szkript hívódik meg, melynek feladata a testek létrehozása és a szükséges kezdeti feltételek generálása a beállítások alapján. A test paraméterekben megadhatók speciális sztringek mellyel elõre programozott szimulációk, speciális esetek idézhetõek elõ. Számos ötletem támadt megvalósítás és tesztelés közben, ám mindössze kettõt valósítottam meg.
 
-		Az egyik ilyen speciális eset a SEL (Sun-Earth-Luna), mely egy $N = 3$ testbõl álló rendszert reprezentál, s kezdeti feltételei közel azonosak a Nap, Föld és Hold alkotta hármas tulajdonságaival (tömeg, egymástól való távolság, sebesség). A \figref{SEL2} ennek futására láthatunk példát. Összesen $365$ napot szimulál a program $1$ napos lépésközt alkalmazva, a tengelyeken látható értékek $AU$-ban értendõk. A Nap piros, a Föld zöld, a Hold pedig kék színnel van feltüntetve. A képeken a továbbiakban a vonal jelzi a megtett utat, a pont vagy kereszt pedig az éppen aktuális pozíciót jelöli a térben.
+		Az egyik ilyen speciális eset a SEL (Sun-Earth-Luna), mely egy $N = 3$ testbõl álló rendszert reprezentál, s kezdeti feltételei közel azonosak a Nap, Föld és Hold alkotta hármas tulajdonságaival (tömeg, egymástól való távolság, sebesség). A \figref{SEL2} ennek futására láthatunk példát. Összesen 365 napot szimulál a program 1 napos lépésközt alkalmazva, a tengelyeken látható értékek $AU$-ban értendõk. A Nap piros, a Föld zöld, a Hold pedig kék színnel van feltüntetve. A képeken a továbbiakban a vonal jelzi a megtett utat, a pont vagy kereszt pedig az éppen aktuális pozíciót jelöli a térben.
 
 		\begin{figure}[!ht]
 		\centering
@@ -61,11 +61,11 @@
 		\label{fig:SEL2}
 		\end{figure}
 		
-		A képen szépen látszódik, ahogy a Föld kering a nap körül, s a Hold által okozott tömegvonzás miatt apró kitérések láthatók a zöld vonalon. A Nap mozgása elhanyagolható, és csak erõsen belenagyítva látszódik MATLAB-ban. Érdekes, hogy a Hold összesen $13$ periódust tesz meg a Föld körül ($27,3$ nap a keringési ciklusideje, ami $13$ ciklust jelent $1$ év alatt). Jelzem, hogy ez egy durva közelítése a rendszernek és a beállítások módosításával, pontosság állításával nagyban változtatható a pálya alakja. Sikerült olyan szimulációt is futtatni, melyben a Hold pár év szimulációja után ,,belecsapódott'' a Földbe, így mindig érdemes végiggondolni mennyire helyes a kapott eredmény.
+		A képen szépen látszódik, ahogy a Föld kering a nap körül, s a Hold által okozott tömegvonzás miatt apró kitérések láthatók a zöld vonalon. A Nap mozgása elhanyagolható, és csak erõsen belenagyítva látszódik MATLAB-ban. Érdekes, hogy a Hold összesen 13 periódust tesz meg a Föld körül (27,3 nap a keringési ciklusideje, ami 13 ciklust jelent 1 év alatt). Jelzem, hogy ez egy durva közelítése a rendszernek és a beállítások módosításával, pontosság állításával nagyban változtatható a pálya alakja. Sikerült olyan szimulációt is futtatni, melyben a Hold pár év szimulációja után ,,belecsapódott'' a Földbe, így mindig érdemes végiggondolni mennyire helyes a kapott eredmény.
 
 		A másik megvalósított inicializáció során a beállításokban megadott \verb+seed+ alapján egy elõre definiált intervallumon belül, véletlenszerû értékekkel ruházza fel a testeket. Az értékeket úgy határoztam, hogy közel reálisak legyenek, valamint a szimuláció során látványos eredményt produkáljanak.
 		
-		A \figref{16_twister} ábrán egy véletlenszerû kezdeti feltételekkel ellátott, $N = 16$ testbõl álló rendszer szimulációja látható. A választott idõtartam $100~000$ nap, a lépésköz $100$ nap.
+		A \figref{16_twister} ábrán egy véletlenszerû kezdeti feltételekkel ellátott, $N = 16$ testbõl álló rendszer szimulációja látható. A választott idõtartam 100~000 nap, a lépésköz 100 nap.
 		
 		\begin{figure}[!ht]
 		\centering
@@ -103,17 +103,17 @@
 			\hline
 			Beállítás & Érték \\
 			\hline \hline
-			Testek száma & $32$ \\
+			Testek száma & 32 \\
 			\hline
 			Testek tulajdonságai & Véletlenszerû (mivel a \verb+Seed+ mindig azonos, ezért a generált kezdeti értékek is azonosak) \\
 			\hline
-			Szimuláció idõtartama & $20000$ \\
+			Szimuláció idõtartama & 20000 \\
 			\hline
-			Szimulációs lépésköz & $100$ \\
+			Szimulációs lépésköz & 100 \\
 			\hline
-			$\varepsilon$ (softening factor) & $1$ \\
+			$\varepsilon$ (softening factor) & 1 \\
 			\hline
-			Seed  & $10$ \\
+			Seed  & 10 \\
 			\hline
 			\end{tabular}%
 		  \label{tab:mat_eredmenybellitasok}%
@@ -127,19 +127,19 @@
 			\hline
 			Módszer & Megoldó & Átlagos futási idõ [sec] \\
 			\hline \hline
-			Direkt & Saját integrátor & $0,7013$ \\
+			Direkt & Saját integrátor & 0,7013 \\
 			\hline
-			Direkt & \verb+ode45+ KDE megoldó & $12,959$ \\
+			Direkt & \verb+ode45+ KDE megoldó & 12,959 \\
 			\hline
-			Közelített direkt & Saját integrátor & $0,2853$ \\
+			Közelített direkt & Saját integrátor & 0,2853 \\
 			\hline
 			\end{tabular}%
 		  \label{tab:mat_futasieredmenyek}%
 		\end{table}%
 
-		A szemléletes grafikus bemutatás miatt választottam a testszámot $32$-re. A teljes keletkezett ábrák a \todo függelékben találhatók.
+		A szemléletes grafikus bemutatás miatt választottam a testszámot 32-re. A teljes keletkezett ábrák a függelékben találhatók (\figref{32_direct}, \figref{32_ODE}, \figref{32_selective}).
 
-		A futási sebességbõl látszik, hogy a saját integrátor és a KDE megoldó összehasonlítása nehéz feladat, mivel a KDE implementációja számomra ismeretlen, és a beállított hibaparaméterek, ami alapján dolgozik, nagyban befolyásolják a végeredményt. Elõfordult olyan helyzet, amikor lényegesen gyorsabb volt, mint a saját megvalósításom, de elõfordult olyan is, hogy szingularitás miatt hibaüzenettel fejezte be a futást. A közelítõ módszer a várt módon felgyorsította a futást, jelen esetben a szorzó közel $2,5$.
+		A futási sebességbõl látszik, hogy a saját integrátor és a KDE megoldó összehasonlítása nehéz feladat, mivel a KDE implementációja számomra ismeretlen, és a beállított hibaparaméterek, ami alapján dolgozik, nagyban befolyásolják a végeredményt. Elõfordult olyan helyzet, amikor lényegesen gyorsabb volt, mint a saját megvalósításom, de elõfordult olyan is, hogy szingularitás miatt hibaüzenettel fejezte be a futást. A közelítõ módszer a várt módon felgyorsította a futást, jelen esetben a szorzó közel 2,5.
 
 		A függelékben lévõ ábrákon láthatók eltérések, melyek az apró akkumulálódott hibáknak és az eltérõ implementációnak tudható be. Ez egy példa arra vonatkozóan, hogy a különbözõ N-test szimulációt megvalósító alkalmazások korrekt összehasonlítása mennyire nehézkes feladat a megvalósítás ismeretének hiányában.
 		
