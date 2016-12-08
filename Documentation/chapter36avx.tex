@@ -58,7 +58,7 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8],
 
 		A következõ alfejezetekben olyan megoldásokkal próbálkoztam, melyeknél a teljesítményt tartottam szem elõtt és feláldoztam a program osztályait. Ezeket teljes mértékben próbaképp, ideiglenesen hoztam létre, így nem biztosítottam lehetõséget a felhasználó számára ezek bekapcsolására.
 
-		Itt megjegyezném, hogy több projektet is létrehoztam a diplomamunkám során, s akárcsak korábbi egy alkalommal, azt tapasztaltam, hogy a Visual Studio-ban létrehozott, SSE és AVX kódot is tartalmazó NVIDIA CUDA projekt nem teljesít olyan jól. A ,,sima'' projekt, ahol csak CPU-n futtatható kódot írtam, az SSE és AVX sokkal jobb futási eredményeket produkált, így a továbbiakban a vektorizációs eredményeket ez alapján mutatom be. A két projekt SSE és AVX része között nincs sok eltérés és a profiler sem ad magyarázatot erre a jelenségre.
+		Itt megjegyezném, hogy több projektet is készítettem a diplomamunkám során, és akárcsak korábbi egy alkalommal, azt tapasztaltam, hogy a Visual Studio-ban létrehozott, SSE és AVX kódot is tartalmazó NVIDIA CUDA projekt nem teljesít olyan jól. A ,,sima'' projekt, ahol csak CPU-n futtatható kódot írtam, az SSE és AVX sokkal jobb futási eredményeket produkált, így a továbbiakban a vektorizációs eredményeket ez alapján mutatom be. A két projekt SSE és AVX része között nincs sok eltérés és a profiler sem ad magyarázatot erre a jelenségre.
 
 	%----------------------------------------------------------------------------
 	\subsection{Kibontott algoritmus}
@@ -91,7 +91,7 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[8],
 		Némi keresgélés után az Intel egyik oldalán, találtam némi információt arra vonatkozóan, hogy mi lehet a probléma \cite{intelforum}:
 
 		\begin{quote}
-			It is not at all unusual for AVX code on Sandy Bridge \& Ivy Bridge to be slightly slower than SSE code for data that is not contained in the L1 cache...
+			\textit{,,It is not at all unusual for AVX code on Sandy Bridge \& Ivy Bridge to be slightly slower than SSE code for data that is not contained in the L1 cache...''}
 		\end{quote}
 		
 		Az Intel szoftverfejlesztõje által elvégzett kísérletek azt mutatták, hogy az AVX-et bemutató architektúrákon, az AVX teljesítménye kisebb volt, mint az SSE teljesítménye, abban az esetben, ha a szükséges adatok nem állnak rendelkezésre L1 cache-ben.

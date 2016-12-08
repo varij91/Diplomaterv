@@ -41,7 +41,7 @@ const float3 posJ) { // A másik test pozíciója
 	
 	Összesen 17 egyszeres pontosságú lebegõpontos mûveletet (FLOP - Floating Point Operation) hajt végre, egy testpár közötti gyorsulás kiszámításához és még 3 összeadást a függvényen kívül, az akkumuláláshoz. Ezt a függvényt kell $N^2$-szer meghívni minden testpárra, ahol $N$ a testek száma.
 
-	Az alábbi kódrészleteket az egyik elsõ verzióból való azok közül, amit írtam. A többi egy kicsit jobban feldarabolt a párhuzamosítás miatt. Az alapelv viszont változatlan és ebben a formában könnyebben értelmezhetõ.
+	Az alábbi kódrészletek az egyik elsõ verzióból való azok közül, amit írtam. A többi egy kicsit jobban feldarabolt a párhuzamosítás miatt. Az alapelv viszont változatlan és ebben a formában könnyebben értelmezhetõ.
 
 	A testeket egy \verb+std::vector+ konténerben tárolom, ami a dinamikus tömbkezelés problémáit, (allokáció, reallokáció, felszabadítás) nehézségeit veszi le a fejlesztõk válláról.
 
@@ -79,7 +79,7 @@ void NBodyAlgorithmCPUAllPairs::advance(std::vector<Body> &bodies) {
 }
 	\end{lstlisting}
 	
-	Annak érdekében, hogy az egyes gyorsulásértékek, konzisztens pozícióadatokból legyen kiszámítva, az integrálás (\eqref{NBody_integrateEq} képlet) végrehajtását egy másik ciklusban kell elvégezni. Összesen $N$-szer végrehajtani a ciklust, iterációnként ez 21 FLOP-ot jelent. Ebbõl 3 FLOP-ot hoz be egy gyorsulás értékét csökkentõ plusz konstans, melynek feladata, hogy a szimuláció során ne hagyja a testeket egymástól nagyon eltávolodni. A grafikus megjelenítés rögzített, nem mozdítható vagy forgatható és gyakran jönnek, mennek az ablak szélén a testek.
+	Annak érdekében, hogy az egyes gyorsulásértékek konzisztens pozícióadatokból legyenek kiszámítva, az integrálás (\eqref{NBody_integrateEq} képlet) végrehajtását egy másik ciklusban kell elvégezni. Összesen $N$-szer kell végrehajtani a ciklust, iterációnként ez 21 FLOP-ot jelent. Ebbõl 3 FLOP-ot hoz be egy gyorsulás értékét csökkentõ plusz konstans, melynek feladata, hogy a szimuláció során ne hagyja a testeket egymástól nagyon eltávolodni. A grafikus megjelenítés rögzített, nem mozdítható vagy forgatható és gyakran jönnek, mennek az ablak szélén a testek.
 
 	\begin{lstlisting}
 float stepTime2 = 0.5f * mp_properties->stepTime * mp_properties->stepTime;

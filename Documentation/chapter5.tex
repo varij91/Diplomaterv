@@ -7,7 +7,7 @@
 	
 	A futási idõket a jobb ábrázolhatóság érdekében logaritmikus skálán jelenítettem meg (\figref{Perf_FUTAS} ábra).
 	
-	MATLAB prototípus futási eredményeit nem ábrázoltam, mert szkriptnyelvrõl lévén szó nagyságrendekkel kisebb teljesítményt produkált, így lényegében nem is látszódna a grafikonon.
+	A MATLAB prototípus futási eredményeit nem ábrázoltam, mert szkriptnyelvrõl lévén szó nagyságrendekkel kisebb teljesítményt produkált, így lényegében nem is látszódna a grafikonon.
 
 	%----------------------------------------------------------------------------
 	\section{CPU}
@@ -18,7 +18,7 @@
 		
 		Bár elvileg 8 szál futtatására képes a processzorom, de valójában a 4 magon megvalósított Intel szálkezelõ megoldás (HyperThreading) -- mely kontextusváltást gyorsítja -- idõosztásos alapon mûködik. A sebességnövekedés OpenMP használatával így körülbelül négyszeres lehetne maximum. Az OpenMP használatával nyert eredmények, a megvalósítás során bemutatott \figref{Impl_basic_vs_omp} ábrán láthatók.
 		
-		Feltüntettem az ideiglenes megoldások, próbálkozások nyújtotta eredményeket, melyeket az AVX felhasználást bemutató \sectref{Impl_AVXSect} alfejezetben részleteztem. Az eredményekbõl leolvasható, hogy a dinamikus tömböket alkalmazó \verb+NBodySystemFlat+ kétszeres sebességnövekedést ért el a SSE-t és OpenMP-t együttesen felhasználó eredeti megoldáshoz képest.
+		Feltüntettem az ideiglenes megoldások és próbálkozások nyújtotta eredményeket, melyeket az AVX felhasználást bemutató \sectref{Impl_AVXSect} alfejezetben részleteztem. Az eredményekbõl leolvasható, hogy a dinamikus tömböket alkalmazó \verb+NBodySystemFlat+ kétszeres sebességnövekedést ért el a SSE-t és OpenMP-t együttesen felhasználó eredeti megoldáshoz képest.
 		
 		Összegezve elmondható, hogy alacsony testszámú szimulációs esetben mindenképp egy CPU-s implementációt érdemes használni.
 	%----------------------------------------------------------------------------
@@ -28,13 +28,11 @@
 		\subsection{Elméleti teljesítmény}
 		%----------------------------------------------------------------------------
 		Az eredményekbõl látható, hogy alacsony testszám (szálszám) mellett a GPU nem teljesített kiemelkedõen. A rendelkezésemre álló NVIDIA GeForce 525M elméleti teljesítményét (Theorethical Peak Performance) a következõ összefüggés alapján kaphatjuk meg:
-		
 		\begin{align}
 			P_T = \frac{n \cdot f \cdot 2}{1000} = \frac{96 \cdot 600 \cdot 2}{1000} = 115,2~GFLOPS
 		\end{align}
 		
 		Ahol $n$ jelöli a CUDA magok számát, $f$ az órajelük frekvenciáját (MHz). A $2$ szorzó az órajel ciklusonként végrehajtott 2 darab utasítás miatt jelenik meg.
-		
 		\begin{align}
 			P_T = \frac{n \cdot f \cdot 2}{1000}
 		\end{align}
@@ -49,7 +47,7 @@
 		
 		Az elsõ ábrán történik az inicializáció, mely során az eszköz memóriájában megtörténik az allokáció a \verb+cudaMalloc+ függvény segítségével.
 		
-		A második részben látható a kezdeti adatok átmásolása az eszköz memóriájába majd a kernel futása összesen 20-szor. Minden iteráció után megtörténik az meghatározott adatok visszamásolása a rendszermemóriába. A legvégén pedig az alaphelyzetbe állító függvény a \verb+cudaDeviceReset+ fut le.
+		A második részben látható a kezdeti adatok átmásolása az eszköz memóriájába majd a kernel futása összesen 20-szor. Minden iteráció után megtörténik a meghatározott adatok visszamásolása a rendszermemóriába. A legvégén pedig az alaphelyzetbe állító függvény a \verb+cudaDeviceReset+ fut le.
 		
 		\begin{figure}[!ht]
 			\centering
@@ -66,11 +64,12 @@
 		\end{figure}
 		
 		A profiler szerint a kernelem legnagyobb korlátját a megfelelõ számítási kapacitás hiánya okozza\footnote{Másik gyakori korlátozó tényezõ a kernelek esetén a memóriasávszélesség.}.
+		\newline
 		
 		\begin{quote}
-			For device ,,GeForce GT 525M'' the kernel's memory utilization is significantly lower than the its compute utilization. These utilization levels indicate that the performance of the kernel is most likely being limited by computation on the SMs.
+			\textit{,,For device ,,GeForce GT 525M'' the kernel's memory utilization is significantly lower than the its compute utilization. These utilization levels indicate that the performance of the kernel is most likely being limited by computation on the SMs.''}
 		\end{quote}
-		Az analízis során kiderült, hogy a vezérlõ (control-flow) jellegû utasítások aránya viszonylag magas, a ,,hasznos'' aritmetikai utasításokhoz képest. Az arányokat az \figref{Perf_utilization} ábra jelzi.
+		Az analízis során kiderült, hogy a vezérlõ (control-flow) jellegû utasítások aránya viszonylag magas, a ,,hasznos'' aritmetikai utasításokhoz képest. Az arányokat az \figref{Perf_utilization} ábra mutatja.
 		
 		\begin{figure}[!ht]
 			\centering

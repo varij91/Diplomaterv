@@ -5,14 +5,14 @@
 	%----------------------------------------------------------------------------
 	\section{Megjelenítés}
 	%----------------------------------------------------------------------------
-		Eleinte 3D-s megjelenítést szeretettem volna megvalósítani, de sajnos az idõm nem engedte, illetve nem is ezen volt a diplomamunkám hangsúlya. A szimulátor jelleget fenntartva, azonban igyekeztem javítani a látványon, a testek sûrûségalapú kiszínezésével, valamint különbözõ kezdeti feltételek megadásának lehetõségével. Az \figref{GUI_sorozat} ábrán néhány felvétel a program futásáról grafikus módban.
+		Eleinte 3D-s megjelenítést szerettem volna megvalósítani, de sajnos az idõm nem engedte, illetve nem is ezen volt a diplomamunkám hangsúlya. A szimulátor jelleget fenntartva, azonban igyekeztem javítani a látványon, a testek sûrûségalapú kiszínezésével, valamint különbözõ kezdeti feltételek megadásának lehetõségével. Az \figref{GUI_sorozat} ábrán néhány felvétel a program futásáról grafikus módban.
 	
 	%----------------------------------------------------------------------------
 	\section{Hibaszámítás}
 	%----------------------------------------------------------------------------
-		Referenciamodell használata során feltételezzük, hogy az egy szálon futó CPU-s megvalósítás eredményei a helyesek. Az összehasonlítást végzõ függvény az \verb+NBodyUtility+ osztályban kapott helyet. Két testeket tároló tömböt hasonlít össze pozícióadatok alapján, az elsõ nagyobb eltérésnél, kijelzi az eltérés értékét és kilép.
+		Referenciamodell használata során feltételezzük, hogy az egy szálon futó CPU-s megvalósítás eredményei a helyesek. Az összehasonlítást végzõ függvény az \verb+NBodyUtility+ osztályban kapott helyet. Két testeket tároló tömböt hasonlít össze pozícióadatok alapján, az elsõ nagyobb eltérésnél kijelzi az eltérés értékét és kilép.
 		
-		A CPU-s modellek eredményei teljes mértékben megegyeztek. Eltérés elõször a CPU-s és GPU-s megoldások között mutatkozott. Ennek oka a lebegõpontos számítások hardveres megvalósításában keresendõ \cite{CUDAFloat}.
+		A CPU-s modellek eredményei teljes mértékben megegyeztek. Eltérés elõször a CPU-s és GPU-s megoldások között mutatkozott, melynek oka a lebegõpontos számítások hardveres megvalósításában keresendõ \cite{CUDAFloat}.
 		
 		\begin{itemize}
 			\item GPU rendelkezik szorzás-összegzés (MAC) elvégzésére alkalmas hardverrel, míg a CPU nem. Ezzel az egyes utasításokat más sorrendbe rakhatja a fordító optimalizálás során.

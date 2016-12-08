@@ -8,13 +8,6 @@
 	\section{Heterogén számítási rendszerek}
 	%----------------------------------------------------------------------------
 		Heterogén számítási rendszer alatt olyan processzoros rendszert értünk, mely több, különbözõ típusú és célú processzort használ közös buszrendszerre integrálva. A manapság kapható asztali számítógépek és laptopok is ide tartoznak. Elõnye és a célja az ilyen rendszereknek, hogy hatékonyabbá tegyék az energiafelhasználást, növeljék az egységnyi teljesítményre jutó számítási kapacitást.
-		
-		%\begin{figure}[!ht]
-		%\centering
-		%\includegraphics[width=150mm, keepaspectratio]{figures/PC.pdf}
-		%\caption{PC vázlatos felépítése} 
-		%\label{fig:PC}
-		%\end{figure}
 
 		Az alfejezet további részében a CPU-k és GPU-k felépítésbeli és használatbeli eltéréseit mutatom be teljesen általánosan, a legfontosabb szempontokat kiemelve. Elõfordulhatnak olyan fogalmak, melyeket csak a dolgozat késõbbi fejezeteiben ismertetek részletesebben.
 		%----------------------------------------------------------------------------
@@ -28,10 +21,10 @@
 		%----------------------------------------------------------------------------
 		\subsection{Hardver felépítése}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Rendszerint magas frekvenciájú ($2-4$ GHz) órajelen mûködtetett kisszámú, de ,,erõteljes'' processzormagból áll. A flexibilis felhasználhatóság következménye, hogy komplex hardveres vezérlõ logikát (control unit) igényel. Ez az egység felelõs a magok közti feladatok kiosztásáért, az esetleges utasítás vagy adat egymásra hatások kiküszöböléséért. Gyártás szempontjából az egyik legköltségesebb rész a chipfelület körülbelül $30\%$-t kitevõ cache.
+			\textbf{CPU}: Rendszerint magas frekvenciájú (2-4 GHz) órajelen mûködtetett kisszámú, de ,,erõteljes'' processzormagból áll. A flexibilis felhasználhatóság következménye, hogy komplex hardveres vezérlõ logikát (control unit) igényel. Ez az egység felelõs a magok közti feladatok kiosztásáért, az esetleges utasítás vagy adat egymásra hatások kiküszöböléséért. Gyártás szempontjából az egyik legköltségesebb rész a chipfelület körülbelül $30\%$-t kitevõ cache.
 
 			\noindent
-			\textbf{GPU}: Kis fogyasztású, azonos felépítésû, egyszerû processzormagokat tartalmaz, melyek relatíve kis frekvencián ($0,8-1,3$ GHz) üzemelnek. A chipfelület legnagyobb részét ezek foglalják el. A magok száma alsó hangon néhány $10$-tõl egészen az $1000$-res nagyságrendig terjedhet. A vezérlõ logika is egyszerû, mivel egyes magokon ugyanaz a program fut, csak más adatokkal.
+			\textbf{GPU}: Kis fogyasztású, azonos felépítésû, egyszerû processzormagokat tartalmaz, melyek relatíve kis frekvencián (0,8-1,3 GHz) üzemelnek. A chipfelület legnagyobb részét ezek foglalják el. A magok száma alsó hangon néhány 10-tõl egészen az 1000-res nagyságrendig terjedhet. A vezérlõ logika is egyszerû, mivel egyes magokon ugyanaz a program fut, csak más adatokkal.
 
 			\begin{figure}[!ht]
 			\centering
@@ -51,7 +44,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Memória modell}
 		%----------------------------------------------------------------------------
-			\textbf{CPU}: Egyszerû, dedikált rendszermemórián kívül csak néhány ($1$/$2$/$3$) szintû chipre integrált cache-hierarchiával rendelkeznek. A cache-bõl adódó problémákat és nehézségeket teljes mértékben hardver vezérli, elfedve ezeket a felhasználó elõl. A memóriát az operációs rendszer felügyeli és menedzseli.
+			\textbf{CPU}: Egyszerû, dedikált rendszermemórián kívül csak néhány (1/2/3) szintû chipre integrált cache-hierarchiával rendelkeznek. A cache-bõl adódó problémákat és nehézségeket teljes mértékben hardver vezérli, elfedve ezeket a felhasználó elõl. A memóriát az operációs rendszer felügyeli és menedzseli.
 
 			\noindent
 			\textbf{GPU}: Az integrált GPU-kat leszámítva, melyek a CPU rendszermemóriáját használják fel videomemóriának, dedikált memóriával rendelkeznek. Memória hierarchiájuk többszintû, az irányítás a programozó kezében van. Lehetõséget biztosít bizonyos mértékû cache használatra, de teljesítmény szempontjából általában nem kifizetõdõ teljesen ráhagyatkozni. A programok nagyobb részénél a korlátozó tényezõt az alacsony memória sávszélesség vagy rosszul kihasznált memória hierarchia jelenti.
@@ -61,7 +54,7 @@
 		%----------------------------------------------------------------------------
 			\textbf{CPU}: Egy mag képes több szál párhuzamos futtatására idõosztásos alapon (Intel processzorok esetén HyperThreading a neve). Több mag esetén képes ,,valósan'' is párhuzamos, egymástól független szálakat futtatni. Flynn taxonómia\footnote{Az egyik legismertebb csoportosítása a párhuzamos számítógép architektúráknak a Michael J. Flynn által 1966-ban publikált Flynn osztályozás (Flynn's taxonomy), mely a felhasznált utasítás- és adatfolyamok száma (instruction stream, data stream) alapján kategorizálja az egyes számítógépeket. Négy csoport létezik: SISD, SIMD, MISD, MIMD (S - Single, M - Multiple, I - Instruction, D - Data).} (Flynn's taxonomy) szerint ez a MIMD kategóriába esik. Adatfeldolgozás szempontjából nem hatékony, viszont flexibilis.
 
-			SIMD végrehajtásra is képesek a modern CPU-k, ugyanis rendelkeznek speciális utasításkészlettel és széles (vektor) regiszterekkel, melyekbe egyszerre több adat is betölthetõ. A regiszterekbe helyezett adatokon egyszerre hajtódik végre a beolvasott utasítás. Intel processzorokban például ez a $128$ bites regiszterekkel dolgozó SSE (Streaming SIMD Extensions) és a $256$ bites AVX (Advanced Vector Extensions). Utóbbi 8 darab egyszeres pontosságú lebegõpontos adaton képes utasítások végrehajtására.
+			SIMD végrehajtásra is képesek a modern CPU-k, ugyanis rendelkeznek speciális utasításkészlettel és széles (vektor) regiszterekkel, melyekbe egyszerre több adat is betölthetõ. A regiszterekbe helyezett adatokon egyszerre hajtódik végre a beolvasott utasítás. Intel processzorokban például ez a 128 bites regiszterekkel dolgozó SSE (Streaming SIMD Extensions) és a 256 bites AVX (Advanced Vector Extensions). Utóbbi 8 darab egyszeres pontosságú lebegõpontos adaton képes utasítások végrehajtására.
 
 			\noindent
 			\textbf{GPU}: SIMD jelleghez hasonló, de vektorba rendezett adatok helyett, itt minden adathoz külön szál tartozik és a szálak szinkronban (lockstep) hajtanak végre utasításokat; elnevezése a SIMT (Single Instruction Multiple Thread).
@@ -79,17 +72,18 @@
 	%----------------------------------------------------------------------------
 		A GPU-ról az eddig általánosságban volt szó. A két nagy, ismert GPU gyártó az \mbox{NVIDIA} és az AMD\footnote{Piacrészesedést tekintve az Intel vezet toronymagasan, az alaplap chipsetjébe integrált kisteljesítményû GPU-i miatt. GPGPU felhasználást tekintve az NVIDIA és az AMD a piacvezetõk.} architektúrái között vannak számottevõ eltérések, azonban mindkettõ bemutatására jelen dolgozat keretei között nincs lehetõség. A számítógépemben egy dedikált NVIDIA GPU található, így NVIDIA architektúrák bemutatása és ezzel együtt az NVIDIA terminológia használata mellett döntöttem.
 
-		Teljesítménybeli összehasonlításukra nincs kiforrott, általánosan elfogadott referenciaprogram (benchmark), így a kérdésre, hogy melyik gyártó GPU-i jobbak, a válasz rendszerint: attól függ. Marketingtõl elvonatkoztatva még azonos gyártó esetén is változik, hogy mely GPU generáció és család ér el jobb relatív teljesítményt egy adott probléma megoldása során.
+		Teljesítménybeli összehasonlításukra nincs kiforrott, általánosan elfogadott referenciaprogram (benchmark), így a kérdésre, hogy melyik gyártó GPU-i jobbak, a válasz rendszerint: attól függ. A marketingtõl elvonatkoztatva még azonos gyártó esetén is változik, hogy mely GPU generáció és család ér el jobb relatív teljesítményt egy adott probléma megoldása során.
 
-		Programozásukban is vannak különbségek. Az NVIDIA jobban támogatja az általa kifejlesztett és karbantartott programozási modellt és nyelvi kiegészítést a CUDA-t (Compute Unified Device Architecture), mint a nyílt, platform- és gyártó független OpenCL-t (Open Compulting Language).
+		Programozásukban is vannak különbségek. Az NVIDIA jobban támogatja az általa kifejlesztett és karbantartott programozási modellt és nyelvi kiegészítést, a CUDA-t (Compute Unified Device Architecture), mint a nyílt, platform- és gyártó független OpenCL-t (Open Compulting Language).
 
 		A CUDA egyszerûen elsajátítható és rengeteg segítség, példakód található az NVIDIA honlapján. Nagy hátránya csak NVIDIA által készített GPU-kon futtatható kódot lehet vele írni. Az OpenCL-nek csak egy közel 6 éves verzióját támogatják, és nem igazán foglalkoznak vele. Amennyiben friss OpenCL verzió használata kritérium, AMD-s GPU-t tartalmazó videokártyát érdemes választani.
+		
 		Az alfejezet további részében kiemelem a programozói szempontból leglényegesebb hardverelemeit az NVIDIA GPU-knak. Az újabb architektúrákon az egyes elnevezések, csoportosítások eltérhetnek, illetve számos újdonsággal kiegészülnek; ezeket majd egy késõbbi fejezetben tárgyalom.
 		
 		%----------------------------------------------------------------------------
 		\subsection{Processzormagok}
 		%----------------------------------------------------------------------------
-			A GPU-k szilíciumlapkán betöltött felület mérete és fontosság alapján a legfontosabb elemek a processzorblokkok. Legfelsõ szinten az úgynevezett SM (Streaming Multiprocessor), ami lényegében egy processzor tömb. Tartalmaz egyszeres és kétszeres pontosságú lebegõpontos mûveletek végrehajtásáért felelõs processzormagokat, speciális operátorok elvégzésére alkalmas processzormagokat, szálak számára közös használatú memóriát, egy regiszterbankot, valamint az elõbbiek ütemezésért, erõforrás menedzseléséért felelõs logikát. Az elõbb felsorolt egységek vezérlését, utasítások felhozatalát és dekódolását és az SM-hez rendelt szálak ütemezését szintén egy belül található modul végzi~\cite{ModernGPUArch}.
+			A GPU-k szilíciumlapkán elfoglalt felület mérete és fontosság alapján a legfontosabb elemek a processzorblokkok. Legfelsõ szinten az úgynevezett SM (Streaming Multiprocessor), ami lényegében egy processzor tömb. Tartalmaz egyszeres és kétszeres pontosságú lebegõpontos mûveletek végrehajtásáért felelõs processzormagokat, speciális operátorok elvégzésére alkalmas processzormagokat, szálak számára közös használatú memóriát, egy regiszterbankot, valamint az elõbbiek ütemezésért, erõforrás menedzseléséért felelõs logikát. Az elõbb felsorolt egységek vezérlését, utasítások felhozatalát és dekódolását és az SM-hez rendelt szálak ütemezését szintén egy belül található modul végzi~\cite{ModernGPUArch}.
 			
 			Új architektúrás SM-eket, processzortömböket már más elnevezésekkel illetik, ugyanis lényeges módosításokon és funkcióbõvítésen estek keresztül az évek során.
 			
@@ -121,11 +115,11 @@
 		%----------------------------------------------------------------------------
 		\subsection{Vezérlés és ütemezés}
 		%----------------------------------------------------------------------------
-			A GPU a szálakat $32$-es csoportokra, úgynevezett warp-okra osztva menedzseli és futtatja. A irányító hardver neve a warp ütemezõ (scheduler), mely az SM-en belüli vezérlõlogika része. A warp-ok mindig ugyanúgy, a szál saját azonosítószámai alapján jönnek létre, melyeknek programozás során is kiemelt szerepük van.
+			A GPU a szálakat 32-es csoportokra, úgynevezett warp-okra osztva menedzseli és futtatja. A irányító hardver neve a warp ütemezõ (scheduler), mely az SM-en belüli vezérlõlogika része. A warp-ok mindig ugyanúgy, a szál saját azonosítószámai alapján jönnek létre, melyeknek programozás során is kiemelt szerepük van.
 		
-			A warp-on belüli szálak egyszerre indulnak, ugyanattól az utasítástól és mindig egyszerre haladnak végig az utasításokon. Ha legalább egy szál programjának végrehajtási útvonala eltér a többi, warp-on belüli szálétól, akkor a teljes warp végrehajtja mindkét utat, a felesleges szálak deaktiválása után. Ez a jelenség az száldivergencia, ami leggyakrabban elágazó kódrészleteknél és ciklusoknál fordult elõ. A jó teljesítmény eléréséhez el kell kerülni az ilyen helyzeteket, minimalizálni kell a divergens kód mennyiségét.
+			A warp-on belüli szálak egyszerre indulnak, ugyanattól az utasítástól és mindig egyszerre haladnak végig az utasításokon. Ha legalább egy szál programjának végrehajtási útvonala eltér a többi, warp-on belüli szálétól, akkor a teljes warp végrehajtja mindkét utat, a felesleges szálak deaktiválása után. Ez a jelenség a száldivergencia, ami leggyakrabban elágazó kódrészleteknél és ciklusoknál fordul elõ. A jó teljesítmény eléréséhez el kell kerülni az ilyen helyzeteket, minimalizálni kell a divergens kód mennyiségét.
 
-			Egy szál/warp teljes futáshoz kapcsolódó kontextusa megõrzõdik a szál/warp létrejöttétõl egészen a befejezésig. A hardveres warp ütemezõ a regiszterben gazdag architektúrának köszönhetõen szinte zérus overheaddel képes az SM-re kiosztott warp-ok között váltani, így elérve, hogy minél jobban ki legyen használva a GPU. Ha egy szál várakozik valamilyen erõforrásra, vagy adatra, akkor egy olyan szálat helyez végrehajtás alá, ami futásra kész állapotban van.
+			Egy szál/warp teljes futáshoz kapcsolódó kontextusa megõrzõdik a szál/warp létrejöttétõl egészen a befejezésig. A hardveres warp ütemezõ a regiszterben gazdag architektúrának köszönhetõen szinte zérus overheaddel képes az SM-re kiosztott warp-ok között váltani, így elérve, hogy minél jobban ki legyen használva a GPU. Ha egy szál várakozik valamilyen erõforrásra vagy adatra, akkor egy olyan szálat helyez végrehajtás alá, ami futásra kész állapotban van.
 		%----------------------------------------------------------------------------
 		\subsection{Memória modell}\label{sect:cuda_memoriamodell}
 		%----------------------------------------------------------------------------
@@ -139,23 +133,23 @@
 			\end{figure}
 		
 			\subsubsection{Globális memória}
-				A legnagyobb, GB nagyságrendû memória, mely hasonló funkciót lát el, mint a CPU által hozzáférhetõ rendszermemória. A GPU-n kívül található (off-chip) DRAM (Dynamic Random-Access Memory) típusú, így a memória tranzakciók több száz órajelciklust vesznek igénybe. Adatátvitelnél szavas ($4$ byte) hozzáférés esetén $128$ byte-os tranzakciót jelent, ekkora egy szegmens. Ha nem megfelelõen van megírva a szálak által futtatott program, a felesleges olvasások nagyon lassíthatják a futási sebességet. Minden szál látja és eléri így használható szálak közti kommunikációra, de az adatintegritásra, mint minden közösen használt memória esetén itt is figyelni kell. Rendelkezik cache-sel írási és olvasási irányban is.
+				A legnagyobb, GB nagyságrendû memória, mely hasonló funkciót lát el, mint a CPU által hozzáférhetõ rendszermemória. A GPU-n kívül található (off-chip) DRAM (Dynamic Random-Access Memory) típusú, így a memória tranzakciók több száz órajelciklust vesznek igénybe. Adatátvitelnél, szavas (4 bájt) hozzáférés esetén, egy memória mûvelet 128 bájtos tranzakciót jelent, ekkora egy DRAM szegmens. Ha nem megfelelõen van megírva a szálak által futtatott program, a felesleges olvasások nagyon lassíthatják a futási sebességet. Minden szál látja és eléri, így használható szálak közti kommunikációra, de az adatintegritásra, mint minden közösen használt memória esetén itt is figyelni kell. Rendelkezik cache-sel írási és olvasási irányban is.
 			
 			\subsubsection{Osztott memória (Shared memory)}
-				A regiszterek után, ennek a memóriának a legnagyobb a sebessége. A GPU-n, pontosabban minden SM-ben található, mérete néhány $10$ kB nagyságrendû. Programozó választhat, hogy ezt, vagy az L1 szintû cache-t preferálja jobban az alkalmazásában, így tudja változtatni (fix értékekre) a méretet a másiknak rovására. Ezen keresztül tudnak egy blokkon (lásd \sectref{cuda_szalhier} alfejezet) belül futó szálak kommunikálni egymással, illetve többször felhasznált adatot effektíve manuálisan cache-elni.
-				Szoftveresen nem lehet teljesen kikapcsolni (minimális mérete $16$ kB), a korábbi GPU-k támogatása (backward compatibility) miatt.
+				A regiszterek után, ennek a memóriának a legnagyobb a sebessége. A GPU-n, pontosabban minden SM-ben található, mérete néhány 10 kB nagyságrendû. Programozó választhat, hogy ezt, vagy az L1 szintû cache-t preferálja jobban az alkalmazásában, így tudja változtatni (fix értékekre) a méretet a másiknak rovására. Ezen keresztül tudnak egy blokkon (lásd \sectref{cuda_szalhier} alfejezet) belül futó szálak kommunikálni egymással, illetve többször felhasznált adatot effektíve manuálisan cache-elni.
+				Szoftveresen nem lehet teljesen kikapcsolni (minimális mérete 16 kB), a korábbi GPU-k támogatása (backward compatibility) miatt.
 			
 			\subsubsection{Regiszterek}
 				SM-en belül található, minden szál számára privát. Bár sok regiszter van a GPU-kban, sokszor korlátozó tényezõ tud lenni. Korlátozza az egy SM-en párhuzamosan futtatható szálak számát, ami rossz GPU kihasználtsághoz vezethet.
 			
 			\subsubsection{Lokális memória}
-				Ha korlátozott a szálak által felhasználható regiszterek száma (programozó megadhatja), vagy elfogytak, akkor a szál futása során használt változókat, argumentumokat kimenti az off-chip globális memóriába, mely terület a regiszterekhez hasonlóan privát hozzáférésû (innen a lokális név). Lassú, de mindkét tranzakciós irányban rendelkezik cache-sel.
+				Ha korlátozott a szálak által felhasználható regiszterek száma, vagy elfogytak, akkor a szál a futása során használt változókat, argumentumokat kimenti az off-chip globális memóriába, mely terület a regiszterekhez hasonlóan privát hozzáférésû (innen a lokális név). Lassú, de mindkét tranzakciós irányban rendelkezik cache-sel.
 			
 			\subsubsection{Konstans memória}
-				A chipen kívüli globális memóriában található rész, de csak olvasható a GPU számára. Saját cache-sel rendelkezik és mérete jellemzõen néhány $10$ kB. Gyors hozzáférést biztosít és minden szál által látható. Csak CPU tudja írni a tartalmát.
+				A chipen kívüli globális memóriában található rész, de csak olvasható a GPU számára. Saját cache-sel rendelkezik és mérete jellemzõen néhány 10 kB. Gyors hozzáférést biztosít és minden szál által látható. Csak CPU-k tudják írni a tartalmát.
 			
 			\subsubsection{Textúra memória}
-				Konstans memóriához hasonlóan ez is a globális memóriában kap helyet. Szintén saját cache-sel rendelkezik, de írásnál nincs cache koherencia. Többdimenziós textúraelemek (texel) kiolvasására van optimalizálva. Méretét a videokártyán található DRAM korlátozza.
+				Konstans memóriához hasonlóan ez is a globális memóriában kap helyet. Szintén saját cache-sel rendelkezik, de írásnál nincs cache koherencia. Többdimenziós textúraelemek (\mbox{texel}) kiolvasására van optimalizálva. Méretét a videokártyán található DRAM korlátozza.
 
 		%----------------------------------------------------------------------------
 		\subsection{Architektúrák}
@@ -163,15 +157,15 @@
 			Az egyes GPU generációk között számos eltérés található, melyeket röviden igyekszem bemutatni kiemelve a leglényegesebb információkat. Idõrendnek megfelelõen, a legkorábbi architektúrával kezdem.
 		
 			\subsubsection{Tesla}
-				Az NVIDIA elsõ CUDA kompatibilis architektúrája, mely elõször 2006 végén jelent meg. Az évek során sokat fejlõdött a gyártási technológia és 2008 után $55$ nm-es csíkszélességgel készültek.
+				Az NVIDIA elsõ CUDA kompatibilis architektúrája, mely elõször 2006 végén jelent meg. Az évek során sokat fejlõdött a gyártási technológia és 2008 után 55 nm-es csíkszélességgel készültek.
 				
 				\textbf{Újdonságok:}
 				\begin{itemize}
-					\item SM-ek megjelennek, belül $8$ CUDA maggal (SP)
+					\item SM-ek megjelennek, belül 8 CUDA maggal (SP)
 				\end{itemize}
 
 			\subsubsection{Fermi}
-				2010-ben jelent meg, $40$ és $28$ nm csíkszélességû technológiával gyártott architektúra. Az SM-ek $8/32$ darab $32$ bites lebegõpontos CUDA magból épülnek fel.
+				2010-ben jelent meg, 40 és 28 nm csíkszélességû technológiával gyártott architektúra. Az SM-ek 8/32 darab 32 bites lebegõpontos CUDA magból épülnek fel.
 				
 				\textbf{Újdonságok:}
 				\begin{itemize}
@@ -184,20 +178,21 @@
 			
 			\subsubsection{Kepler}
 				2012-ben jelent meg elõször és ez volt  NVIDIA elsõ olyan mikroarchitektúrája, melyet kifejezetten hatékony energiafelhasználásra törekedve terveztek. Csíkszélessége 28 nm. NVIDIA marketing szerint egy Kepler SM mindössze csak a 45\%-át használja annak az energiának, amit Fermi SM fogyaszt.
+				\newline \newline
 				
 				\textbf{Újdonságok:}
 				\begin{itemize}
-					\item SMX:  Módosított, csökkentett fogyasztású $192$ CUDA magból álló SM.
-					\item Egységes órajel(unified clock): A teljes GPU egy közös órajelet használ.
-					\item Dynamic Parallelism: A GPU is indíthat saját magán új programokat (egyszerre maximum $32$ darabot). Lényegesen gyorsabban teszi, mint a CPU.
+					\item SMX:  Módosított, csökkentett fogyasztású 192 CUDA magból álló SM.
+					\item Egységes órajel (unified clock): A teljes GPU egy közös órajelet használ.
+					\item Dynamic Parallelism: A GPU is indíthat saját magán új programokat (egyszerre maximum 32 darabot). Lényegesen gyorsabban teszi, mint a CPU.
 					\item Hyper-Q: Több, különbözõ CPU szálról indított kernel.
 					\item GPUDirect: Közvetlen kommunikáció más, a PCIe buszon lévõ eszközökkel (pl.: más GPU).
 					\item NVENC: Hardveres videó enkóder.
-					\item Szálankénti regiszterek maximális száma $64$-rõl $255$-re emelkedett.
+					\item Szálankénti regiszterek maximális száma 64-rõl 255-re emelkedett.
 				\end{itemize}
 
 			\subsubsection{Maxwell}
-				2014-ben jelent meg, a felhasznált gyártási technológia itt is $28$ nm, ugyanaz mint Kepler esetén. Még jobban fejlesztették az egységnyi teljesítményre esõ számítást, a magok fogyasztása megint felezõdött.
+				2014-ben jelent meg, a felhasznált gyártási technológia itt is 28 nm, ugyanaz mint Kepler esetén. Még jobban fejlesztették az egységnyi teljesítményre esõ számítást, a magok fogyasztása megint felezõdött.
 				
 				\textbf{Újdonságok:}
 				\begin{itemize}
@@ -206,11 +201,11 @@
 				\end{itemize}
 
 			\subsubsection{Pascal}
-				2016-ban, azaz idén megjelent architektúra, mely már $16$ nm-es áramköri csíkszélességgel kerül gyártásra.
+				2016-ban, azaz idén megjelent architektúra, mely már 16 nm-es áramköri csíkszélességgel kerül gyártásra.
 				
 				\textbf{Újdonságok:}
 				\begin{itemize}
-					\item SM: $64$ CUDA magból áll.
+					\item SM: 64 CUDA magból áll.
 					\item NVLink: szélessávú direkt buszrendszer a CPU vagy más GPU-k között.
 					\item Unified memory: GPU számára elérhetõvé válik a rendszermemória.
 					\item Osztott memória és regiszterek száma növekedett.
@@ -218,7 +213,7 @@
 	%----------------------------------------------------------------------------
 	\section{CUDA}
 	%----------------------------------------------------------------------------
-		A CUDA (Compute Unified Device Architecture) egy az NVIDIA által fejlesztett programozási modell és egyben nyelvi kiegészítés is, mely úgy tekint a GPU-ra, mintha az egy koprocessor lenne a CPU számára. A CPU vezérli a folyamatokat, õ futtatja a fõprogramot és feladatokat ad a GPU számára. A GPU nem viselkedhet mesterként, vagyis nem kezdeményezhet, nem küldhet, és nem kérhet adatokat a CPU-tól. Kapcsolatukat a \figref{CUDA_feldolgozasi_modell} ábrán láthatjuk CUDA terminológiát használva a továbbiakban gyakran a CPU-ra host-ként, a GPU-ra eszközként (device) fogok hivatkozni \cite{Heterogen}.
+		A CUDA (Compute Unified Device Architecture) egy az NVIDIA által fejlesztett programozási modell és egyben nyelvi kiegészítés is, mely úgy tekint a GPU-ra, mintha az egy koprocesszor lenne a CPU számára. A CPU vezérli a folyamatokat, õ futtatja a fõprogramot és feladatokat ad a GPU számára. A GPU nem viselkedhet mesterként, vagyis nem kezdeményezhet, nem küldhet, és nem kérhet adatokat a CPU-tól. Kapcsolatukat a \figref{CUDA_feldolgozasi_modell} ábrán láthatjuk. CUDA terminológiát használva a továbbiakban gyakran a CPU-ra host-ként, a GPU-ra eszközként (device) fogok hivatkozni \cite{Heterogen}.
 
 		A CUDA kiegészíti többek között a C, C++ és a Fortran nyelveket, melyekhez saját fordítót is ad az NVIDIA. Számomra a C/C++ kiegészítés és az NVCC nevû fordító a lényeges. A CUDA nyelvi elemeket használó fájlok kiterjesztése *.cu, melyeket elõször a NVCC fog feldolgozni és egy C/C++ fordító által elfogadott szintaktikára hozni, ezzel felbontva a host és a eszköz által futtatandó kódokat.
 
@@ -231,7 +226,7 @@
 	
 		A host négy fontos feladata:
 		\begin{itemize}
-			\item memóriaallokáció a device memóriájában
+			\item memória allokáció a device memóriájában
 			\item adat másolása a device memóriájába
 			\item adat másolása a device memóriájából
 			\item program indítása a device-on
@@ -242,7 +237,7 @@
 		%----------------------------------------------------------------------------
 		\subsection{Szál hierarchia}\label{sect:cuda_szalhier}
 		%----------------------------------------------------------------------------
-			A program végrehajtás alapegysége a szál (\emph{thread}), melyeket blokkosítva (TB - \emph{Thread Block}) kezel a CUDA és a GPU, ahogy az a \figref{CUDA_szal_hierarchia} ábrán is látható. Egy blokkon belüli szálak képesek egymás közötti relatíve gyors kommunikációra és szinkronizációra. Mérete korlátozott, jelenleg maximum $1024$ szálat tartalmazhat. A blokkokon belül $32$-es szálcsoportok kerülnek kialakításra, melyeket \emph{warp}-oknak nevezünk. Warpon belüli $32$ szál mindig azonos ütemben, egyszerre kerül futtatásra. A blokkok felett van még egy konténer, melyet rácsnak (\emph{thread grid})-nek nevezik~\cite{ShaneCook}.
+			A program végrehajtás alapegysége a szál (\emph{thread}), melyeket blokkosítva (TB - \emph{Thread Block}) kezel a CUDA és a GPU, ahogy az a \figref{CUDA_szal_hierarchia} ábrán is látható. Egy blokkon belüli szálak képesek egymás közötti relatíve gyors kommunikációra és szinkronizációra. Mérete korlátozott, jelenleg maximum 1024 szálat tartalmazhat. A blokkokon belül 32-es szálcsoportok kerülnek kialakításra, melyeket \emph{warp}-oknak nevezünk. Warpon belüli 32 szál mindig azonos ütemben, egyszerre kerül futtatásra. A blokkok felett van még egy konténer, melyet rácsnak (\emph{thread grid})-nek nevezik~\cite{ShaneCook}.
 		
 			\begin{figure}[!ht]
 			\centering
@@ -269,7 +264,7 @@ void main() {
 }
 			\end{lstlisting}
 			
-			A \verb+__global__+ kulcsszó jelzi a fordító számára, hogy a myKernel nevû függvény egy GPU-n futtatandó kernel. Hívása hasonló egy egyszerû függvényhíváshoz, de a név és az argumentumlista között kiegészül egy \verb+<<< param1, param2, ... >>>+, úgynevezett \emph{futtatási konfigurációval} (execution configuration). Itt lehet megadni többek között a futtatandó szálak számát (ennyi példányban fog lefutni a kernel). Elsõre feleslegesnek tûnhet, hogy többször akarom lefuttatni ugyanazt a kódot, de a valóság az, hogy a kernel-nek a kódját úgy írjuk meg, hogy minden szálra egyedi lesz. Vannak beépített változók, melyekkel azonosítani tudjuk a szálakat, elérve ezzel, hogy minden szál például egy tömb más-más adatán dolgozzon. Gyakori feladat párhuzamos programozásnál a ciklusok párhuzamosítása. Vegyük az alábbi példát (deklarációtól és memóriaallokációtól most eltekintünk):
+			A \verb+__global__+ kulcsszó jelzi a fordító számára, hogy a myKernel nevû függvény egy GPU-n futtatandó kernel. Hívása hasonló egy egyszerû függvényhíváshoz, de a név és az argumentumlista között kiegészül egy \verb+<<< param1, param2, ... >>>+, úgynevezett \emph{futtatási konfigurációval} (execution configuration). Itt lehet megadni többek között a futtatandó szálak számát (ennyi példányban fog lefutni a kernel). Elsõre feleslegesnek tûnhet, hogy többször akarom lefuttatni ugyanazt a kódot, de a valóság az, hogy a kernel kódját úgy írjuk meg, hogy minden szálra egyedi lesz. Vannak beépített változók, melyekkel azonosítani tudjuk a szálakat, elérve ezzel, hogy minden szál például egy tömb más-más adatán dolgozzon. Gyakori feladat párhuzamos programozásnál a ciklusok párhuzamosítása. Vegyük az alábbi példát (deklarációtól és memória allokációtól most eltekintünk):
 			
 			\begin{lstlisting}
 void main() {
@@ -300,8 +295,8 @@ void main() {
 			Beépített változók segítségével (megfelelõ módon szorozgatva és összeadva) létrehozhatunk egyedi azonosítót minden szálunk számára, melyekkel a fentiekkel analóg módon egyedi adatokat jelölhetünk ki feldolgozásra.
 			
 			\begin{itemize}
-				\item \verb+threadIdx+: Háromelemû azonosító (x, y, z), mely a szál saját blokkján belüli elhelyezkedését tartalmazza. $2$ és $3$ dimenziós blokk is létrehozható.
-				\item \verb+blockIdx+: Háromelemû azonosító (x, y, z), mely a blokk rácson belüli elhelyezkedését tartalmazza. $2$ és $3$ dimenziós rácsszerkezet is létrehozható.
+				\item \verb+threadIdx+: Háromelemû azonosító (x, y, z), mely a szál saját blokkján belüli elhelyezkedését tartalmazza. 2 és 3 dimenziós blokk is létrehozható.
+				\item \verb+blockIdx+: Háromelemû azonosító (x, y, z), mely a blokk rácson belüli elhelyezkedését tartalmazza. 2 és 3 dimenziós rácsszerkezet is létrehozható.
 				\item \verb+blockDim+: Háromelemû azonosító (x, y, z), mely a blokkok méretét tartalmazza (kernel hívása után minden TB azonos méretû).
 			\end{itemize}
 
@@ -320,7 +315,7 @@ int idY = blockIdx.y * blockDim.y + threadIdx.y;
 			\end{figure}
 			
 		%----------------------------------------------------------------------------
-		\subsection{Tipikus CUDA program felépítése}
+		\subsection{Egy tipikus CUDA program felépítése}
 		%----------------------------------------------------------------------------
 			Ahhoz, hogy ,,hasznos'' kernelt tudjunk készíteni adatokat kell adnunk GPU-nak és fogadnunk a GPU-tól, ugyanis az csak a saját memóriájához fér hozzá, a rendszermemóriához nem. A CPU feladata, hogy a feldolgozandó adatokat eljuttassa és a futási végeredményeket visszamásolja egyikbõl a másikba.
 		
@@ -342,7 +337,7 @@ void main() {
 	// h_a és h_b vektorok feltöltése adatokkal
 	// ...
 	
-	// Memóriaallokáció az eszköz memóriájában
+	// Memória allokáció az eszköz memóriájában
 	cudaMalloc(d_a, N * sizeof(float));
 	cudaMalloc(d_b, N * sizeof(float));
 	cudaMalloc(d_c, N * sizeof(float));
@@ -378,8 +373,8 @@ void main() {
 
 			A CUDA utasítások túlnyomó része egy \verb+cudaError_t+ típusú értékkel tér vissza, melyet mindig érdemes leellenõrizni. Ha gond nélkül sikerült végrehajtani az adott CUDA függvényt akkor a visszatérési érték értéke cudaSuccess.
 
-			Ha kevés adatot kell feldolgozni, akkor nem biztos, hogy megéri GPU-t használni. A szálak száma, amivel érdemes már GPU-t használni legyen körülbelül $1000$-es nagyságrendben.
+			Ha kevés adatot kell feldolgozni, akkor nem biztos, hogy megéri GPU-t használni. A szálak száma, amivel érdemes már GPU-t használni legyen körülbelül 1000-es nagyságrendben.
 
-			Ökölszabályként elmondható, hogy az ideális blokkméret $32$-nek egész számú többszöröse, és nagyobb mint $192$. Gyakori választás a $256$.
+			Ökölszabályként elmondható, hogy az ideális blokkméret 32-nek egész számú többszöröse, és nagyobb mint 192. Gyakori választás a 256.
 
 		

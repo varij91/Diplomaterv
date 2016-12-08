@@ -1,6 +1,7 @@
 %----------------------------------------------------------------------------
 \chapter*{Kivonat}\addcontentsline{toc}{chapter}{Kivonat}
 %----------------------------------------------------------------------------
+
 	% Probléma ismertetése
 		% Párhuzamos programozás elõtérbe került
 		% Fizikai szimulációk
@@ -15,7 +16,18 @@
 		%Munkám során bemutatom a megtervezett N-test szimulátort, mely felhasznál 
 		
 		%Munkám során megterveztem és megvalósítottam egy N-test szimulációt végzõ programot, majd felgyorsítottam alkalmazva az OpenMP többszálúsítás és SSE/AVX vektorizáció által nyújtott lehetõségeket. A CPU-s implementáció után áttértem az NVIDIA CUDA platformra és GPU-n futtatható verziót is készítettem. A szimulációt OpenGL felhasználásával grafikusan megjelenítve, valamint számszerûen is ellenõriztem. Dolgozatom a futási eredmények összehasonlításával és a fejlesztés kiértékelésével zártam.
+		
+	Diplomamunkám célja egy gravitációs N-test szimulátor program megvalósítása, különbözõ párhuzamosítási technológiák alkalmazásával.
+	
+	A modern processzorok döntõ többsége rendelkezik a párhuzamos programvégrehajtás képességével, mellyel jelentõs számítási potenciált hordoznak magukban. Megfelelõ kihasználása azonban sok esetben nem egyszerû feladat. Nehézséget jelent például a programozásuk során, a szekvenciális gondolkodásmódtól való eltérés, az adatintegritás megõrzése, a párhuzamosan futó programrészek közötti kommunikáció megvalósítása, valamint a rendelkezésre álló hardverkörnyezet ismerete.
 
+	A gravitációs N-test probléma, egy a csillagászatban gyakran elõforduló probléma, mely egymással folyamatos interakcióban lévõ égitestek mozgását írja le egyenletekkel, felhasználva a Newton-féle gravitációs törvényt. A felírt egyenletek numerikus megoldása adja a szimuláció alapját. A feladat rendkívül számításigényes és remek lehetõséget biztosít párhuzamos programozás szempontjából.
+
+	A dolgozat a gravitációs N-test probléma részletezésével indul, melyben a gyakran használt algoritmusok ismertetése mellett, levezetésre kerülnek a megvalósítandó összefüggések is. A párhuzamosítási lehetõségek közül kiragadva tárgyalja a grafikus processzorok felépítését és programozását.
+	
+	Az elméleti rész után bemutatja a diplomamunka keretein belül megtervezett és megvalósított N-test szimulátort. Elõször MATLAB prototípust, majd egy CPU-n futó, C++ alapú implementációt ismertet, mely felhasználja az OpenMP többszálúsítás, és az SSE/AVX vektorizáció által nyújtott párhuzamosítási lehetõségeket. Ezt követõen pedig NVIDIA CUDA platformon létrehozott, grafikus processzoron futtatható megvalósítás kerül bemutatásra. A dolgozat a futási eredmény és a számítási teljesítmény kiértékelésével zárul.
+
+		
 	\vfill
 %----------------------------------------------------------------------------
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}

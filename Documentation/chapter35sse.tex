@@ -3,7 +3,7 @@
 %----------------------------------------------------------------------------
 	A következõ CPU-s párhuzamosítási lehetõség már megkövetelte a legbelsõ, gyorsulást számító függvény módosítását.
 
-	Az Intel SSE (Streaming SIMD Extensions) egy utasításkészlet kiegészítés, mely beépített speciális 128 bit széles vektorregiszterekkel dolgozik. A neve is tartalmazza az általa megvalósított SIMD (Single Instruction Multiple Data) modellt. Korábbi fejezetben említésre került, hogy ez egyben egy csoportosítás, a Flynn féle taxonómia része. Lényege, hogy egyszerre \emph{több, azonos típusú adaton} egyszerre végrehajtódik ugyanaz az \emph{egy darab utasítás}, ezzel adatszintû párhuzamosítást valósítva meg. Elõnye az egyszerû (SISD) számítógépekkel szemben egyértelmûen a kevesebb utasítás-felhozatal, vagyis kevesebb memóriamûvelet, ami gyakori korlát párhuzamos programok írása esetén.
+	Az Intel SSE (Streaming SIMD Extensions) egy utasításkészlet kiegészítés, mely beépített speciális 128 bit széles vektorregiszterekkel dolgozik. A neve is tartalmazza az általa megvalósított SIMD (Single Instruction Multiple Data) modellt. Korábbi fejezetben említésre került, hogy ez egyben egy csoportosítás, a Flynn féle taxonómia része. Lényege, hogy \emph{több, azonos típusú adaton} egyszerre végrehajtódik ugyanaz az \emph{egy darab utasítás}, ezzel adatszintû párhuzamosítást valósítva meg. Elõnye az egyszerû (SISD) számítógépekkel szemben egyértelmûen a kevesebb utasítás-felhozatal, vagyis kevesebb memóriamûvelet, ami gyakori korlát párhuzamos programok írása esetén.
 
 	SSE esetében betölthetõ a 128 bites regiszterbe 4 darab egyszeres pontosságú lebegõpontos szám, melyen végrehajthatók a vektorutasítások. Az \figref{Impl_SIMD} ábrán egy SIMD példa látható: SSE regisztereken végzett összeadás.
 
@@ -14,9 +14,9 @@
 	\label{fig:Impl_SIMD}
 	\end{figure}
 
-	Ahhoz, hogy ne kelljen x86 ASM programot írni a fordítók biztosítanak úgynevezett \emph{intrinsic header} fájlokat, melyek elfedik, és közvetlenül használhatóvá teszik az SSE utasításokat \cite{sse}.
+	Ahhoz, hogy ne kelljen x86 assembly programot írni a fordítók biztosítanak úgynevezett \emph{intrinsic header} fájlokat, melyek elfedik, és közvetlenül használhatóvá teszik az SSE utasításokat \cite{sse}.
 
-	A korábbiakban használt tömbelemek összeadás maradva:
+	A korábbiakban használt tömbelemek összeadásánál maradva:
 	
 	\begin{lstlisting}
 for(int i = 0; i < N; i += 4) {
@@ -86,9 +86,9 @@ void NBodyAlgorithmCPU::calculateAcceleration(const float3(&posI)[4],
 }
 	\end{lstlisting}
 	
-	A függvény elején történik a változók betöltése az \verb+_mm_set_ps+ és az \verb+_mm_set_ps1+ függvények segítségével. Ez utóbbi mind a négy ,,rekeszt'' feltölti a megadott \verb+float+ értékkel. A vektor változókkal ezután ugyanúgy a számítások következnek, mint az összeadós példában, majd az eredmények visszamásolása a rendszermemóriába. Az kiszámolt gyorsulásértékek akkumulálásánál figyelembe kell venni, hogy a tömb elején az $x$, közepén az $y$ és a végén a $z$ koordináták szerepelnek.
+	A függvény elején történik a változók betöltése az \verb+_mm_set_ps+ és az \verb+_mm_set_ps1+ függvények segítségével. Ez utóbbi mind a négy ,,rekeszt'' feltölti a megadott \verb+float+ értékkel. A vektor változókkal ezután ugyanúgy a számítások következnek, mint az összeadós példában, majd az eredmények visszamásolása a rendszermemóriába. A kiszámolt gyorsulásértékek akkumulálásánál figyelembe kell venni, hogy a tömb elején az $x$, közepén az $y$ és a végén a $z$ koordináták szerepelnek.
 
-	Akár csak a példában a \verb+for+ ciklust is módosítottam:
+	Akárcsak a példában a \verb+for+ ciklust is módosítottam:
 
 	\begin{lstlisting}
 ...
@@ -119,7 +119,7 @@ _aligned_free(accI);
 ...
 	\end{lstlisting}
 	
-	A kiszámolt gyorsulásértékeket tartalmazó tömböt a 128-cal osztható címre allokáltam, mert az lesz a \verb+_mm_store_ps+ utasítás célpontja. Az akkumulálást rész direkt van teljesen kibontva. Ciklussal is le lehet ugyan írni, ami szebb, de az a megoldás lassabb lesz. OpenMP \verb+unroll+ direktívás megoldás egy kicsivel volt csak rosszabb ennél. Tekintve, hogy az akkumulálást végzõ \verb+for+ ciklus $N \cdot N/4$-szer futna le, nagy $N$ esetére sok control-flow jellegû utasítást jelent.
+	A kiszámolt gyorsulásértékeket tartalmazó tömböt a 128-cal osztható címre allokáltam, mert az lesz a \verb+_mm_store_ps+ utasítás célpontja. Az akkumulálás rész direkt van teljesen kibontva. Ciklussal is le lehet ugyan írni, ami szebb, de az a megoldás lassabb lesz. OpenMP \verb+unroll+ direktívás megoldás egy kicsivel volt csak rosszabb ennél. Tekintve, hogy az akkumulálást végzõ \verb+for+ ciklus $N \cdot N/4$-szer futna le, nagy $N$ esetére sok control-flow jellegû utasítást jelent.
 
 	Az integrálást végzõ kódrészletet nem módosítottam SSE függvényekkel, ugyanis ,,nagy'' $N$ mellett a nyert sebességnövekedés elenyészõ, tekintve, hogy testszámmal lineáris a komplexitása.
 
