@@ -10,7 +10,7 @@
 
 		Az N-test probléma gravitációs N-test probléma, amennyiben az erõhatás forrása a testek tömege, és leírása a például Newton-féle gravitációs törvény segítségével történik.
 
-		A második esetben, a testek töltése a releváns, és a fellépõ kölcsönhatás jellege elektromágneses. A matematikai leírást ekkor a Coulomb-törvény felhasználásával kaphatjuk meg. Ez utóbbi típust használják például molekuláris dinamika során is, melyben atomok és molekulák mozgását szimulálják.
+		A második esetben, a testek töltése a releváns, és a fellépõ kölcsönhatás jellege elektromágneses. A matematikai leírást ekkor a Coulomb-törvény felhasználásával kaphatjuk meg. Ez utóbbi típust használják például molekuláris dinamikában is, melyben atomok és molekulák mozgását szimulálják.
 
 		Fontos kiemelni, hogy a probléma a leggyakoribb esetekben erõsen nemlineáris kapcsolatokat ír le a testek között, így megoldásuk analitikus módszerekkel igencsak korlátozott. N-test szimuláció a diszkrét idõpontokban meghatározott, numerikus módszerek alkalmazásával megoldott N-test problémát jelenti. Számításigény szempontjából a legköltségesebb szimulációk közé tartozik, ugyanis a kiértékelendõ kölcsönhatások száma a testek számával négyzetes kapcsolatban áll, vagyis a probléma komplexitása $O(N^{2})$. Az \figref{N_Body_Alap} ábrán egy két-, illetve egy ötelemû rendszer látható feltüntetve a testek közötti kölcsönhatást.
 
@@ -23,7 +23,7 @@
 
 		\begin{figure}[!ht]
 			\centering
-			\includegraphics[width=150mm, keepaspectratio]{figures/NBody/N_Body_Alap.pdf}
+			\includegraphics[width=120mm, keepaspectratio]{figures/NBody/N_Body_Alap.pdf}
 			\caption{N-test probléma kettõ és öt testet tartalmazó rendszerek esetében} 
 			\label{fig:N_Body_Alap}
 		\end{figure}
@@ -33,9 +33,9 @@
 	%----------------------------------------------------------------------------
 		Égitestek viselkedésének leírásával már Sir Isaac Newton is foglalkozott, aki sikeresen levezette Kepler törvényeit, kiindulva a saját gravitációs és mozgási törvényébõl. Kepler feltételezte, hogy van egy kitüntetett, fixen elhelyezkedõ objektum a világegyetemben (Nap), ami körül elliptikus pályán keringenek az égitestek. Newton a fix égitest létezését elvetette és bebizonyította, hogy a Kepler-féle leírás csak egy közelítést ad a Naprendszerünk tényleges viselkedésére. Az égitestek hatással vannak egymásra, kölcsönösen keringenek egymás körül. Megjósolta, hogy nem csak elliptikus, hanem parabolikus és hiperbolikus pályák is elõfordulhatnak~\cite{OrbitMech}.
 		
-		A jelenlegi mikrohullámú háttérsugárzás egyenletessége arra enged következtetni, hogy az univerzum anyagsûrûség szempontjából kezdetben kifejezetten egyenletes volt: a fluktuáció mértéke az átlagos értéktõl körülbelül $10^{-4}$ és $10^{-5}$ nagyságrendbe esett. A mára kialakult galaxisok és a galaxiscsoportok mellett ugyanez az ingadozás eléri akár a $10^3$ nagyságrendet is~\cite{CosmSimAnal}.
-
-		A gravitációs kölcsönhatás következtében az apró tömörülések, csomók megfelelõ kiindulási pontot biztosítottak ahhoz, hogy a korai univerzum ,,összeomoljon'' és kialakuljanak a korábban említett jelentõs sûrûségbeli eltérések. Az ilyen tömörülések növekedési, fejlõdési folyamata és a közöttük lévõ kapcsolat is erõsen nemlineáris, ami korlátozza a tisztán analitikus kiértékelés lehetõségét, elõtérbe hozva a korábban említett numerikus megoldásokat.
+		A jelenlegi mikrohullámú háttérsugárzás egyenletessége arra enged következtetni, hogy az univerzum anyagsûrûség szempontjából kezdetben kifejezetten egyenletes volt.
+		%...volt: a fluktuáció mértéke az átlagos értéktõl körülbelül $10^{-4}$ és $10^{-5}$ nagyságrendbe esett. A mára kialakult galaxisok és a galaxiscsoportok mellett ugyanez az ingadozás eléri akár a $10^3$ nagyságrendet is~\cite{CosmSimAnal}.
+		A gravitációs kölcsönhatás következtében az apró tömörülések, csomók megfelelõ kiindulási pontot biztosítottak ahhoz, hogy a korai univerzum ,,összeomoljon'' és kialakuljanak jelentõs sûrûségbeli eltérések. Az ilyen tömörülések növekedési, fejlõdési folyamata és a közöttük lévõ kapcsolat is erõsen nemlineáris, ami korlátozza a tisztán analitikus kiértékelés lehetõségét, elõtérbe hozva a korábban említett numerikus megoldásokat~\cite{CosmSimAnal}.
 		
 		Az asztrofizikában alkalmazott N-test szimuláció célja, hogy segítse megérteni az égitestek, galaxisok és végsõ soron az univerzum kialakulását. Szerepet játszik például ûreszközök, bolygók pályájának meghatározásában, galaxis formációk vizsgálatában és kiemelkedõen fontos módszer a sötétanyag kutatás terén.
 
@@ -67,7 +67,7 @@
 	
 			A fenti megfontolásokat követve az összefüggések felírhatók tetszõleges $N \geq 2$ egész számú objektumra is.
 			
-			Rátérve a gravitációs N-test szimuláció alapösszefüggéseire be kell vezetnünk néhány jelölési konvenciót, illetve tulajdonságot:
+			Rátérve a gravitációs N-test szimuláció alapösszefüggéseire be kell vezetni néhány jelölési konvenciót, illetve tulajdonságot:
 
 			\begin{itemize}
 				\item $\mathbf{F_{ij}}$ a $j.$ test által az $i.$ testre kifejtett gravitációs erõvektor,
@@ -78,7 +78,7 @@
 				\item $\mathbf{r_{ij}}$ az $j.$ test tömegközéppontjából az $i.$ test tömegközéppontjába mutató vektor, ami $\mathbf{r_{ij}} = \mathbf{x_{j}} - \mathbf{x_{i}}$ alakban áll elõ.
 			\end{itemize}
 		
-			Az indexek mindig egy testet, vagy testeket jelölnek ki és értékük $1 \leq i$ és $j \leq N$
+			Az indexek mindig egy testet, vagy testeket jelölnek ki és értékük $1 \leq i$ és $j \leq N$.
 
 			Ezek után az $i.$ testre ható erõ, amit a $j.$ testtel való gravitációs kölcsönhatás okoz a következõképpen adható meg:
 			\begin{align}
@@ -138,9 +138,9 @@
 
 		Az elsõ csoport a testeket hierarchikus fába rendezve tárolja és az úgynevezett ,,multipole expansion'' matematikai módszerrel közelíti a gravitációs kölcsönhatást. Ilyen algoritmus például a Barnes-Hut vagy a Fast-Multipole módszer.
 		
-		Az második csoport az FFT-t (Gyors Fourier-transzformáció) megvalósító algoritmusok sebességét igyekszik kihasználni. A testekre ható gravitációs potenciált a háló és a Poisson-egyenlet megoldásával határozzák meg. Ilyen például a Particle-mesh (test-háló) módszer és annak továbbfejlesztett változatai P3M (Particle-particle-particle-mesh), az AP3M (Adaptive P3M).
+		A második csoport az FFT-t (Gyors Fourier-transzformáció) megvalósító algoritmusok sebességét igyekszik kihasználni. A testekre ható gravitációs potenciált a háló és a Poisson-egyenlet megoldásával határozzák meg. Ilyen például a Particle-mesh (test-háló) módszer és annak továbbfejlesztett változatai P3M (Particle-particle-particle-mesh), az AP3M (Adaptive P3M).
 
-		A közös az algoritmusokban, hogy védekezniük kell a valamilyen módon a ,,közeli'' testek közti interakciónál. Ha az ütközés esete nincs lekezelve a testek egymást ,,katapultként kilõhetik'' (a Newton-féle gravitációs törvény nevezõje nulla közeli érték, és a testek között ható erõ végtelenhez tart), ami által a szimuláció kevésbé lesz élethû. A megoldást az összefüggések levezetése során már említett közeli testek közti erõ enyhítése (force softening) jelenti. Ezt a legegyszerûbben úgy tehetjük meg, ha a nevezõt kiegészítjük egy konstans nem nulla értékkel, megakadályozva a szingularitást.
+		A közös az algoritmusokban, hogy védekezniük kell a valamilyen módon a ,,közeli'' testek közti interakciónál. Ha az ütközés esete nincs lekezelve a testek egymást ,,katapultként kilõhetik'' (a Newton-féle gravitációs törvény nevezõje nulla közeli érték, és a testek között ható erõ végtelenhez tart), ami által a szimuláció kevésbé lesz élethû. A megoldást az összefüggések levezetése során már említett közeli testek közti erõ enyhítése (force softening) jelenti. Ezt a legegyszerûbben úgy tehetjük meg, ha a nevezõt kiegészítjük egy konstans nem nulla értékkel, megakadályozva a szingularitás kialakulását.
 
 		Az N-test szimulációt terhelõ hiba meghatározása nagyon bonyolult feladat. Minden algoritmus típus másként viselkedik. Az algoritmus futási sebessége és a szimuláció pontossága egymással fordított arányban áll, így az alkalmazáshoz elengedhetetlen egy számunkra megfelelõ kompromisszum.
 		
@@ -151,7 +151,7 @@
 
 			Az algoritmus komplexitása a testek számával négyzetes növekszik, így ez megfelelõ számítási kapacitás hiányában csak korlátozott mértékben használható módszer.
 			
-			A direkt módszer egy gyorsabb változata, ha egy bizonyos távolságon túl, elhanyagoljuk a testek egymásra hatását. Ez mindösszesen egy elágazás beépítésével megtehetõ, és megspórolja a túlságosan kis erõk kiszámítását. Ez a legegyszerûbb approximáció, amivel gyorsíthatjuk a szimulációt. SIMD esetén azonban nem nyerünk vele annyit futási sebességben, mint amennyit pontosságban esetleg veszítünk, ugyanis az egyes szálaknak ilyen esetben be kell várniuk egymást. Minden egyes futó szál egy adott pillanatban ugyanazt az utasítást hajtja végre, ha van számítás, ha nincs. Így ez a gyorsítási opció elsõsorban az egy szálon futó programok esetén jöhet szóba.
+			A direkt módszer egy gyorsabb változata, ha egy bizonyos távolságon túl, elhanyagoljuk a testek egymásra hatását. Ez mindösszesen egy elágazás beépítésével megtehetõ, és megspórolja a túlságosan kis erõk kiszámítását. Ez a legegyszerûbb approximáció, amivel gyorsíthatjuk a szimulációt. SIMD esetén azonban nem nyerünk vele annyit futási sebességben, mint amennyit pontosságban esetleg veszítünk, ugyanis az egyes szálaknak ilyen esetben be kell várniuk egymást (lockstep végrehajtás). Minden egyes futó szál egy adott pillanatban ugyanazt az utasítást hajtja végre, ha van számítás, ha nincs. Így ez a gyorsítási opció elsõsorban az egy szálon futó programok esetén jöhet szóba.
 
 		%----------------------------------------------------------------------------
 		\subsection{Fa alapú módszerek}
@@ -160,7 +160,7 @@
 
 			Ezek az algoritmusok felosztják a teljes rendelkezésre álló teret cellákra (kétdimenziós esetben négyzet, háromdimenziós esetben kocka). A cellákat egy bináris fához hasonló módon tárolják, csak itt a fa egyes elemei 4 (quad-tree), illetve 8 (oct-tree) gyerekkel rendelkeznek dimenziótól függõen~\cite{BHGalSim}.
 
-			A felosztás kétdimenziós esetben (quad-tree) a \figref{N_Body_Fa_modszer} ábrának megfelelõ módon addig folytatódik ameddig egy cella pontosan $1$ vagy $0$ testet tartalmaz. Ha egy cellában több is található, akkor a vizsgált cellát $4$ azonos méretû kisebb cellára bontja. A szemléltethetõség miatt a kétdimenziós esetet választottam, de a leírtak könnyedén alkalmazhatók háromdimenziós esetben is.
+			A felosztás kétdimenziós esetben (quad-tree) az \figref{N_Body_Fa_modszer} és az \figref{N_Body_Fa_felepites} ábráknak megfelelõ módon addig folytatódik ameddig egy cella pontosan 1 vagy 0 testet tartalmaz. Ha egy cellában több is található, akkor a vizsgált cellát 4 azonos méretû kisebb cellára bontja. A szemléltethetõség miatt a kétdimenziós esetet választottam, de a leírtak könnyedén alkalmazhatók háromdimenziós esetben is.
 
 			\begin{figure}[!ht]
 			\centering
@@ -172,9 +172,9 @@
 			\begin{figure}[!ht]
 			\centering
 			\includegraphics[width=150mm, keepaspectratio]{figures/NBody/N_Body_Fa_felepites.pdf}
-			\caption{A felépített fa (quad-tree)} 
+			\caption{Az \figref{N_Body_Fa_modszer} ábra alapján felépített fa (quad-tree)} 
 			\label{fig:N_Body_Fa_felepites}
-			\end{figure}
+			\end{figure}			
 			
 			A több testet tartalmazó cellákat virtuális testként kezeli: rendelkeznek tömeggel és pozícióval. A tömegük a bennfoglalt testek össztömege, a pozíciójuk pedig a tömegközéppont.
 
@@ -183,7 +183,7 @@
 				\frac{s}{d} < \theta 
 			\end{align}
 			
-			ahol $s$ vizsgált cella szélessége, $d$ a test és a cella tömegközéppont távolsága és $\theta$ pedig egy konstans küszöbérték (jellemzõen $0,5$).
+			ahol $s$ vizsgált cella szélessége, $d$ a test és a cella tömegközéppont távolsága és $\theta$ pedig egy konstans küszöbérték (jellemzõen 0,5).
 
 			A fent bemutatott lépéssorozat a Barnes-Hut algoritmust reprezentálja, melynek komplexitása $O(Nlog_{2}N)$. Más fa alapú módszerek is léteznek, s egyes esetekben ez a komplexitás redukálódhat akár $O(N)$-re is.
 
@@ -244,10 +244,9 @@
 
 		A távolságot csillagászati egységben (astronomical unit) mérik, rövidítve CsE (AU) és az általa definiált távolság megegyezik az átlagos Nap-Föld távolsággal.
 
-		Az idõ alapegysége a nap (day), mely $86400$ másodpercként van rögzítve. Gyakran használt egység még a Julián naptár szerinti év (year) is mely $365,25$ napot tesz ki.
+		Az idõ alapegysége a nap (day), mely 86400 másodpercként van rögzítve. Gyakran használt egység még a Julián naptár szerinti év (year) is mely 365,25 napot tesz ki.
 
 		A tömeget többféleképpen is meg lehet választani. A hivatalosan elfogadott érték a Nap tömege, jelölése $M_{\odot}$. Alkalmazástól függõen szokás használni a Jupiter, vagy a Föld tömegét is. Szimpátia alapján a Föld tömegét választottam alapegységnek.
-
 		\begin{align}
 				1~AU = 149~597~870~700~m
 		\end{align}
@@ -257,7 +256,6 @@
 		\begin{align}
 				1~M_{\oplus} = 5,9742 \cdot 10^{24}~kg
 		\end{align}
-		
 		Ennek megfelelõen minden felhasznált konstanst és származtatott mennyiség értékét módosítani kell, melyet az alkalmazásunk felhasznál. Jelen esetben ez csak a gravitációs állandó érinti, tehát átváltva csillagászati mértékegységrendszerre:
 		\begin{align}
 				G = 8,89042279 \cdot 10^{-10} \frac{{AU}^3}{M_{\oplus}D^2}

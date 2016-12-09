@@ -3,7 +3,7 @@
 %----------------------------------------------------------------------------
 	A számítástechnika fejlõdésével együtt növekszik az elõállított és feldolgozandó adatoknak a mennyisége, legyen szó egyszerû felhasználói alkalmazásról vagy nagyszabású ipari, tudományos projektrõl. Ezek feldolgozására a legutóbbi évtizedben közel stagnáló órajel frekvencia mellett megjelentek és elterjedtek a több processzort, processzormagot tartalmazó rendszerek: a két/négy magos asztali számítógépektõl egészen a több millió magos szuperszámítógépekig.
 
-	A rendelkezésre álló hardver fejlõdése mellé azonban elengedhetetlen a megfelelõ szoftver írása, mely kellõ mértékben kihasználja a rendelkezésére álló erõforrásokat. A több magot is igénybevevõ, párhuzamos programokat gyakran sokkal nagyobb kihívás megvalósítani, mint soros társaikat, ezért is kap olyan nagy hangsúlyt manapság a párhuzamos programozás.
+	A rendelkezésre álló hardver fejlõdése mellé azonban elengedhetetlen a megfelelõ szoftver írása, mely kellõ mértékben kihasználja a rendelkezésére álló erõforrásokat. A több magot is igénybevevõ, párhuzamos programokat gyakran sokkal nagyobb kihívás megvalósítani, mint sorosan futó társaikat, ezért is kap olyan nagy hangsúlyt manapság a párhuzamos programozás.
 	%----------------------------------------------------------------------------
 	\section*{Technológiai háttér}
 	%----------------------------------------------------------------------------
@@ -23,7 +23,7 @@
 	%----------------------------------------------------------------------------
 		A technológiai akadályok arra késztették a piacvezetõ processzorgyártókat (Intel, AMD), hogy az órajel frekvenciájának növelését hanyagolva, más megoldást találjanak a számítási teljesítmény növelésére.
 
-		A megfelelõ irányt az egy processzoron belül több, egymástól független processzormag elhelyezése jelentheti. Kisebb mûködési frekvenciával rendelkezõ, ,,gyengébb'' processzormagokat integrálva közös szilíciumlapkára elérhetõ, hogy az együttes számítási teljesítményük meghaladja az egymagos, ,,erõsebb'' processzorét, s emellett még az összfogyasztás is kisebb legyen.
+		A megfelelõ irányt az egy processzoron belül több, egymástól független processzormag elhelyezése jelentheti. Kisebb mûködési frekvenciával rendelkezõ, ,,gyengébb'' processzormagokat integrálva közös szilíciumlapkára elérhetõ, hogy az együttes számítási teljesítményük meghaladja az egymagos, ,,erõsebb'' processzorét, és emellett még az összfogyasztás is kisebb legyen.
 
 		A teljes számítási kapacitás kihasználása azonban lényeges erõfeszítést igényelhet programozói oldalról, ugyanis a program írása során szakítani kell a szokványos szekvenciális gondolkodásmóddal. Számos probléma esetén a fejlesztõnek figyelni kell a párhuzamosan futó programrészek közti szinkronizációra, közös erõforráshasználatára, adatintegritásra.
 
@@ -47,5 +47,9 @@
 		
 		A harmadik fejezet tartalmazza a diplomamunka keretein belül készített szimulátor leírását, a fejlesztés során felmerülõ nehézségeket és megoldásukat.
 		
-		A negyedik fejezet az futási eredményeket foglalja össze, valamint ábrázolja az egyes párhuzamosítási technikák által nyújtott számítási teljesítményeket.
+		A negyedik fejezet a megvalósított ellenõrzési formákat mutatja be röviden.
+		
+		Az ötödik fejezet az futási eredményeket foglalja össze, valamint ábrázolja az egyes párhuzamosítási technikák által nyújtott számítási teljesítményeket.
+		
+		A hatodik, egyben utolsó fejezet tömören összefoglalja az elmúlt egy éves munkámat, majd kiemel néhány lehetséges továbbfejlesztési irányt.
 		

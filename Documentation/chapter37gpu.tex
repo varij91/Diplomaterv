@@ -233,7 +233,7 @@ __global__ void integrateKernelWithFloat4(float4 *g_posOld, float4 *g_posNew, fl
 
 		A kernel elõször a szál sorszámának meghatározásával kezdõdik. Ez egyben meghatározza, hogy melyik testnek kell kiszámolnia az adatait. Amennyiben több szálat indítottunk, mint amennyi testünk van, a felesleges szálak deaktiválásra kerülnek. Ilyen helyzet áll elõ, ha a testek száma nem osztható a TB-ben lévõ szálak számával.
 	
-		A szálak által közösen használt változók \verb+d_NUM_BODY+, \verb+d_VELOCITY_DAMPENING+, \verb+d_STEP_TIME+ mindegyike konstans memóriában van eltárolva. Kiszámításra kerül a \verb+steptime+ négyzete, ami egy kezdetlegesebb kernel hagyatéka, és így utólag belegondolva célszerûbb lett volna konstans memóriába betölteni a host-ból. Eleinte azonban problémák adódtak a konstans memória használatával. Egyrészt osztály tagváltozójaként nem lehet deklarálni, fordítási idõben léteznie kell, másrész az õsosztály header fájljában deklarálva, a \verb+cudaMemcpyToSymbol+ (konstans memóriába másolás) nem tudott bele értéket írni.
+		A~~~~szálak~~~~által~~~~közösen~~~~használt~~~~változók~~~~\verb+d_NUM_BODY+,~~~~\verb+d_VELOCITY_DAMPENING+,\newline\verb+d_STEP_TIME+ mindegyike~~konstans~~memóriában~~van~~eltárolva.~~Kiszámításra kerül a \verb+steptime+ négyzete, ami egy kezdetlegesebb kernel hagyatéka, és így utólag belegondolva célszerûbb lett volna konstans memóriába betölteni a host-ból. Eleinte azonban problémák adódtak a konstans memória használatával. Egyrészt osztály tagváltozójaként nem lehet deklarálni, fordítási idõben léteznie kell, másrész az õsosztály header fájljában deklarálva, a \verb+cudaMemcpyToSymbol+ (konstans memóriába másolás) nem tudott bele értéket írni.
 	
 		A célpont adatait egyszerû változó deklarációval és értékadással berakja a gyors hozzáférésû regiszterekbe. Ha a regiszterek elfogytak, akkor kerül használatra a lassú, de cache-sel rendelkezõ lokális memória. Mivel az azonos típusú elemek egy tömböt alkotnak és nem test szerint vannak a globális memóriában rendezve az adatok, a \verb+float4+ értékek kiolvasása \emph{coalesced}. Ez azt jelenti, hogy warp-on belüli szálak sorfolytonos memóriarekeszekhez szeretnének hozzáférni, így minimalizálva a szükséges memória tranzakciók számát. Ha \verb+Body+ struktúrák tömbje lenne a globális memóriába másolva, akkor a kiolvasás \emph{strided} lenne, melynek eredménye, hogy az adott pillanatban felesleges, tömeg, gyorsulásvektor és sebességvektor is beolvasásra kerül. Ezzel a felhozott memóriaszegmensek száma lényegesen nagyobb lenne.
 	
@@ -297,7 +297,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 		%----------------------------------------------------------------------------
 			Technikai problémába ütköztem, amikor a GPU kernelt debugolni próbáltam. Folyton hibaüzenettel véget ért a debug mód:
 			\begin{quote}
-				CUDA context was created on a GPU that is not currently debuggable.
+				\textit{,,CUDA context was created on a GPU that is not currently debuggable.''}
 			\end{quote}
 			A számítógépemben található kettõ GPU közül csak az egyik CUDA kompatibilis, a másik egy integrált Intel GPU. Az NVIDIA NSight debugger, akkor mûködik, ha a kijelzõ vezérlését nem a vizsgálat alatti GPU végzi.
 			

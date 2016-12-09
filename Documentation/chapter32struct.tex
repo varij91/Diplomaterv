@@ -130,7 +130,7 @@
 		%----------------------------------------------------------------------------
 			Szintén egy absztrakt osztály, mely a testpárok~~közötti gyorsulásértékeket~~kiszámító \verb+calculateAcceleration+ tagfüggvények definícióit tartalmazza. Két test közötti interakció mértékének kiszámítása ugyanis teljes egészében algoritmus független.
 			
-			Az \figref{Impl_Algorithm} ábrán csak egy metódust jelöltem meg, azonban ténylegesen 6 \verb+calculateAcceleration+ került megvalósításra. Ebbõl 3 a teljesítményméréshez, 3 pedig a grafikus kijelzéshez használatos; 1-1 sor plusz kódot (szomszédok számának meghatározása) és argumentumlistát leszámítva páronként azonosak. A három tagfüggvénypárból kettõ használ speciális párhuzamosítási technikákat, a harmadik natív C++ referenciafüggvény. Sima C++ megvalósítás esetén 1, SSE esetén egyszerre 4, AVX esetén pedig egyszerre 8 gyorsulásérték kerül kiszámításra.
+			Az~~\figref{Impl_Algorithm}~~ábrán~~csak~~egy~~metódust~~jelöltem~~meg,~~azonban~~ténylegesen~~6 \verb+calculateAcceleration+ került megvalósításra. Ebbõl 3 a teljesítményméréshez, 3 pedig a grafikus kijelzéshez használatos; 1-1 sor plusz kódot (szomszédok számának meghatározása) és argumentumlistát leszámítva páronként azonosak. A három tagfüggvénypárból kettõ használ speciális párhuzamosítási technikákat, a harmadik natív C++ referenciafüggvény. Sima C++ megvalósítás esetén 1, SSE esetén egyszerre 4, AVX esetén pedig egyszerre 8 gyorsulásérték kerül kiszámításra.
 			
 			A különbözõ N-test algoritmus implementációk ebbõl az osztályból származnak le. A következõ lépés lehetne egy \verb+NBodyAlgorithmCPUBarnesHut+ osztály megvalósítása például.
 
@@ -215,7 +215,7 @@
 		
 			A program a felállás után a \verb+*Stopwatch+ kifejezést tartalmazó függvények segítségével méri le a szimuláció hosszát. Kiszámolja, hogy összesen hány erõt kellett kiszámolni, hány lebegõpontos operációt végzett el összesen a program és ezek függvényében írja ki a futási teljesítményt.
 		
-			Amennyiben referenciamodellt használunk, minden iteráció után meghívódik a \verb+calculateError+ metódus, ami minden testnek összehasonlítja a pozícióját és jelzi azonnal, ha lényeges értékbeli eltérést tapasztalt.
+			Amennyiben~~~referenciamodellt~~~használunk,~~minden~~iteráció~~után~~meghívódik~~a~~\verb+calculateError+ metódus, ami minden testnek összehasonlítja a pozícióját és jelzi azonnal, ha lényeges értékbeli eltérést tapasztalt.
 
 		%----------------------------------------------------------------------------
 		\subsubsection{A main függvény}

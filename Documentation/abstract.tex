@@ -1,38 +1,30 @@
 %----------------------------------------------------------------------------
 \chapter*{Kivonat}\addcontentsline{toc}{chapter}{Kivonat}
 %----------------------------------------------------------------------------
-
-	% Probléma ismertetése
-		% Párhuzamos programozás elõtérbe került
-		% Fizikai szimulációk
-		% Gravitációs N-test probléma jól párhuzamosítható
-	% 1 éves munkám
-		%Dolgozatom a gravitációs N-test probléma elméleti bemutatásával indul, melyben levezetem a megvalósítandó összefüggéseket és rövid ismertetõt adok a gyakran használt algoritmusokról.
-		%Ezt követõen a párhuzamosítási lehetõségek közül kiemelem az NVIDIA grafikus processzorokat (GPU), és általánosan ismertetem hardveres felépítésüket, valamint a hozzájuk tartozó CUDA programozási modellt.
-		
-		%Célom egy olyan szimulátor program megvalósítása, mely teljesen szekvenciális megvalósítás mellett különbözõ párhuzamosítási technológiákat is képes felhasználni és ezeket teljesítmény szempontjából összehasonlítani.
-	% Elõremutató konklúzió
-		%Jelen idõ kellene
-		%Munkám során bemutatom a megtervezett N-test szimulátort, mely felhasznál 
-		
-		%Munkám során megterveztem és megvalósítottam egy N-test szimulációt végzõ programot, majd felgyorsítottam alkalmazva az OpenMP többszálúsítás és SSE/AVX vektorizáció által nyújtott lehetõségeket. A CPU-s implementáció után áttértem az NVIDIA CUDA platformra és GPU-n futtatható verziót is készítettem. A szimulációt OpenGL felhasználásával grafikusan megjelenítve, valamint számszerûen is ellenõriztem. Dolgozatom a futási eredmények összehasonlításával és a fejlesztés kiértékelésével zártam.
 		
 	Diplomamunkám célja egy gravitációs N-test szimulátor program megvalósítása, különbözõ párhuzamosítási technológiák alkalmazásával.
 	
-	A modern processzorok döntõ többsége rendelkezik a párhuzamos programvégrehajtás képességével, mellyel jelentõs számítási potenciált hordoznak magukban. Megfelelõ kihasználása azonban sok esetben nem egyszerû feladat. Nehézséget jelent például a programozásuk során, a szekvenciális gondolkodásmódtól való eltérés, az adatintegritás megõrzése, a párhuzamosan futó programrészek közötti kommunikáció megvalósítása, valamint a rendelkezésre álló hardverkörnyezet ismerete.
+	A modern processzorok döntõ többsége rendelkezik a párhuzamos programvégrehajtás képességével, mellyel jelentõs számítási potenciált hordoznak magukban. Megfelelõ kihasználásuk azonban sok esetben nem egyszerû feladat. Nehézséget jelent például a programozásuk során, a szekvenciális gondolkodásmódtól való eltérés, az adatintegritás megõrzése, a párhuzamosan futó programrészek közötti kommunikáció megvalósítása, valamint a rendelkezésre álló hardverkörnyezet ismerete.
 
 	A gravitációs N-test probléma, egy a csillagászatban gyakran elõforduló probléma, mely egymással folyamatos interakcióban lévõ égitestek mozgását írja le egyenletekkel, felhasználva a Newton-féle gravitációs törvényt. A felírt egyenletek numerikus megoldása adja a szimuláció alapját. A feladat rendkívül számításigényes és remek lehetõséget biztosít párhuzamos programozás szempontjából.
 
-	A dolgozat a gravitációs N-test probléma részletezésével indul, melyben a gyakran használt algoritmusok ismertetése mellett, levezetésre kerülnek a megvalósítandó összefüggések is. A párhuzamosítási lehetõségek közül kiragadva tárgyalja a grafikus processzorok felépítését és programozását.
+	A dolgozat a gravitációs N-test probléma részletezésével indul, melyben a gyakran használt algoritmusok ismertetése mellett, levezetésre kerülnek a megvalósítandó összefüggések is. Számos párhuzamosítási lehetõség közül kiragadva tárgyalja a grafikus processzorok felépítését és programozását.
 	
-	Az elméleti rész után bemutatja a diplomamunka keretein belül megtervezett és megvalósított N-test szimulátort. Elõször MATLAB prototípust, majd egy CPU-n futó, C++ alapú implementációt ismertet, mely felhasználja az OpenMP többszálúsítás, és az SSE/AVX vektorizáció által nyújtott párhuzamosítási lehetõségeket. Ezt követõen pedig NVIDIA CUDA platformon létrehozott, grafikus processzoron futtatható megvalósítás kerül bemutatásra. A dolgozat a futási eredmény és a számítási teljesítmény kiértékelésével zárul.
+	Az elméleti rész után a dolgozat bemutatja a diplomamunka keretein belül megtervezett és megvalósított N-test szimulátort. Elõször egy MATLAB prototípust, majd egy CPU-n futó, C++ alapú implementációt ismertet, mely felhasználja az OpenMP többszálúsítás, és az SSE/AVX vektorizáció által nyújtott párhuzamosítási lehetõségeket. Ezt követõen pedig NVIDIA CUDA platformon létrehozott, grafikus processzoron futtatható megvalósítás kerül bemutatásra. A dolgozat a futási eredmény és a számítási teljesítmény kiértékelésével zárul.
 
 		
 	\vfill
 %----------------------------------------------------------------------------
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
 %----------------------------------------------------------------------------
+	The purpose of my thesis is to create a gravitational N-body simulator using different parallel computing methods.
 
-%A modern processzorok döntõ többsége rendelkezik a párhuzamos programvégrehajtás képességével, mellyel jelentõs számítási potenciált hordoznak magukban. Megfelelõ kihasználása azonban sok esetben nem egyszerû feladat. Nehézséget jelent például programozásuk során a szekvenciális gondolkodásmódtól való eltérés, adatintegritás megõrzése, párhuzamosan futó programrészek közötti kommunikáció megvalósítása, valamint a rendelkezésre álló hardverkörnyezet ismerete. Általános célú processzorok (CPU) mellett lehetõség van speciálisan párhuzamos programvégrehajtásra, adatfeldolgozásra kialakított processzor/feldolgozóegység alkalmazására is. Ilyen például az egyre nagyobb teljesítménnyel rendelkezõ és manapság könnyedén hozzáférhetõ grafikus processzor (GPU), mely általános célú felhasználásra is kifejezetten alkalmasnak bizonyult.
+	Most of the modern processors have the ability of parallel program execution, which means a significant computing potential. However, the proper exploitation of processors in many cases is a difficult problem. To mention a few of the main difficulties: using different logic than in case of sequential programming, preservation of data integrity, implementation of communication between parallel running elements and also the knowledge of the available hardware.
+	
+	The gravitational N-body problem is a common issue in astronomy, which describes the movement of the continuously interacting orbs. To describe the movement of these bodies the simulation uses Newton's gravitational law, and the numeral evaluation of these equations gives the base of the simulation. This task requires large computing capacity, consequently that is a proper task to implement using parallel programming methods.
+	
+	At the beginning of my thesis in a short theoretical overview I describe the N-body problem and the commonly used algorithms along with the deduction of the implemented formulas. Then from the available parallel programming technologies I focus on the structure and programming of graphics processors.
+
+	Following the synopsis, I detail the designed and implemented N-body simulator. \mbox{Firstly}, I present a MATLAB prototype of the simulation then I demonstrate a C++ based implementation, which uses the multithreading of OpenMP and the parallel programing options offered by SSE/AVX vectorization. Then I describe a graphics processor based application, which uses NVIDIA CUDA platform. Finally, I end my thesis by evaluating the results and comparing the achieved computing performance of each implementation.
 
 	\vfill
